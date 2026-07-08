@@ -1,0 +1,407 @@
+<title>The Feed — Audience-Coupled Generative Agents</title>
+<style>
+@font-face { font-family:'Space Mono'; font-weight:400; font-style:normal; font-display:swap; src:url(data:font/woff2;base64,d09GMgABAAAAACT4AA4AAAAAW4wAACScAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGoFWG4xOHINwBmAAhRARCAqBg0jobQuECAABNgIkA4d+BCAFhEAHiAIbMktFRoaNA0AC+vkVRckgXXEUpYPTz/6/JDfGhAow+xKzzVJx687MXEwqFxKIu1RP5TcVC4Kz8h3bOChuLf+ogefX3mSiEo/YtVnbVKLSXhNR65QjNPZJLg9P46j3Z3bPUFMi2rkxkglMbtfdEM/VmB9oTv9dgCuBwwIET0MISUhCchElerFLgIsQEggqDWIVKqNitF3tf9qttL591m7eOTOr2LT7XWftxMr2K/Y3/v/lQO95v0mxoDWayGiZAE9XpGyxzlzyDmMIyuJIcIR4ggOhERIlMR5jEAah1+Jzvu4+2YUZK8j4wLZM/yuNWr4C2VfpGiAo51YA9N/fTwuyObqkSLgqVISqqScas7B3dIfsl9zJ5bnRU1NfLbO/+v2xlGseBgOlU1HnU3A8NVNdoAHxt6PNQdXqLl07GrIxWLXCzmMM/ce9jv+zmbY7GsuAt0EFgIvm7DAUVYoq1ez8kXdGoxUfSYY9lhFl52m1hpUMCF2I9+5MHK4Yq6QiKDru00HZpmjz+jzXKeouVeD5/6mzufw+5lAC4fJhC4eSSZqxXpdjHV9Zh+2ax6OQHDRKVDmURWmpIoEhAyct2wOPeX38ajm0vFle5ovvS/OdEI8QWpHVCjmINKcVYqf+PzYz6jJxm4FCj4+6Ica92z8LNMkA7EaTDhEPkSgRIkkSRAoehIAAQkgIIWaFsLFDODkhSNUQYS0QbdogOnRAdOuBWGARxDV/inHDbTHuuivGvaABAhEHTABGAT2ADkAziBhz/nQLguamuxDzXBOKG7W8Ze8YcRsCjb1YCFADjwdt0ldFEJLX/4z2Q7JYQCkGBNrzyYTsx4JfmH8o/yRUN1DxJvE9Mq+i0wRlj1pHLRUqFSJBDCSaY0IiGAYRC/HN6giBuMtQaJGKDBK0yqeankdJQoAjHzNZdGmV+UK+m/vojS4L8VVnQzzWh0JM9Glb1j1SChKp7P/VYqhVsSbkn0GlQsvUZYim6mES4XBCk+JiDSi7BxKC7QCW40JVeY0e+ZskUaw0ObjkjDyqNOn3txigBdAIqAMxWF5IuTt9SBA7vVFZhagmXCQfNA4DA0bHIaG9Do+arIJtKFcxBQSoQvXN/DAX4qaML51abqu0Zut9jafRkPtxM+biF1dcrmV8CAPzGkS+cMEp73vTK0Icx1xPmmGwjOUgh0zntUKmKraZtDtbY4XFhkV1aha5+fRBFBLBQA1Pi8hMCDEXF8tGF0+RfaohBgxBEYDfrguJ3VWgcBfDk/3hp1B9Z+JwqSVomSo/NFW3hwL0tIQHVbA9UtwwuSqhCsypCbRZaXLYiZ0eQdx3QHwqhP7ACViO1XgzluPCQKF+3B0WLsTFeCkulOubKEu5Umqk5AHnHWC/DQC8TH4EFYtZJpUv+VL7cicflMBKLr8BD+iCTGBhOVJToDa5mYvkKZq0lw4JyxWOx3ScgDm4CHOxHhkyvYz8qjkWLezB1TiEw/df614g0GneAoWGGP0WKtQJtZGXCg/QaxL3xgP+CnvxDLpks4DpL+G+2IbtiUXpzoqbQsk+4UTReDPX/WjezRugjuZa9ssY+lajXLnCLsf6wmigjTyv9SOG2AuKmEG1D8HyJYZBljo1J8BmrMMGhC+ZJLXNqJo2GJfjEA7jmqEjoSE06Fp+jgh5YNx+R3IThNqz31H8PsUu++0bBPzWP9AHwvtwSxuwn2N9w5ALBBTI4tElAGEekIEkFhYWgn5xyVGX7LDGoB0EciELaXy+58s014oYCHshJCCt1kTrtcYWEEf5HTPUB+1C4dwtmELLm7D48/NkSEhqNaINO241UCUmBydB20GocZedBJWkB3mVxV9ViTgfjNAXY8DYB3EN8k4Qagnh9mh8QlCpaLgwHgLEkMI8HEYohjhehs2HDE8M4ROb2m0rDqQ7mwzsmT5C8Sy5uyBFHD2GRgNaxUSwClgLgDlnygFvYu8zY5v/T4OKxXreghwOiI9pNtAODdyhLBoZiZAam5Z91EZhi5VPSmeFx/0TRWSq9v6+3KVDYmJj6DFF7wx2LpvF5rB5bAVbz7azH/g4hdt9O/0MTuY/RdrB6R3wZKY3cBzE5Jj4E9LZ2ez8G5OzdS/UDAAlph34P2xxrrl/n8G/py8vAF6+X657eZjPOfgNblx/Uf913eWzzx9AGIAFvnEbEMe6VmNftyr22Nb/ai96wknH/ddvzjjlVbOe843HvGjG84465gdXXPWU0xAJEiVJkSETU5Z8BVjmY+MQEislIYVTUdPQ0nvDC970i1fcV8bGzolUieLlE1KjVkSdBh26dOuxQNSQYSNGLfKaz73uJ//xpIu+8qXLvnDOPect9oGfXQgCn/jRPvv936/OeiY02GuJDz3sIXs8DUUTK16ceegw6VKlYciTLUeuZIV4inAJFPsOn5KMnIKOSC8zAyMrEwuCQwU3j3LVAqoEudRr0ahJm2bfazWoT78BYzotVKLdNbe8531vece73oZASvECRAYgVQGIFkHDHUCzA0DeHaSNATJa2ZXY62U/GhokIiGnDzYrO+YG/caeDUerHtXXx+I0RLNgYqfoPYzYW2b1uenSMH+7a1vOzELilMIhb62APtkOOiebmGMiONYSKRQDvXo6FYjzrVXJfW0yBwHFvO+CUnXx9zBC10DJiPC+dmriHV3tK3cXExIYcBa6Ml38S1ukrWRDK6CKJKEucrMBUIeyp70GsGb/y4oLZB6rITUcktWqF25ntnzlGbVXESYTPtoz2QIsHARdUGAUgSpaAjW8DILh7G27WJgVWJW+254zZfxKyQkGKFwuxIp2uKmRzLiL4+OoDqSIKQ9EQnoQSU1DrEL6lFss19HxpfH65WQ5LvXH5UotqKdjoBUHD8s2m/AVG1gH27FAuIsq5kq0PWUZGhd/0f1tk2+nzaLOolbtAVCyFX05/FlFah7TGhN6CebR/NeKP7VG8A7/Z/9YNGbtSf2raGrPQN6Chv/u08Akntc1a+klSzMm4DFE7wKVUlF4s2mBsxmM5VgqEumokJG5o96TVYXGBooLP5Zp4oglRBUDRy9BidLXIK4S9aLAdJP+mVGOyXO1ehwmUOJossl2x3FTbaBFY1TWBl0GUNvwBmVK1DoffmvpNQzO/tpMbM3It2/dyilun3HjpBzTCNOKCV++Jxb0Y1BGTKTYgGlLTsnbiIItFZT3n0RDWek2KXLlZFi9Sm6ujOcwaMOI0KEBkqCnlwW1ZyO/0JFRMWJYaXZwRBMgoLIFndH4om8UQlKnE62zFjfGqtRQRzVWhI1DqJlWNJZjEg+TztmcT+WHQtQ3R4r3waYpS40cbwDqP9ZfLlRZmqblez3RHRgeCa/Biir1NL/plve+qgUQDHnp4xqO3Azz/uXf79/J9tKmmuq44q8nuisXyCR9R2ANc5wjHbFJxQM1xjTd9mxegzXz9iz8yRlu7qcv3D1PU6b8Rfy/+l9REU/BSByPpQrwEiC7Ehs2SogDGadxQUqQD7kUXX53iXoWpglrZIhGWtVeyhHF8mIl5+MN5VBvKPyxtCmvxwpyClHWea4EdDcWKFacwEOciUuJwojCy0/TfTWafBVHVt8YQXsulXRjWAY8V1rn/NKf0sHk4Uvdoh873Q65MsInp+aJ4YiWXlM9uWBpHXWyniSib7DnKVNGWwBjcL4mKUQv6tM0ODPsi+xjV4DBOwtNOAtCEiVPTghXJ4N+neNvcry9VBDtvTO8lt03+iYB/TYUzgBoW8OyZfJbHedI2ySnFb2Ac84TMNoNOgD2xRB1DYXo/2BqwMi0MoBbi+tQMnCE1CBBcRujGmNwJptSYJ0a0Vb7of9Upkn5luI5Nh7uYUzduzOMXBiPvAqZPFFGjmD8eQQg4dYsK2JxsYxlChqUdlqjaZMvJKGhQPoZoUpAlSwfhQj5lQmVY3wbr/AYOzntXRIuNFvdHUsQ1/6+Uj+l05msdpl8cp+Q+XU4Smos+1Mgl5Q09zzCemffQ5LM8s/oIyrzLbqvA4Wps6nQYOohN8BN9VR1SUuUCotAoSTawyufSFgGSEesWvaxJih/B3D552aAWIUSBi76yiqgkoR4hqwr72pgFqOH3SsIPnbTunJd7/LCuvC0WW9scP5ck4retSeN5WKe4MUd/mAaz9Rbhlaeyj2mTfO+c3fzBE6HaOcgFTYVJ7QFxwYUS/e/3GFBOh8yZ9/Vy2aTshONY62ZGlmjs4qsdba9ivcVrxTn2mmZJXsoX/pgLLhdjiHoSmDvQtimb6FyQu86J93qAmRXnmR3/YFKnJcp8q7nlw+jF/7M4vyBvB9SnThikT0S9o5YBuXykXv8Ubd45ASljCuWhsN21/CVFKwYttsd8kuGjZewidd24a2NoCWUVro4/5brezO8EVSyqGagOHWBIA9NHeKrBHeydwIB1Zml8h9g41GvguTOKxY+mQSkAN8Sdg2K+nFZqIfAIvQ0afgIQk93k7cJsbWtbcVEYfJkbamCpx8niHgKZuwmmHTq9prXLZP+w1PlU68sswjDaUuLUJfpLWdiLMeaJijnihxuTjfua3QwfRJQ2YUC0LBhb3nhJnGKPqNhs7jbTv1uD+SvDHGjQOcVdlya6jId4FZjdFPXfCmt0t2cXM1R6WLFrcujVCeNPCX6bQlPr2hmvv3bN0bmh90l+oXTM8yqU8qIE5VTn5RXAbm30DRxHnWvDsyslCMVPEkv0tIlkaniN4UHye7c/PNqRhbRjefEcFajjrPwE2Cg7tOGKVu7eJZL7QinDDvkKnfCjtj3NJ/KIpqGL011f2LuVIpRXDXsMN//JehqxW9U0+HI0XvQ8kmKH76/4yA5duiuBHwWIkd+sfODOUFHYAlgpN7LlfmB2/9XMiuUrJAtUJXU9YbySffkWVWb5uDnjwIf7ZmMeY7E8XDfFAxY2dZVPl1e4i6UOiL/irFzSB0Qq5c8DCTxZzkS/FEXDlt3yDtDYaXTxiiRHaf1HVLt1z55rV9T6UgfK4+t3BJOq8fLx58UYlU3bLbex0QTTomIt9KNVXWSsLaCLVBe+z74MzfkjzEwyWpU2Sobpbpb13ZBOr/alkgjlx2kS06YNDwoorH82XICjdD2dO1A62F17Wz7fTaxxUszNvLJ4NziQclashjzaKFPbzqw9XzJvdNHn2VYcCO37t90JmtrLG2vnPk7lw9bc56wwiCjeQZwXtJuB11KuzveI7+qe/bC7H5Ff7BfeqPuDXrwBaVrX4LjysLpY1NVOZPAYyHl41f3+SLyJ8QDue/9vXgPdty4jpr+aYqa+uUQdfPJbZXv8yXDGOjKBraByuvo6aIwna2yAMu3+bSYt6erY3LtBoPDqEYVbn3ZWvbaMrdeiaocZsMGUGFk1Y5N0+tXTY34+myaYRcWxJLYXqdM5/eNNW/r9A34dS6ZFZIXd22R7V9TUKFFny//U9LNTFnNZNiSGX0VaFqgNqXtwXEGe+6Lfx49W1K0sqjED+6KYb6B+mHl4mXrj68PriurKz1Gil3sd8+4BSkZRg+4y4afDbdj2uHH+3OUikKjzFDBnyiK+iVCQZM8SUV+ClJBLYgxuFJHRdLc9Qz8AwFPdXM1doXS+qggdjekBrcE1UJ1MDalFWohWD7OPk7NBs8SeOhcNBJVB9WEzet0arzENEl9QRmmowtGoPbGM8zCVN1ooR8r9aO9TE2WFsIS7O+nQCIHGnZhrvLALLU7id2jAXaDW2Y+ysFgNBXIhmKLoyun1k9vWrljpNLvG+jc1ixCfiCbgo+qzsyCCKIYr8FrVBBhOh2ZuT6acrwaP3NUTOePPkbblZel+g52E4/UffE/cPgCxMw9E+G5CZS8UcnGC4yyda+Wu2SjUlKtYCmk4dKw61F2//TmxQyV3eKa3ugenHw0Lwo1qi4zdeXThJlzjEO0JEa3PaD+5/ZAdHtLgpCVFyT//V89rLy+C19Y+S72MbPofvCX3KWsL3l+DMyILCFMI25WMLuuo76WohxaVOPTRbDu5GU1EUyjD3RJ7d5+nb5RJwxyJZfKWWIekTPBRfUNyoakvpSuJh9WNz4I8f2nqN+oU/0gw8DExJJzwXNBb7iikgoHe75kNhx8+/5q5IVdmOOR4gaB9KsVxC7MtOthcAy8YtzyIQuhG+AvNdiTofppFUPwepJBqVE0bhqIv8n48r3GZ5dj5I1sjHETlq8d/h7bTH2SbelpCpiwduuNg4FUv3EI/3E0KwLiFRhFTbLyckjV/M/F2GAQ57mdtW0BTFXid0kkEpe4xKdODdY2wQ0E6kJGTFpKeIvkKVtqE5Kb3GlLcTIgLssy1oi0ttyKQssHh1yh4+70DPtAqImjWsJzOO+ExxIeReW7xMVRIIE3iaexCmqWysWm6yRqY5feNOjL8BsHuvWU29XYFMhQibwesVTikYj9Kkwj8peLQQ/HiN455Md8zpERo8Pcipuq11WmyeuJYhlOSSQBNaaV+LxCmYzgVVgr06aM1a04+OeIe914xKzsclJxWp9eVAGIBXrzkD/VbxnsLbMoasQrsFxqlqrAlteLuG6pRyzyazCV2O+RSErvH586VSP0lYtABmKwzDEUwPy24WiZQUHyC7A3zeRu/n1+Wkea+3+vv5zxW4adG1zE3+FvIlYMmuxuvFwsDpnUYn9FqVTqSa5QY1ruXgQKuKIW43BFttPc1292wN7INhoZilS4HGUfGf9NGAwhKkvuGUchn6j1wq93D5EPreAc47xLzuSxOs+SZ2dgiyL5eawnsWUBsYzo1xM6FdkG+0ZQ+yX1GEX1Hp2ZR2MeFc8zDwvFwwYCGoO/vXeBgMqmHJUGp7/ZTwN1PP+h/ILd7tttKMjfOGckn2yeJn+ZOURC22/e4vbGGOko+U4eK+F9MkPgvDCqyn8+Ngr1cNrs6Wb09HeMq3+gzRcupn8J4exx8ZPk/dHjJOAmpcbeTuVwr27BCm0ercGpW0G1F90vKlwp91HdhXoWt00YgrBJBbHSluFQh6rZAxNxDJcAUTKH/VhgRvDQrG68XCT2azErjP5nwplZMu0ZqSbpP3HoYIwjM1YmRqt6cmJxtIOSpqF6CxbXq4+6hFqBM/sclEIvb7DOkggG3rYXUrAs+f4r+/v6nA12zOWsA7t6iaKuIGm+uhYq45GYmFy5hddQuQ/igsrANteJS6f+wxqWbMYo6qX/TZAPmDQ73NxJHicwgZMn9tS30Br8iQ6rATfqa6wXVpCgQ2WLUhoQudNIym7REEK+0Frkjg3G1dstqNTkny8hQuJSp8OdZrap1Ov/SFzue764arTOTqBk1A8rUVYuKXaj7kSJQyQ+rDMHlSb1Tqb8UWmc1KbDNTY3cZOaMZCGZIsiEsH12rBQRmlQpchh59qxHEVNiTpgQFVir1cMUv8xTmSanD5FnXqTfJNg5W0hISEp0LWgV0CxKLOLcPma/TRqjopgD1Rq4MrTtfpdJ7FdJ+uLKzSXrvmsJzHdyW26BwH3jVtuKyPODVzHt7Dtv9YuO80QvJYco1m37iKDI8ERRf6TN5qlU9jAHqb872PdSst8rJ7ct7itCBskgU3qykrSRVGasi6UTZxPS0024OlHGOiuq7+y/yspfbyIu4Mv2gcy4tkKhYRMJiRshTz0hddxkkXiJA4nSSxKXuSVcs8QWuRZNNyQ7+uczpzcDvcJqs7NCYGr/L4bG0ar0FXFh/vfp8C5YNFUdSgdyTXplEeFcucTdqGmorqBEgflFk1/n93n7zEpW9QMb9tQX1ZjRsROsNZRYIB3yGTotqiDeHlTkBQ7eQKLADV7nYbG0e+3+yoxkfaXAlVDqT5kYRiMzQs0MLZjH73+zuFfolR0jff8/fexay+DEf5Bo26BPT/IDNRXlatdsiKfFC0pIm4JhZHQvuEXqPa7GBk0EJZWtbbNxiA0g312kMHRpzd32f/xUNGonrB1Kw0ttqDVS7ls4frybmxpjUxjbVNrO0nMYe7uK7O73dU1DkwqcLr4klKXoMQhSrdVh2FxkHvpD9YTsn4Sx3mvUY3ZLBDA2SPTVasxvNh+NB47Q1TqMZXG3yYhUKJNovGrMD1ReQaLP1psxzG1rrpb5orfb6IIGaqoMFksFSYFKqMITRVmDzo1qClkc6COkM2EaqqdoICjW6lvsQUtPq/THlLyvJGQXGdtV+na98TU22dwuqJlph77fY85GtU7HKaIX2J7FqU8p7NE5q6uc2DO2iDISTYuiUjGZXKPbMgzP2ua2cmczsqaFQPOZjqTCpOS3QcPSU5C4DPGqQv0zHrV/PHeORcO51kt/P+deb8mp0Wyma/mMtQM4QIFziziKu6oF2egW3BQEL6Yn6pOZu5hZm1Iz34njV3hz0O3468GsX9Dubf5onYoZ/UqIviftlcEuEC9viMwjZb/GzSkoxehaoVabsjqSEn6NSt4cBZf50MZYt45scQIMhKPiqKlrSKxV6hmhJmZtUweWr4yh/9ZiWTtU5mbmFmTmZmTWcxN8AenpH74TM9edEr+Zk3Lv3onEjGQEf9DESutCI29zCqqEZSQRazLsagCYYk+5D2XfpDBOJieEJ57dcZUesa/M9IfuROPgoJETZw+2+cC6RqReEQcLW0V7+L4Nwj/x/Iv5pbDOrUMm4Rj4da8Wlqe05ow+CtE6/8kOVB8cur8B0o5qmcc+rlv3rfsnctR8Z0PCPSXaT4a/wPK0volC05/q4kf+Gg+uPbayEspzi3VW9WooMhi5YlJf5gUBnGjqqfX4rV16nVNeoayNOxTKpLzWR4etct67He7/YPG4jkenbM06xiq0tC8IHNKNvo/u+kGm32jif3lAkkd6y8dfyYc5rjMvPLT68n1p8vzDtRnjl8aw/oR4LnWeD/ZH/W+cXI8ao325u1oNArv9JyZDNu4IxP29xiKrL2Ggz0GKSaBtMoFJVFUDGh+S/B/dq5QtLbqNtfcr9VtKkS6OrkeLrncUznZfL05EHKynj9Y+TTIJTE31d6vuQhhDFp3fCPWFuQpooq8gtqhvxbSkceylHQRhmFF44dkYeU5SNjPNYVaiGIQZBOqIZeCCD8ByGhpWTDc6k2hCQeq7KebCps1/ZGKpuQwPd9i9hWLCQKa5UTI+l/4rf4gJfHnvdPuWLTm/BZs2prLB12h2PEj0br8y9F84LCjYydeHhyG9AB/mMlpPcxh/sBv5ekBs+19DGchq1CKmm0Mm7i5XCmV0ABTUwQrLzuPlWE1ENZcklPf1dym5Bzj+IqZedjxyfnukk/TLQIGL93yeYlcGzAwzFovxLT3dnkxrd2HYUn2Sh1GYf/WPkGN6z16Bap2GA0be4O9LVSL9mLlul82GhxmFar06AG7eEZg5fGsAgHPauUJjs+RM9wZV+YO1lEW6yhofh1Otwazo/lkcdG+1Az67SPce7zUmZ7eJxgKj15lNtuEqXY0M7Ug98V0Bl+gtUpTdkfnFSlcBHxqpdMYCbdXKldlJqQKBYPFIAs5Bghi0O4gBgYIBzp2wGEnBt3sUm2tShXRaFW12afVRFREk5rQ0eKzu2NqxmJN2nv3NJOhxiQeen8EH7CbS8+yc2J60NQ7yRF1VeJpTBqdZmd1p6d3ZLGhkNndiedL0BLsfDdbTUPFyZ9Ekr4QoLSzc+X4Kbx8DhbfGisbxfkug7HXUUGiPVk9F1mMQV5vzs1R2HAy3VO9zQ0n7blOXod45WfkZ66C4ApMr+mDVpN+gRtzC5dW6wdm0uyl93RWbpVpFWWeJUNLysqjj2eIebo7A3STa8PQMW+zC3NT9dBe23C0MdtdErh2VKevurNLSjy/SjjlJRSNjP0diIbfzsIrS0srcZwkO3H0hw5xeebdbnWRh5ddgeH0xw676V7CgIqOOgpXm0iLMzEQ1jIqsMInBFsD9JDThNrqfRWxRtfwpitvFeTThm8coXOKnr0JR2vBdeFsv4HEuThpQF0VrSXafyC+izKgqtxGHuIeIrc3VMlUef/Q1yINiw3+mXuqwjVUeaSmKpvKVqTyitkKT4SMLP6LhKSO4CQ5yRX9h5b8GBr7EVP0G06ewmQQHugRrNzVQ1YWJG1+4gkyagiaw+QhEvbtcXZo68PcIHvzJdHfV5/JO+epyDW0GTu4lZT0ZnD1Sszx4LhyN9BWRkJ2koNX7PrmZC/aDf94w69/Z/L0O7MOJMS/NNFYb/GjuSx+zsHsVRj9S3jlLxhh/9Pgut2bvtv56tffwNzAq5eobMpXaTA0WtnjOcqA7fldq/n9GBYL7xPPxhHYpLiAUD4en+D4cKnANmAH/7pIdJ2vq6Rzlfe3aLO6+T28Goi9M0th+e7dzY4tgfUzgHhRmGybBsz/ZDivRq6wNlw1FrGOgSxszUpV+nDYO7bM+YKKMLZXsDcsO4YnOLBUdXq6OhVzJOB7RJ3qJjoqwtHHGIsY7wtI4eVkfZaWEnd8coK+7RyZV3DxvWd/nxf3SPdB+sS3XVAWJlACfvCl16EVfYxkG4O5OoXZLflz+ecivr+Es6qo5GzRrrIyT7JvaRNQfo6sPP1bdkT/ctduaF1CgKr+9L1T3nX/51/X/Qtc95rQdedMXvc6WHt2Q/V0ingViZydYqdoVo65KlmGJlmmRrLMZmUrmy6bY3Nsjs2Z5pRv4zZu4zYuWnNZy7yLC+BLFX99cA+uHR/MbZu8nt69MalOllI1oUjoQhQXJGUA035lt9/td/vLOjXWPK7B3eBusBvC6O6NuRolc7ESLb4jhJ5cNddMTI/y66OczqowDf4vz7JX9sl+OSAH5ZAcliMbj1zCt3dawfM+O/GCwm614CGJB3LFUt77/mlPJJE8td6Bag1C6LNl67NVqrYwqkWA1s0ND/92pw6YX6a5cPuC983FBp57rivlr0HXJ2N/fqcuSHNv2TRrypcLJxtqTGut9aL6FAjOrof6FHB/bHkbMsxnI6h70awpnGyIgNMD9Sm080CajkyKz6x7GjNO4ODQYjY3Za/1MvUT+LkNpED9BAi3a9Nm051F1INmnaCT2fzpvLoXVU4EUtujTbDuiU7MXX0Yr/MgzmJ3CsQJ6WF77vrgRHYV2RnoIWRTe98ugThDCb0oQAkJBF9PvhKQdTfVhppc2omuVG8CCTjCm5zq3H0orC//zMlsT/3l81vWdyOOA4EAwntXbrjfrmv4i0+J+Sng9f94TwDefNo2Av3/wzT4MAaq9MqU0FfXTMt3nHHVjK7r7O9q5pbLptyhE4u4r2ukScv284LATS3hSYnMogaglmo1TFrq5hFEHongkofqplJIHO6yRXTSBFASXqQNMqYbOeAaxk112MWhmrKogYdzth+hgYFrMgzqZC8GyrBgRqaEgxQzJzhfnELo6xnUL5kRcdCrglaF5yjgqt8mDQ5SSJ3VwanLiWncik1MQ/Chc2BHvD6ZO7GdEmmlIK/EcXgoWcbjqgcmDvKXM7UnOSwXMY1w6acZo7aA6HUtap4gNayZ99BTYICeJ3nEKB7zlidwMYAVG1z5/QGOOGW9p3wHAZEhCNUlDuJEZj9ZTecxWkEfDr4W4UmIjDBPokmO+JNiaJ07KRbX4yfFCao5CcWhFsnoAVYb/T3toBF6UjHAHh36dTKz36ioHm2BGIlCspI5rEuVQS1WVnIIU6UCvahNjYlqMSykw8qe1PbYZCRwOIUybL0BO7UYM4pUtx6dXmwCC1lCa4XSn1ajlEr73K1KFMNs2wm2VaOC4pWL6lBWqtWzV5G2umQuMaxHl26jyuFC3YngDHWMQXnCd2PQAb06tFlpnbXsrqQcGXO2INWlJ9nUmFYSbQb0RcSA7NclqqM5YmQtPKJo9A3VJWiub1u5TQ+E9zAygE4+Cg0+0OoJbZ60TTGednw/E+jwoRNOKiEkInbKaWec7Vd++jKd5M45r8vHtnvK0xR+p+xkfnKf+FS3z+jolTH4lZF9fHy9+vU5wMFpgMsvSIO1MIb6hHdW4XOjFlpkTGViup9fSb/FApZYaplxBy33jCp/CKoWslFYjRUmrPRAl/Tm6/3mFQ322ie9C5v1MP/LzZOfWCQOQZF5SDxCRxKQRARDkpBkJAVJlYYhXYZMTFnNuu6Gm5EtR648+QqwzMdWWExwSpOiAMsxsQ7jOOQd6yVBMZiletZzCIkwjZqZWLzrPcc97wUvesxRr3tDnARF6DZYZ5NJm61OEW5NfrLGa+ZFcWtNhVeya+a8hK3QfDu1OMIafvEhUEJIRKyUhBRORk5BSdWDbLb4wlcu+tLlbYqqD3cs7Jg3NtaDyxUa+nhreEDS3j/QFz8w1nFIjM4HMmElKLAB+gZR/mNJbyHnoJHeYtgOi13A+lbs4qD+Xj+Tp1tNUMCBAsAAewCcAwAUcGCAPQMAAOd0LlVyXIOPR+E4ofPKDUXKUMKr8qq9Gq/Wn9vFiqObgQXRNbECsb9zEc5aymXs2RJ5gZap4YFFY4N0um4VRJdV4Fr6vxqjXYr0tbapxtjo0Q9DPnrVd2Clj/ai7clBlEnd4wMLNtmikWqsfXx0da2si5Rcg5kYrv3/WgAAAAA=) format('woff2'); }
+@font-face { font-family:'Space Mono'; font-weight:700; font-style:normal; font-display:swap; src:url(data:font/woff2;base64,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) format('woff2'); }
+
+:root {
+  --bg:#0B0E13; --bg2:#0F131A; --panel:#141922; --panel2:#191F29;
+  --ink:#E9ECF1; --dim:#9AA4B2; --faint:#626C7A;
+  --line:#232B37; --line2:#313B4A;
+  --amber:#E8B23A; --amber-dim:#3a3016;
+  --live:#F04A54; --live-dim:#3a1a1d;
+  /* memory-type coding (from the paper: observation / plan / reflection / dialogue) */
+  --obs:#57B6CE; --plan:#E8B23A; --refl:#9E8CFF; --dlg:#5FC28E;
+  --grid:rgba(255,255,255,.03);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:#EEEAE1; --bg2:#F4F1EA; --panel:#FBFAF6; --panel2:#F3F0E8;
+    --ink:#1A1D23; --dim:#5A6472; --faint:#8A93A0;
+    --line:#DAD5C8; --line2:#C7C1B2;
+    --amber:#A9791A; --amber-dim:#EFE4C6;
+    --live:#C63A43; --live-dim:#F2DCDC;
+    --obs:#2C7E96; --plan:#A9791A; --refl:#6A55C9; --dlg:#2E8B5C;
+    --grid:rgba(0,0,0,.035);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B0E13;--bg2:#0F131A;--panel:#141922;--panel2:#191F29;--ink:#E9ECF1;--dim:#9AA4B2;--faint:#626C7A;
+  --line:#232B37;--line2:#313B4A;--amber:#E8B23A;--amber-dim:#3a3016;--live:#F04A54;--live-dim:#3a1a1d;
+  --obs:#57B6CE;--plan:#E8B23A;--refl:#9E8CFF;--dlg:#5FC28E;--grid:rgba(255,255,255,.03);
+}
+:root[data-theme="light"]{
+  --bg:#EEEAE1;--bg2:#F4F1EA;--panel:#FBFAF6;--panel2:#F3F0E8;--ink:#1A1D23;--dim:#5A6472;--faint:#8A93A0;
+  --line:#DAD5C8;--line2:#C7C1B2;--amber:#A9791A;--amber-dim:#EFE4C6;--live:#C63A43;--live-dim:#F2DCDC;
+  --obs:#2C7E96;--plan:#A9791A;--refl:#6A55C9;--dlg:#2E8B5C;--grid:rgba(0,0,0,.035);
+}
+*{box-sizing:border-box;}
+html{background:var(--bg);}
+body{
+  margin:0; background:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:44px 44px;
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15.5px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:'Space Mono',ui-monospace,Menlo,monospace;}
+.wrap{max-width:1080px; margin:0 auto; padding:0 22px 100px;}
+a{color:var(--amber);}
+:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important;}}
+
+/* ===== Masthead ===== */
+header{padding:34px 0 8px;}
+.tally{display:flex; align-items:center; gap:20px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:14px;}
+.onair{font-family:'Space Mono',monospace; font-weight:700; font-size:12px; letter-spacing:.22em; color:var(--live);
+  display:inline-flex; align-items:center; gap:9px; border:1px solid var(--live); padding:5px 11px; border-radius:3px; background:var(--live-dim);}
+.dot{width:9px; height:9px; border-radius:50%; background:var(--live); animation:blink 1.6s steps(1) infinite;}
+@keyframes blink{50%{opacity:.25;}}
+.chan{font-family:'Space Mono',monospace; font-size:12px; color:var(--dim); letter-spacing:.08em;}
+.chan b{color:var(--ink);}
+.clock{margin-left:auto; font-family:'Space Mono',monospace; font-size:12px; color:var(--dim); letter-spacing:.06em;}
+
+h1{font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(30px,5.4vw,54px); line-height:1.02;
+  letter-spacing:-.01em; margin:26px 0 6px; text-wrap:balance;}
+h1 .amber{color:var(--amber);}
+.thesis{font-size:clamp(17px,2.4vw,21px); line-height:1.5; color:var(--ink); max-width:38ch; margin:0; font-weight:500;}
+.thesis .q{color:var(--dim);}
+.sub{color:var(--dim); max-width:64ch; margin:16px 0 0; font-size:15px;}
+
+.stripe{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0; border:1px solid var(--line);
+  margin-top:26px; background:var(--panel); border-radius:5px; overflow:hidden;}
+.stat{padding:13px 15px; border-right:1px solid var(--line);}
+.stat:last-child{border-right:none;}
+.stat .l{font-family:'Space Mono',monospace; font-size:10.5px; letter-spacing:.13em; color:var(--faint); text-transform:uppercase;}
+.stat .v{font-family:'Space Mono',monospace; font-weight:700; font-size:21px; margin-top:5px; color:var(--ink);}
+.stat .v.amber{color:var(--amber);}
+.stat .n{font-size:11.5px; color:var(--dim); margin-top:2px; line-height:1.35;}
+@media(max-width:640px){.stat{border-right:none; border-bottom:1px solid var(--line);} .stat:last-child{border-bottom:none;}}
+
+/* ===== Verdict banner ===== */
+.verdict-banner{display:flex; gap:16px; align-items:flex-start; margin-top:22px; border:1px solid var(--amber);
+  background:linear-gradient(180deg,var(--amber-dim),transparent); padding:16px 18px; border-radius:5px;}
+.verdict-banner .vb-tag{font-family:'Space Mono',monospace; font-weight:700; font-size:12px; letter-spacing:.14em; color:var(--amber); white-space:nowrap; padding-top:2px;}
+.verdict-banner p{margin:0; font-size:14.5px;}
+.verdict-banner b{color:var(--ink);}
+
+/* ===== Sections ===== */
+section{margin-top:66px;}
+.sh{display:flex; align-items:baseline; gap:13px; margin-bottom:20px;}
+.sh .idx{font-family:'Space Mono',monospace; font-size:12px; color:var(--amber); font-weight:700;}
+h2{font-family:'Space Mono',monospace; font-weight:700; font-size:24px; margin:0; letter-spacing:-.01em;}
+.sh .rule{flex:1; height:1px; background:var(--line); align-self:center;}
+h3{font-family:'Space Mono',monospace; font-weight:700; font-size:16px; margin:0 0 8px; letter-spacing:.01em;}
+p{max-width:74ch;}
+.dimtext{color:var(--dim); font-size:13.5px;}
+.lead{font-size:16px;}
+
+/* ===== Feed panel (hero component) ===== */
+.feed{border:1px solid var(--line); border-radius:6px; background:var(--panel); overflow:hidden;}
+.feed-head{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); background:var(--panel2);}
+.feed-head .who{font-family:'Space Mono',monospace; font-weight:700; font-size:13px;}
+.feed-head .meta{font-family:'Space Mono',monospace; font-size:11px; color:var(--faint); margin-left:auto;}
+.feed-body{padding:6px 0;}
+.mem{display:grid; grid-template-columns:78px 1fr 46px; gap:12px; align-items:center; padding:8px 14px; border-bottom:1px solid var(--bg2);}
+.mem:last-child{border-bottom:none;}
+.mem .kind{font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:2px 0;}
+.mem .txt{font-size:13.5px; line-height:1.45;}
+.mem .txt .cite{color:var(--amber);}
+.k-obs .kind{color:var(--obs);} .k-plan .kind{color:var(--plan);} .k-refl .kind{color:var(--refl);} .k-dlg .kind{color:var(--dlg);}
+.mem .imp{display:flex; align-items:center; gap:5px; justify-content:flex-end;}
+.impbar{width:5px; border-radius:2px;}
+.mem .impnum{font-family:'Space Mono',monospace; font-size:11px; color:var(--dim); width:14px; text-align:right;}
+.k-obs .impbar{background:var(--obs);} .k-plan .impbar{background:var(--plan);} .k-refl .impbar{background:var(--refl);} .k-dlg .impbar{background:var(--dlg);}
+.mem.inject{background:var(--amber-dim);}
+.mem.inject .txt{color:var(--ink);}
+.feed-foot{padding:9px 14px; border-top:1px solid var(--line); font-family:'Space Mono',monospace; font-size:11px; color:var(--faint); display:flex; gap:16px; flex-wrap:wrap;}
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; font-family:'Space Mono',monospace; font-size:11px; color:var(--dim);}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend i{width:9px; height:9px; border-radius:2px; display:inline-block;}
+
+/* ===== Formula ===== */
+.formula{border:1px solid var(--line2); border-radius:6px; background:var(--bg2); padding:18px 20px; margin-top:14px; overflow-x:auto;}
+.formula code{font-family:'Space Mono',monospace; font-size:15px; color:var(--ink); white-space:nowrap; display:block;}
+.formula .c-recency{color:var(--obs);} .formula .c-rel{color:var(--dlg);} .formula .c-imp{color:var(--plan);}
+.formula .note{font-family:-apple-system,sans-serif; font-size:12.5px; color:var(--dim); margin-top:10px; white-space:normal;}
+
+/* three uses */
+.uses{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px;}
+@media(max-width:720px){.uses{grid-template-columns:1fr;}}
+.use{border:1px solid var(--line); border-radius:6px; background:var(--panel); padding:15px 16px; border-top:2px solid var(--amber);}
+.use .un{font-family:'Space Mono',monospace; font-weight:700; font-size:13px; color:var(--amber);}
+.use h4{font-size:14.5px; margin:6px 0 5px;}
+.use p{font-size:13px; color:var(--dim); margin:0; max-width:none;}
+
+/* ===== Loop flow ===== */
+.loop{border:1px solid var(--line); border-radius:6px; background:var(--panel); padding:6px 0; margin-top:6px;}
+.step{display:grid; grid-template-columns:132px 1fr; gap:14px; padding:11px 16px; border-bottom:1px solid var(--bg2); align-items:start;}
+.step:last-child{border-bottom:none;}
+.step .sd{font-family:'Space Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--amber); padding-top:2px;}
+.step .st{font-size:13.5px; color:var(--ink);}
+.step .st .u{color:var(--amber); font-family:'Space Mono',monospace; font-size:12px;}
+
+/* ===== generic cards ===== */
+.cards{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+@media(max-width:720px){.cards{grid-template-columns:1fr;}}
+.card{border:1px solid var(--line); border-radius:6px; background:var(--panel); padding:16px 18px;}
+.card.warn{border-left:3px solid var(--live);}
+.card.ok{border-left:3px solid var(--dlg);}
+.card p{font-size:13.5px; color:var(--dim); margin:6px 0 0; max-width:none;}
+.card .ct{font-family:'Space Mono',monospace; font-weight:700; font-size:13px;}
+.card.warn .ct{color:var(--live);} .card.ok .ct{color:var(--dlg);}
+
+/* ===== table ===== */
+.tw{overflow-x:auto;}
+table{width:100%; border-collapse:collapse; font-size:13.5px; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:var(--panel);}
+th{font-family:'Space Mono',monospace; font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); text-align:left; padding:10px 13px; border-bottom:1px solid var(--line2); background:var(--panel2);}
+td{padding:9px 13px; border-bottom:1px solid var(--bg2); vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+td.mono,th.mono{font-family:'Space Mono',monospace;}
+.tick{color:var(--dlg); font-weight:700;} .cross{color:var(--faint);}
+tr.mine td{background:var(--amber-dim);}
+tr.mine td:first-child{font-weight:700; color:var(--ink);}
+.cost-row td:first-child{font-family:'Space Mono',monospace; font-weight:700;}
+tr.hl td{color:var(--ink);}
+.big-cost{font-family:'Space Mono',monospace; font-weight:700; color:var(--amber);}
+
+/* ===== deploy diagram ===== */
+.stack{border:1px solid var(--line); border-radius:6px; background:var(--bg2); padding:16px; margin-top:6px; font-family:'Space Mono',monospace; font-size:12.5px; line-height:1.75; color:var(--dim); overflow-x:auto;}
+.stack .node{color:var(--ink);} .stack .svc{color:var(--amber);} .stack .arrow{color:var(--faint);}
+
+/* ===== timeline ===== */
+.days{border-left:2px solid var(--line2); margin-left:6px; padding-left:20px;}
+.day{position:relative; padding-bottom:16px;}
+.day::before{content:""; position:absolute; left:-27px; top:6px; width:9px; height:9px; border-radius:50%; background:var(--bg); border:2px solid var(--amber);}
+.day.gate::before{background:var(--live); border-color:var(--live);}
+.day .dl{font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:var(--ink);}
+.day .dl .tag{color:var(--live); font-size:10.5px; letter-spacing:.08em; margin-left:8px;}
+.day.gate .dl .tag{color:var(--live);}
+.day .dt{font-size:13px; color:var(--dim); margin-top:2px; max-width:70ch;}
+
+/* ===== demo beats ===== */
+.beats{counter-reset:b;}
+.beat{display:grid; grid-template-columns:88px 1fr; gap:14px; padding:12px 0; border-bottom:1px solid var(--line);}
+.beat:last-child{border-bottom:none;}
+.beat .ts{font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:var(--amber);}
+.beat .bt{font-weight:600; font-size:14.5px; margin-bottom:3px;}
+.beat .bt.money{color:var(--amber);}
+.beat p{font-size:13.5px; color:var(--dim); margin:0; max-width:72ch;}
+
+.callout{border:1px solid var(--line2); border-left:3px solid var(--amber); background:var(--bg2); border-radius:5px; padding:13px 16px; margin-top:16px; font-size:14px;}
+.callout b{color:var(--amber);}
+
+footer{margin-top:74px; border-top:1px solid var(--line); padding-top:16px; color:var(--faint); font-size:12.5px; font-family:'Space Mono',monospace;}
+footer p{margin:5px 0; max-width:none;}
+footer a{color:var(--amber);}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="tally">
+    <span class="onair"><span class="dot"></span>ON AIR</span>
+    <span class="chan">CH. <b>AGENT SOCIETY</b> · Qwen Cloud Hackathon</span>
+    <span class="clock mono" id="clock">--:--:-- LIVE</span>
+  </div>
+
+  <h1>The <span class="amber">Feed</span>.</h1>
+  <p class="thesis">Stanford built a town of AI minds you could only watch as a replay. <span class="q">We turned it into a livestream you can talk to —</span> and every message you send becomes a memory that rewires who these characters become.</p>
+  <p class="sub">A design dossier for an <b>audience-coupled generative-agent</b> world, adapted from Park et al.'s <em>Generative Agents: Interactive Simulacra of Human Behavior</em> (Stanford, UIST&nbsp;2023). Verdict, architecture, cost model, and 12-day build plan — grounded in a 7-agent research pass.</p>
+
+  <div class="stripe">
+    <div class="stat"><div class="l">Ceiling</div><div class="v amber">~85–88</div><div class="n">/100 — higher than the safe pick (~82), manageable variance</div></div>
+    <div class="stat"><div class="l">Track</div><div class="v">Agent Society</div><div class="n">the concept IS the track definition</div></div>
+    <div class="stat"><div class="l">Run cost</div><div class="v">~$15–34</div><div class="n">N=15 agents, 21 days live, via fast-forward + Batch</div></div>
+    <div class="stat"><div class="l">Deadline</div><div class="v">Jul 20</div><div class="n">2:00 PM PT · live through Aug 11</div></div>
+  </div>
+
+  <div class="verdict-banner">
+    <span class="vb-tag">VERDICT</span>
+    <p><b>Take the swing.</b> This is not a reckless passion indulgence — it's a higher-ceiling bet than Sabi Studio whose two real risks are both solved on paper: cost collapses to pocket change once you stop running in real time, and the "you cloned Smallville" problem dies the moment you prove the audience-coupling with one ablation chart. The catch: more integration surface, so the cutline is ruthless and the novelty must be <em>measured</em>, not merely felt.</p>
+  </div>
+</header>
+
+<section id="concept">
+  <div class="sh"><span class="idx">01</span><h2>What a spectator actually does</h2><span class="rule"></span></div>
+  <p class="lead">The unit is a <b>live life</b>, not a finished show — and the chat is the plot. Four things a viewer can do, in rising order of magic:</p>
+  <div class="loop" style="margin-top:16px">
+    <div class="step"><div class="sd">WATCH · ~$0</div><div class="st">A stylized 2D town (Stardew-ish) where sprite characters live 24/7. A side <b>thought-ticker</b> prints each new memory as it's written — color-coded by type, sized by importance. You are literally watching the mind. "Skip to next notable event" jumps a judge straight to drama.</div></div>
+    <div class="step"><div class="sd">FOLLOW</div><div class="st">Each character has a followable social account and <b>autonomously posts</b> in its own voice whenever it lives something salient (importance ≥ 6), capped a few times per sim-day.</div></div>
+    <div class="step"><div class="sd">INTERACT</div><div class="st">You <b>reply to a post</b>. Your reply is moderated, turned into a memory (<span class="u">"@user replied: …"</span>), given a salience boost, and dropped into the character's stream — where it competes in the next planning + reflection cycle and <b>changes what they do next</b>. Tomorrow they reply back, citing you.</div></div>
+    <div class="step"><div class="sd">SCREEN</div><div class="st">A <b>"▶ what are they living right now?"</b> button compiles the current scene into an 8–20s captioned clip in the character's cloned voice (cheap). A <b>"make it cinematic 🎬"</b> upgrade re-renders the hero beat via Wan. And an auto-produced <b>daily highlight episode</b> catches followers up in 60–90s.</div></div>
+  </div>
+</section>
+
+<section id="mind">
+  <div class="sh"><span class="idx">02</span><h2>How a character keeps its life &amp; memories</h2><span class="rule"></span></div>
+  <p>Straight from the paper's <span class="mono">ConceptNode</span> design: every experience is one natural-language <b>memory</b> with a timestamp, an embedding, and an LLM-scored <b>importance (poignancy, 1–10)</b>. To act, the character retrieves only the memories that matter <em>right now</em>. This is the ticker a spectator watches — here's a real slice of one:</p>
+
+  <div class="feed">
+    <div class="feed-head"><span class="who mono">◍ maya_okafor</span><span class="meta mono">memory stream · sim-day 4 · 08:14</span></div>
+    <div class="feed-body">
+      <div class="mem k-dlg"><span class="kind">dialogue</span><span class="txt">Tom said last night he felt ignored at the café opening.</span><span class="imp"><span class="impbar" style="height:15px"></span><span class="impnum">7</span></span></div>
+      <div class="mem k-obs"><span class="kind">observe</span><span class="txt">The bakery down the street has its lights on early.</span><span class="imp"><span class="impbar" style="height:5px"></span><span class="impnum">2</span></span></div>
+      <div class="mem inject k-obs"><span class="kind" style="color:var(--amber)">inject</span><span class="txt"><span class="cite">@judge_02</span> replied to your post: "you should just call him instead of overthinking it"</span><span class="imp"><span class="impbar" style="height:19px;background:var(--amber)"></span><span class="impnum" style="color:var(--amber)">9</span></span></div>
+      <div class="mem k-refl"><span class="kind">reflect</span><span class="txt">I value the café friendships more than being right about the schedule.</span><span class="imp"><span class="impbar" style="height:17px"></span><span class="impnum">8</span></span></div>
+      <div class="mem k-plan"><span class="kind">plan</span><span class="txt">08:30 — walk to Tom's, apologize, then reopen the café together.</span><span class="imp"><span class="impbar" style="height:15px"></span><span class="impnum">7</span></span></div>
+    </div>
+    <div class="feed-foot"><span>retrieved: top-8 of 1,240</span><span>next tick: 08:30</span><span style="color:var(--amber)">▲ external reply boosted +2 → surfaced in this plan</span></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--obs)"></i>observation</span>
+    <span><i style="background:var(--dlg)"></i>dialogue</span>
+    <span><i style="background:var(--refl)"></i>reflection</span>
+    <span><i style="background:var(--plan)"></i>plan</span>
+    <span><i style="background:var(--amber)"></i>audience injection</span>
+  </div>
+
+  <h3 style="margin-top:26px">The retrieval score — one function, weighted as the shipped code actually weights it</h3>
+  <div class="formula">
+    <code>I(m) = <span class="c-recency">0.5·recency</span> + <span class="c-rel">3.0·relevance</span> + <span class="c-imp">2.0·importance</span></code>
+    <div class="note"><span style="color:var(--obs)">recency</span> = exponential decay over last-access · <span style="color:var(--dlg)">relevance</span> = cosine(memory, current situation) via <span class="mono">text-embedding-v4</span> · <span style="color:var(--plan)">importance</span> = the stored poignancy ÷ 10. Each component min-max normalized to [0,1]; take the top-8 into the prompt (caps context at ~1–2.5K tokens instead of dumping the whole stream). <b>The audience twist:</b> an ingested human reply gets poignancy <b>+2</b>, so it reliably surfaces in the very next planning and reflection cycle.</div>
+  </div>
+</section>
+
+<section id="algo">
+  <div class="sh"><span class="idx">03</span><h2>The one nameable algorithm — the Salience Engine</h2><span class="rule"></span></div>
+  <p>The 30% Innovation criterion breaks ties, so headline <b>one</b> idea, not a pipeline. Ours: <b>Audience-Coupled Salience Memory</b> — a single importance function <span class="mono">I(m)</span> that scores every event on one scale and then drives three subsystems at once. Its elegance is the pitch: <em>one score, three payoffs</em> — and innovation and cost-control turn out to be the same mechanism.</p>
+  <div class="uses">
+    <div class="use"><div class="un">USE 1</div><h4>Retrieval</h4><p>Feeds the agent's next-action context — exactly as Stanford did, but now over a stream that includes real human replies as first-class, salience-scored memories.</p></div>
+    <div class="use"><div class="un">USE 2</div><h4>Highlight editing</h4><p>The day's top-salience events auto-assemble the recap. The memory importance <em>is</em> the edit decision — no separate editor model to build or pay for.</p></div>
+    <div class="use"><div class="un">USE 3</div><h4>Render-budget gating</h4><p>Only the single highest-salience beat earns an expensive Wan clip; everything else stays cheap HyperFrames. Spend follows drama automatically.</p></div>
+  </div>
+  <p class="dimtext" style="margin-top:16px"><b>Novelty vs. the seminal paper, in one line:</b> Stanford's town was a <em>closed</em> sandbox; ours is an <em>open, perturbable</em> society — real replies enter the same memory economy and causally rewrite agent trajectories. That closed-vs-open distinction is a genuine research delta, not a reskin — but <b>it only scores if you prove it with an ablation chart</b> (see §07). The novelty lives in the eval, not the vibe.</p>
+</section>
+
+<section id="moneyshot">
+  <div class="sh"><span class="idx">04</span><h2>The money shot — audience in the loop</h2><span class="rule"></span></div>
+  <p>This is the causal beat no competitor — and not even Stanford — can show. It's also the answer to the hackathon's most annoying rule (<em>demo must stay live through Aug 11</em>): the interaction loop turns that burden into the feature.</p>
+  <div class="loop">
+    <div class="step"><div class="sd">DAY T · evening</div><div class="st">Characters post to their feed when they live something salient (importance ≥ 6), with an avatar-consistent image.</div></div>
+    <div class="step"><div class="sd">OVERNIGHT</div><div class="st">Users and judges reply to the posts.</div></div>
+    <div class="step"><div class="sd">DAY T+1 · AM</div><div class="st">A moderation gate (profanity / prompt-injection / PII + per-user rate limit) filters replies → accepted ones become observation memories with a <span class="u">+2 salience bias</span> → the morning plan is <em>guaranteed</em> to retrieve at least one fresh external observation.</div></div>
+    <div class="step"><div class="sd">DAY T+1</div><div class="st">Reflection may synthesize a new higher-order belief → alters the plan → the character <b>posts back citing @user</b> and appears in that day's highlight, in its cloned voice. <span class="u">The judge sees their own message caused this.</span></div></div>
+  </div>
+  <div class="callout"><b>Most clippable moment:</b> "The judge tweeted; the character answered." Live sim → identity-consistent media → cloned voice → human-in-the-loop behavior change → auto-produced episode, in one unbroken take.</div>
+</section>
+
+<section id="cost">
+  <div class="sh"><span class="idx">05</span><h2>Why 24/7 for three weeks is affordable</h2><span class="rule"></span></div>
+  <p>The linchpin decision: <b>do not run in real time.</b> Pre-generate the sim in fast-forward into a buffer that stays ~1 day ahead of a 1× "live" playhead; spectators watch the buffer as if live. Consequence — <b>100% of generation is offline</b>, so the Batch API's 50% discount applies to every call and there's no latency SLA. That single move, stacked with event-driven ticks and tiered model routing, is a <b>15–40× cost reduction</b>.</p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Agents (N)</th><th class="mono">tokens / real-day</th><th class="mono">$ / real-day</th><th class="mono">21-day run (qwen-plus)</th><th class="mono">worst case (all-max)</th></tr></thead>
+    <tbody>
+      <tr class="cost-row"><td>8</td><td class="mono">~2.1M</td><td class="mono">$0.37</td><td class="mono">$7.80</td><td class="mono">$17.90</td></tr>
+      <tr class="cost-row mine"><td>15 ◄ target</td><td class="mono">~3.9M</td><td class="mono">$0.69</td><td class="mono big-cost">$14.60</td><td class="mono">$33.60</td></tr>
+      <tr class="cost-row"><td>25</td><td class="mono">~6.5M</td><td class="mono">$1.15</td><td class="mono">$24.30</td><td class="mono">$56.00</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="dimtext" style="margin-top:12px">All three fit inside <span class="mono">1M-per-model free quota + ~$40 voucher + ~$50 out of pocket</span> with a 2× safety margin; compute is $0 on the 12-month free-tier ECS box. Biggest swing variable is smart-model <b>dialogue turns</b> (~53% of spend) — cap conversations at ~6 turns and keep them on <span class="mono">qwen-plus</span>, not max. Cost stops being a risk and becomes a credibility asset: <em>"it's been live since Jul 21 — open it and talk to a character right now."</em></p>
+
+  <h3 style="margin-top:26px">Tiered model routing</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Job</th><th class="mono">Qwen model</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Routine action · reaction check · importance scoring (batched)</td><td class="mono">qwen-flash</td><td>~90% of all calls; cheapest tier</td></tr>
+      <tr><td>Dialogue turns · hourly plan</td><td class="mono">qwen-plus</td><td>quality where it shows on screen</td></tr>
+      <tr><td>Daily plan · reflection synthesis</td><td class="mono">qwen3-max</td><td>rare, deep reasoning</td></tr>
+      <tr><td>Memory embeddings · rerank</td><td class="mono">text-embedding-v4 · gte-rerank</td><td>retrieval; ~$0</td></tr>
+      <tr><td>Character voices</td><td class="mono">CosyVoice</td><td>clone once → reuse voice_id (identity spine)</td></tr>
+      <tr><td>On-demand / hero video</td><td class="mono">Wan i2v</td><td>~$0.02–0.05 / 5s; async, salience-gated</td></tr>
+      <tr><td>Scene captioning · image moderation</td><td class="mono">qwen3-vl-plus</td><td>perception + safety on user uploads</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="dimtext" style="margin-top:10px">Verify exact snapshot IDs in-console (they drift monthly). Batch and prompt-cache discounts can't stack — Batch wins on the offline hot path.</p>
+</section>
+
+<section id="deploy">
+  <div class="sh"><span class="idx">06</span><h2>Where it lives on Alibaba Cloud</h2><span class="rule"></span></div>
+  <div class="stack">
+    <div><span class="node">Next.js spectator dashboard</span> <span class="arrow">— polls DB every 3–5s (zero-infra; doubles as the replay reader)</span></div>
+    <div><span class="arrow">│</span></div>
+    <div><span class="node">ECS box</span> <span class="arrow">(12-mo free trial, $0)</span> · <span class="node">Node worker as systemd service</span> <span class="arrow">(Restart=always)</span></div>
+    <div><span class="arrow">├─</span> sim loop holds world state in memory, ticks via in-process scheduler</div>
+    <div><span class="arrow">├─</span> slow jobs (Wan, reflection) on a queue so the tick never stalls</div>
+    <div><span class="arrow">└─</span> heartbeat row proves "the world is alive"</div>
+    <div><span class="arrow">│</span></div>
+    <div><span class="arrow">├──▶</span> <span class="svc">DashScope / Qwen Cloud</span> <span class="arrow">(dashscope-intl.aliyuncs.com) — all model calls</span></div>
+    <div><span class="arrow">├──▶</span> <span class="svc">RDS PostgreSQL + pgvector</span> <span class="arrow">— memories (HNSW) + relational state, one DB</span></div>
+    <div><span class="arrow">└──▶</span> <span class="svc">OSS</span> <span class="arrow">— videos/images/avatars (download Wan bytes immediately; its URLs expire in 24h)</span></div>
+  </div>
+  <div class="cards" style="margin-top:16px">
+    <div class="card ok"><div class="ct">Proof-of-deployment file</div><p><span class="mono">deploy/alicloud.ts</span>: DashScope client init from <span class="mono">DASHSCOPE_API_KEY</span>, <span class="mono">ali-oss</span> PutObject, the pgvector connection, ECS region/spec + systemd unit — so a judge can trace request → Qwen model → OSS → DB, all on Alibaba. Satisfies the eligibility gate cleanly.</p></div>
+    <div class="card ok"><div class="ct">Judge-safety &amp; never-goes-dark</div><p>Spectator view is pure DB/OSS reads → unlimited judges cost ~nothing. A <span class="mono">?mode=replay</span> golden-run auto-engages on a stale heartbeat. All Wan/CosyVoice disabled from user-triggered paths (pre-rendered only); judge chats routed to qwen-flash with per-IP limits + a global daily cap + a read-only kill-switch.</p></div>
+  </div>
+  <p class="dimtext" style="margin-top:12px"><b>Not Function Compute:</b> it's stateless and its trial credits lapse around Aug 11 — both fight the "continuously running world" premise. A single always-on ECS box is the pragmatic solo pick.</p>
+</section>
+
+<section id="plan">
+  <div class="sh"><span class="idx">07</span><h2>The 12-day build &amp; two kill-checks</h2><span class="rule"></span></div>
+  <div class="cards" style="margin-bottom:22px">
+    <div class="card"><div class="ct" style="color:var(--dlg)">Ships (never cut)</div><p>Memory stream + <span class="mono">I(m)</span> retrieval · 8–15 agents living with dialogue/reflection/planning · fast-forward buffer + Batch · 2D live view + thought-ticker · <b>the post→reply→memory→visible-reaction loop</b> · <b>the ablation chart</b> · on-demand HyperFrames clip · daily-highlight editor · Alibaba deploy + proof file + replay fallback.</p></div>
+    <div class="card warn"><div class="ct">Cut order (first to go)</div><p>omni "talk live" booth → Wan cinematic tier (fall back to HyperFrames hero shot) → per-town ensemble episodes → autonomous post <em>images</em> (ship text posts) → agent count 15→8. <b>Never cut:</b> the audience-causal loop and the ablation chart — those are the win.</p></div>
+  </div>
+  <div class="days">
+    <div class="day"><div class="dl">Jul 8 · D1</div><div class="dt">Scaffold: ECS + RDS/pgvector + OSS + DashScope client; one qwen-flash round-trip. Generate 4–8 canonical portraits + voiceprints (the identity spine).</div></div>
+    <div class="day gate"><div class="dl">Jul 9 · D2<span class="tag">GO / NO-GO</span></div><div class="dt">Memory stream + retrieval + single-agent loop. <b>Test:</b> one agent perceives an event → stores it with poignancy + embedding → retrieves top-8 → emits a next action that visibly references a retrieved memory, persisted, for &lt;$0.05. If the memory→behavior chain doesn't work for ONE agent today, descope to N=8 or fall back — this is the cheapest proof of the load-bearing mechanic.</div></div>
+    <div class="day"><div class="dl">Jul 10 · D3</div><div class="dt">Multi-agent + dialogue + reflection (fires when accumulated poignancy &gt; 150) + recursive daily→hourly→5-min planning; 8 agents living.</div></div>
+    <div class="day"><div class="dl">Jul 11 · D4</div><div class="dt"><b>Fast-forward buffer + Batch API + tick-log persistence.</b> (Guardrail 1 — this is what makes the run affordable and unblocks Batch; must work.)</div></div>
+    <div class="day"><div class="dl">Jul 12 · D5</div><div class="dt">2D live view (Phaser/Pixi) + thought-ticker + speech bubbles + polling dashboard.</div></div>
+    <div class="day"><div class="dl">Jul 13 · D6</div><div class="dt">Social feed + autonomous posting (importance ≥ 6, capped).</div></div>
+    <div class="day gate"><div class="dl">Jul 14 · D7<span class="tag">KILL-CHECK</span></div><div class="dt">Reply → moderation → ingest (+2) → <b>visible causality citation</b>. Guardrail 2: is a credible ablation reachable? If clearly not → pivot to AI Showrunner or Sabi <em>now</em>, not on day 12.</div></div>
+    <div class="day"><div class="dl">Jul 15 · D8</div><div class="dt"><b>The ablation eval:</b> info-diffusion speed, relationship-graph density, audience-causal divergence — full vs. dialogue-ablated vs. no-audience. <b>Produce the chart.</b> This is the highest-priority deliverable in the whole project.</div></div>
+    <div class="day"><div class="dl">Jul 16 · D9</div><div class="dt">HyperFrames on-demand animatic (Tier A) + daily-highlight Editor Agent. Feature freeze after today.</div></div>
+    <div class="day"><div class="dl">Jul 17 · D10</div><div class="dt">Wan cinematic hero shot (Tier B, salience-gated) + replay fallback + live-view polish.</div></div>
+    <div class="day"><div class="dl">Jul 18 · D11</div><div class="dt">Deploy hardening: proof file, architecture diagram, rate limits, kill-switch, cost caps. <b>Start the live run.</b></div></div>
+    <div class="day"><div class="dl">Jul 19–20 · D12</div><div class="dt">Record the &lt;3-min demo, write README + license + docs, submit (Jul 19). Sim already live; buffer keeps generating through Aug 11. Jul 20 = buffer/verify only.</div></div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="sh"><span class="idx">08</span><h2>The 3-minute demo</h2><span class="rule"></span></div>
+  <p class="dimtext">Structure one causal money shot, not a feature tour. Name Smallville, AI Town, and Fable in the first minute to preempt the "clone" reflex — then show the beat they can't.</p>
+  <div class="beats" style="margin-top:16px">
+    <div class="beat"><div class="ts">0:00–0:20</div><div><div class="bt">It's alive, right now.</div><p>Live 2D town, real wall-clock timestamp on screen, thought-ticker scrolling. "This is Maya. Nothing here is scripted. Right now she's deciding whether to apologize to Tom after last night's argument."</p></div></div>
+    <div class="beat"><div class="ts">0:20–0:50</div><div><div class="bt">The society.</div><p>Pull back to the relationship graph and an emergent event in progress — a rumor, a party forming. Overlay: "info diffusion: 6/15 agents aware." Establishes multi-agent, not a chatbot.</p></div></div>
+    <div class="beat"><div class="ts">0:50–1:35</div><div><div class="bt money">▶ THE MONEY SHOT — audience in the loop.</div><p>Type a live reply to Maya's post → it drops into her memory stream with a visible salience score → her next action changes and she cites your message in her reasoning. "That was a real message from outside the simulation, and it just changed what she does next."</p></div></div>
+    <div class="beat"><div class="ts">1:35–2:10</div><div><div class="bt">One mechanism, three payoffs.</div><p>The same score assembles today's highlight reel from top-salience events; the single hottest beat renders as a Wan clip with HyperFrames captions in Maya's cloned voice. "One importance function decides what she remembers, what the show highlights, and what we spend GPU on."</p></div></div>
+    <div class="beat"><div class="ts">2:10–2:40</div><div><div class="bt">The measurable claim (wins the track).</div><p>Cut to the ablation chart: full multi-agent + audience vs. ablated baselines on info-diffusion speed, relationship-graph density, and audience-causal divergence — the metric Stanford could never report. That's the 30%+30% proof.</p></div></div>
+    <div class="beat"><div class="ts">2:40–3:00</div><div><div class="bt">It's been live the whole time.</div><p>"This has run continuously on Alibaba Cloud since Jul 21 — open it and talk to Maya right now." Close on the live URL + QR. The 24/7 constraint becomes a credibility asset judges verify themselves through Aug 11.</p></div></div>
+  </div>
+</section>
+
+<section id="diff">
+  <div class="sh"><span class="idx">09</span><h2>Differentiators vs. prior art</h2><span class="rule"></span></div>
+  <p class="dimtext">Every prior "living world" owns one or two of these legs. The invention is owning all four around a single, persistent, canonically-shared character whose current life is simultaneously spectated, video-rendered on demand, and steerable by a real crowd.</p>
+  <div class="tw" style="margin-top:14px">
+  <table>
+    <thead><tr><th>Project</th><th>Real-time spectator</th><th>Audience → memory</th><th>On-demand video of <em>now</em></th><th>Persistent social feed</th></tr></thead>
+    <tbody>
+      <tr><td>Stanford Smallville (2023)</td><td class="cross">— replay only</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+      <tr><td>a16z AI Town</td><td class="cross">— replay</td><td class="cross">—</td><td class="cross">—</td><td class="cross">—</td></tr>
+      <tr><td>Fable SHOW-1 / Showrunner</td><td class="cross">— offline batch</td><td class="cross">— solo author</td><td class="cross">⚠ episodic</td><td class="cross">—</td></tr>
+      <tr class="mine"><td>The Feed (this project)</td><td class="tick">✔ buffered "live"</td><td class="tick">✔ salience-scored</td><td class="tick">✔ HyperFrames / Wan</td><td class="tick">✔ per-character</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<footer>
+  <p>SOURCE — Park, O'Brien, Cai, Morris, Liang, Bernstein. "Generative Agents: Interactive Simulacra of Human Behavior." UIST 2023 · arXiv:2304.03442 · github.com/joonspk-research/generative_agents</p>
+  <p>PRODUCED BY — a 7-agent research + design pass (paper deep-read, prior-art scan, cost model, Qwen/deploy, media layer, track strategy, synthesis). Full docs: strategy/truman-show/ · pricing &amp; model IDs are mid-2026 estimates — verify in-console before relying on them.</p>
+  <p>OPEN QUESTIONS — exact Qwen snapshot IDs &amp; Wan pricing drift monthly · low-resource TTS coverage unverified · the ablation metric must be designed to actually separate full-vs-baseline, or the novelty claim is hollow.</p>
+</footer>
+</div>
+
+<script>
+(function(){
+  var el=document.getElementById('clock');
+  function pad(n){return n<10?'0'+n:''+n;}
+  function tick(){var d=new Date(); el.textContent=pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+' LIVE';}
+  tick(); setInterval(tick,1000);
+})();
+</script>

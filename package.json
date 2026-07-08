@@ -1,0 +1,21 @@
+{
+  "name": "the-feed",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "The Feed — audience-coupled generative agents. A live, watchable world of AI characters whose memories are steerable by a real crowd. Qwen Cloud Hackathon (Agent Society track).",
+  "license": "MIT",
+  "scripts": {
+    "sim:day2": "tsx src/sim/day2.ts",
+    "sim:town": "tsx src/sim/town.ts",
+    "sim:gossip": "tsx src/sim/gossip.ts",
+    "sim:audience": "tsx src/sim/audience.ts",
+    "sim:ablation": "tsx src/sim/ablation.ts",
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.0",
+    "typescript": "^5.5.0"
+  }
+}

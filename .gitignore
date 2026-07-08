@@ -1,0 +1,19 @@
+node_modules/
+dist/
+
+# Meta-strategy / competitive analysis — kept OUT of the public repo by default
+# (reveals idea selection + competition read). The Truman Show design + research
+# docs under strategy/truman-show/ ARE committed. Remove these lines to publish.
+strategy/WINNING-PLAYBOOK.md
+strategy/ROUND2-VERDICT.md
+strategy/ranked-ideas.json
+strategy/round2-challengers.json
+strategy/open-questions.md
+strategy/playbook-dashboard.html
+
+.env
+.env.local
+*.log
+.DS_Store
+data/*.sqlite
+data/*.db
