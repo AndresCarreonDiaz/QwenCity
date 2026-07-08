@@ -9,6 +9,13 @@ import { runScenario } from "../src/eval/scenario.ts";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const readme = readFileSync(join(root, "README.md"), "utf8");
 const arch = readFileSync(join(root, "docs", "ARCHITECTURE.md"), "utf8");
+const deploy = readFileSync(join(root, "docs", "DEPLOY.md"), "utf8");
+
+test("DEPLOY.md covers the deploy essentials", () => {
+  for (const needle of ["systemd", "npm run serve", "deploy/alicloud.ts", "DASHSCOPE_API_KEY", "Judge-safety"]) {
+    assert.ok(deploy.includes(needle), `DEPLOY.md missing "${needle}"`);
+  }
+});
 
 test("README has the submission-critical sections", () => {
   for (const heading of ["## Architecture", "rubric", "Measured results", "Qwen Cloud services", "## Quickstart", "Built during the hackathon"]) {

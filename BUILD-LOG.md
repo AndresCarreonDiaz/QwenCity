@@ -6,6 +6,29 @@ run before moving on.
 
 ---
 
+## Iteration 17 — 2026-07-08 · deployment layer (proof file + deploy guide) ✅
+
+**Done**
+- **`deploy/alicloud.ts`** — the Alibaba Cloud proof-of-deployment file: `deploymentInfo()` reports which
+  services are configured (DashScope/Qwen, OSS, RDS+pgvector) from env with **no secrets leaked**;
+  `verifyDashScope()` does a live embedding as proof; `persistToOSS()` / `pgClient()` lazily load
+  `ali-oss` / `pg` via indirect specifiers so the module imports + typechecks **without** those SDKs
+  installed. `npm run deploy:info` prints the manifest + the `request → DashScope → OSS → RDS` trace.
+- **`docs/DEPLOY.md`** — step-by-step ECS + `npm install` + `.env` + **systemd** service, exposure, and the
+  judge-safety / golden-run-replay / cost notes.
+- **`.env.example`** extended with the OSS/RDS/PORT deploy vars.
+- **tsconfig** now includes `deploy/`; **tests** +`deploy.test.ts` (4, incl. no-secret-leak checks) and a
+  DEPLOY.md doc check → **85/85 passing**, typecheck clean.
+
+**Verified:** `npm test` 85/85 · `npm run typecheck` clean · `npm run deploy:info` prints the manifest.
+
+**Next (last autonomous item):** ONE small real-Qwen demo capture → then stop; the actual cloud deploy and
+the video recording are the user's.
+
+**Blocked (needs you):** running the deploy to your Alibaba Cloud account; recording the 3-min video.
+
+---
+
 ## Iteration 16 — 2026-07-08 · spectator server (the judge-visitable URL) ✅
 
 **Done**
