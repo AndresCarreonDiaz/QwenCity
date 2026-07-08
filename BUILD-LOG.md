@@ -6,6 +6,34 @@ run before moving on.
 
 ---
 
+## Iteration 11 — 2026-07-08 · README rubric-mapping + architecture diagram (submission deliverables) ✅
+
+**Done**
+- **README** rewritten for submission: a Mermaid **architecture diagram** (the cognitive loop, the
+  Salience Engine's three uses, the audience loop, the Qwen calls), a **rubric-mapping table** (what code
+  serves each of the 30/30/25/15 criteria), the **measured ablation results** (4/4 vs 1/4 diffusion,
+  50% vs 0% density, 25% vs 0% audience-causal divergence), a Qwen-services table, full quickstart (all 10
+  sims), the deployment summary, and a "built during the hackathon" statement.
+- **`docs/ARCHITECTURE.md`**: components table, the Salience Engine, the fast-forward cost model, and a
+  Mermaid **deployment diagram** (ECS + RDS/pgvector + OSS + DashScope + judge-safety + proof file).
+- **Docs consistency test** (`test/docs.test.ts`): asserts the README has the required sections, both docs
+  have balanced/typed Mermaid blocks, and — crucially — **re-derives the ablation numbers from the code and
+  asserts the README's quoted figures match**, so the docs can't drift from reality.
+- **Tests**: +`docs.test.ts` (3) → **62/62 passing**.
+
+**Verified:** all ten sims exit 0 · `npm test` 62/62, exit 0. (Mermaid renders on GitHub; not executed
+locally — structurally validated instead.)
+
+**Next (no cloud key needed)**
+1. Wire dialogue + planning into the World tick (opt-in flags → one run yields conversations, plans, edges).
+2. Surface the daily recap in the snapshot + viewer (a "Today's highlights" panel).
+3. Scaffold `deploy/alicloud.ts` proof-file shape (structure only; validates when the key lands).
+
+**Blocked (needs you)**
+- DashScope API key (`.env`) + region for the real-Qwen swap and deployment.
+
+---
+
 ## Iteration 10 — 2026-07-08 · daily-highlight editor (Salience Engine, use 2 of 3) ✅
 
 **Done**
