@@ -6,6 +6,35 @@ run before moving on.
 
 ---
 
+## Iteration 14 — 2026-07-08 · real DashScope adapter (key-swap, verified to the wire) ✅
+
+**Done**
+- **DashScope adapter** (`src/model/dashscope.ts`): the production `ModelAdapter` against DashScope's
+  OpenAI-compatible endpoints — `embed` (`text-embedding-v4`), `complete` (with **task→model routing**:
+  act/importance→`qwen-flash`, dialogue/post→`qwen-plus`, plan/reflect→`qwen3-max`), `scoreImportance`
+  (poignancy prompt → parsed 1–10), Bearer auth, and retry on 429/5xx.
+- **Factory wired** (`src/model/index.ts`): `MODEL_BACKEND=dashscope` now constructs the real adapter from
+  `DASHSCOPE_API_KEY` (+ optional `DASHSCOPE_BASE_URL` for the China region). Mock stays the default.
+- **`.env.example`** documents the exact contract (key, backend, region endpoint).
+- **Tests** (`test/dashscope.test.ts`, 7): using an **injectable fetch** — endpoint + body construction,
+  task→model routing, auth header, response parsing, importance parse/clamp/fallback, retry-on-500, and
+  no-retry-on-400. The only unverified part is the live network (needs the key). → **75/75 passing**.
+
+**Verified:** all eleven sims exit 0 (mock default intact) · `npm test` 75/75, exit 0.
+
+**The key-swap is now real:** drop `DASHSCOPE_API_KEY` into `.env`, run `MODEL_BACKEND=dashscope npm run
+sim:day2`, and the exact same loop runs on Qwen — the request logic is already tested.
+
+**Next (no cloud key needed)**
+1. Scaffold `deploy/alicloud.ts` — OSS + pgvector client init (proof-of-deployment file shape).
+2. Thread the fast-forward buffer through the life run (generate → persist → replay in one flow).
+
+**Blocked (needs you)**
+- The **DashScope API key** in `.env` (+ region) — to run a live smoke test and then deploy. Everything up
+  to the wire is done and tested.
+
+---
+
 ## Iteration 13 — 2026-07-08 · highlights in the snapshot + viewer ✅
 
 **Done**
