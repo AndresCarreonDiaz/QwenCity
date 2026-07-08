@@ -98,6 +98,14 @@ npm run sim:highlights  # importance-driven daily recap
 npm test                # 59 unit + integration tests
 ```
 
+## See it running
+
+Live on Qwen: `npm run smoke:live` (needs a key in `.env`). Capture a small real-Qwen world with
+`npm run capture` → open `web/viewer.html`. A committed sample of authentic Qwen output is at
+[`docs/sample-viewer.html`](./docs/sample-viewer.html) (open locally) and
+[`docs/sample-snapshot.json`](./docs/sample-snapshot.json) — including an audience reply steering a
+character's next action and real agent-to-agent gossip. Deploy for a live URL: [`docs/DEPLOY.md`](./docs/DEPLOY.md).
+
 ## Qwen Cloud services (one-line swap: `MODEL_BACKEND=dashscope`)
 
 Every model call is behind the `ModelAdapter` seam (`src/model/`); the offline `MockAdapter` and the

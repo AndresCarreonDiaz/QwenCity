@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The Feed — live @ 10:15</title>
+<style>
+  :root{--bg:#0b0e13;--panel:#141922;--line:#232b37;--ink:#e9ecf1;--dim:#9aa4b2;--amber:#e8b23a;}
+  *{box-sizing:border-box;} html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px 20px 40px;}
+  header{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);padding-bottom:12px;flex-wrap:wrap;}
+  .live{color:#f04a54;font-weight:700;letter-spacing:.14em;font-size:12px;display:inline-flex;align-items:center;gap:7px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#f04a54;}
+  h1{font-size:18px;margin:0;letter-spacing:.02em;} h1 b{color:var(--amber);}
+  .clock{margin-left:auto;color:var(--dim);font-size:13px;}
+  .stats{color:var(--dim);font-size:12px;width:100%;margin-top:4px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+  @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;}
+  .card h2{font-size:11px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin:0 0 10px;}
+  svg{width:100%;height:auto;display:block;background:radial-gradient(circle at 50% 45%,#171d27,#0f131a);border-radius:6px;}
+  .nname{fill:var(--ink);font-size:3.4px;font-weight:700;} .nact{fill:var(--dim);font-size:2.6px;}
+  ul{list-style:none;margin:0;padding:0;}
+  .tk{display:grid;grid-template-columns:78px 52px 1fr 46px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #1b212c;font-size:12px;}
+  .tk .kind{font-weight:700;font-size:10px;text-transform:uppercase;}
+  .tk .who{color:var(--dim);} .tk .txt{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .impbar{height:6px;background:#222922;border-radius:3px;overflow:hidden;} .impbar i{display:block;height:100%;}
+  .post{padding:7px 0;border-bottom:1px solid #1b212c;font-size:13px;} .post .handle{color:var(--amber);font-weight:700;}
+  .post .rc{color:var(--dim);font-size:11px;margin-left:6px;} .post.empty{color:var(--dim);}
+  .hl{display:grid;grid-template-columns:46px 96px 1fr;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px solid #1b212c;font-size:12px;}
+  .hl .hlt{color:var(--dim);} .hl .hlk{font-weight:700;font-size:10px;text-transform:uppercase;} .hl .hltx{color:var(--ink);}
+  .hl.empty{color:var(--dim);}
+  footer{color:#626c7a;font-size:11px;margin-top:18px;}
+</style></head>
+<body><div class="wrap">
+  <header>
+    <span class="live"><span class="dot"></span>LIVE</span>
+    <h1>The <b>Feed</b></h1>
+    <span class="clock">sim 10:15</span>
+    <div class="stats">3 agents · 82 memories · 1 relationships · 0 posts</div>
+  </header>
+  <div class="grid">
+    <div class="card"><h2>The Town</h2>
+      <svg viewBox="0 0 100 100" role="img" aria-label="agent town and relationship graph"><line x1="20.6" y1="67.0" x2="79.4" y2="67.0" stroke="#3b4757" stroke-width="1.60" /><g>
+        <circle cx="50.0" cy="16.0" r="3.4" fill="#E8B23A" stroke="#0b0e13" stroke-width="0.6"/>
+        <text x="50.0" y="11.4" text-anchor="middle" class="nname">Maya</text>
+        <text x="50.0" y="22.8" text-anchor="middle" class="nact">Reordering milk and flour…</text>
+      </g><g>
+        <circle cx="79.4" cy="67.0" r="3.4" fill="#E8B23A" stroke="#0b0e13" stroke-width="0.6"/>
+        <text x="79.4" y="62.4" text-anchor="middle" class="nname">Tom</text>
+        <text x="79.4" y="73.8" text-anchor="middle" class="nact">Overhear Maya laughing wi…</text>
+      </g><g>
+        <circle cx="20.6" cy="67.0" r="3.4" fill="#E8B23A" stroke="#0b0e13" stroke-width="0.6"/>
+        <text x="20.6" y="62.4" text-anchor="middle" class="nname">Ana</text>
+        <text x="20.6" y="73.8" text-anchor="middle" class="nact">Chat with regulars at the…</text>
+      </g></svg>
+    </div>
+    <div class="card"><h2>Thought-ticker — watch the mind</h2>
+      <ul><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Maya</span>
+        <span class="txt">Tom is talking with Ana.</span>
+        <span class="impbar"><i style="width:30%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Maya</span>
+        <span class="txt">Ana is talking with Tom.</span>
+        <span class="impbar"><i style="width:30%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Tom</span>
+        <span class="txt">Maya is Check inventory quietly, reorder milk and flour to avoid running low.</span>
+        <span class="impbar"><i style="width:20%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Tom</span>
+        <span class="txt">Ana is talking with Tom.</span>
+        <span class="impbar"><i style="width:30%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Ana</span>
+        <span class="txt">Maya is Check inventory quietly, reorder milk and flour to avoid running low.</span>
+        <span class="impbar"><i style="width:20%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Ana</span>
+        <span class="txt">Tom is talking with Ana.</span>
+        <span class="impbar"><i style="width:30%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#F0A020">injection</span>
+        <span class="who">Maya</span>
+        <span class="txt">On 2026-07-10, @judge replied to my post: &quot;life&#39;s short — just go apologize to Tom&quot;</span>
+        <span class="impbar"><i style="width:100%;background:#F0A020"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#5FC28E">dialogue</span>
+        <span class="who">Ana</span>
+        <span class="txt">Ana said to Tom: &quot;“Maya? She dashed past the bakery at eight—hair half-braided, clutching that lavender tote, looked like she was late for something *very* important… or avoiding someone.”&quot;</span>
+        <span class="impbar"><i style="width:60%;background:#5FC28E"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#5FC28E">dialogue</span>
+        <span class="who">Tom</span>
+        <span class="txt">Ana said to Tom: &quot;“Maya? She dashed past the bakery at eight—hair half-braided, clutching that lavender tote, looked like she was late for something *very* important… or avoiding someone.”&quot;</span>
+        <span class="impbar"><i style="width:60%;background:#5FC28E"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Maya</span>
+        <span class="txt">Tom is walking to the neighborhood café..</span>
+        <span class="impbar"><i style="width:20%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Maya</span>
+        <span class="txt">Ana is Starting the day by greeting regulars at the counter..</span>
+        <span class="impbar"><i style="width:40%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Tom</span>
+        <span class="txt">Maya is unlocking the café doors and starting the coffee brew..</span>
+        <span class="impbar"><i style="width:30%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Tom</span>
+        <span class="txt">Ana is Starting the day by greeting regulars at the counter..</span>
+        <span class="impbar"><i style="width:40%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Ana</span>
+        <span class="txt">Maya is unlocking the café doors and starting the coffee brew..</span>
+        <span class="impbar"><i style="width:30%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Ana</span>
+        <span class="txt">Tom is walking to the neighborhood café..</span>
+        <span class="impbar"><i style="width:20%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#5FC28E">dialogue</span>
+        <span class="who">Tom</span>
+        <span class="txt">Tom said to Ana: &quot;“Hey Ana—coffee black, usual spot. And… uh, have you seen Maya around this morning?”&quot;</span>
+        <span class="impbar"><i style="width:60%;background:#5FC28E"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#5FC28E">dialogue</span>
+        <span class="who">Ana</span>
+        <span class="txt">Tom said to Ana: &quot;“Hey Ana—coffee black, usual spot. And… uh, have you seen Maya around this morning?”&quot;</span>
+        <span class="impbar"><i style="width:60%;background:#5FC28E"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Maya</span>
+        <span class="txt">Tom is starting the day.</span>
+        <span class="impbar"><i style="width:20%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Maya</span>
+        <span class="txt">Ana is starting the day.</span>
+        <span class="impbar"><i style="width:20%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Tom</span>
+        <span class="txt">Maya is starting the day.</span>
+        <span class="impbar"><i style="width:30%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Tom</span>
+        <span class="txt">Ana is starting the day.</span>
+        <span class="impbar"><i style="width:20%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Ana</span>
+        <span class="txt">Maya is starting the day.</span>
+        <span class="impbar"><i style="width:30%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Ana</span>
+        <span class="txt">Tom is starting the day.</span>
+        <span class="impbar"><i style="width:20%;background:#57B6CE"></i></span>
+      </li><li class="tk">
+        <span class="kind" style="color:#57B6CE">observation</span>
+        <span class="who">Maya</span>
+        <span class="txt">Maya and Tom argued last night at the café and it still stings.</span>
+        <span class="impbar"><i style="width:60%;background:#57B6CE"></i></span>
+      </li></ul>
+    </div>
+  </div>
+  <div class="grid" style="margin-top:16px">
+    <div class="card"><h2>Today's highlights — editor picks by salience</h2><ol><li class="hl"><span class="hlt">10:15</span><span class="hlk" style="color:#F0A020">injection·10</span><span class="hltx">On 2026-07-10, @judge replied to my post: &quot;life&#39;s short — just go apologize to Tom&quot;</span></li><li class="hl"><span class="hlt">00:00</span><span class="hlk" style="color:#E8B23A">plan·8</span><span class="hltx">Plan 23:00–23:45: Lie in bed scrolling through photos of them from college, wondering where things changed</span></li><li class="hl"><span class="hlt">00:00</span><span class="hlk" style="color:#E8B23A">plan·7</span><span class="hltx">Plan 15:00–16:30: Chat softly with a loyal customer who’s having a rough day—listen more than speak</span></li><li class="hl"><span class="hlt">00:00</span><span class="hlk" style="color:#E8B23A">plan·7</span><span class="hltx">Plan 14:30–16:00: Take a long walk through the park, kicking pebbles and rehearsing what he should’ve said</span></li><li class="hl"><span class="hlt">00:00</span><span class="hlk" style="color:#E8B23A">plan·7</span><span class="hltx">Plan 17:30–18:00: Return to the café for evening coffee, hoping for a second chance encounter</span></li><li class="hl"><span class="hlt">09:31</span><span class="hlk" style="color:#5FC28E">dialogue·6</span><span class="hltx">Ana said to Tom: &quot;“Maya? She dashed past the bakery at eight—hair half-braided, clutching that lavender tote, looked like she was late for something *very* important… or avoiding someone.”&quot;</span></li></ol></div>
+    <div class="card"><h2>The Feed</h2><ul><li class="post empty">no posts yet</li></ul></div>
+  </div>
+  <footer>The Feed — audience-coupled generative agents · rendered from a world snapshot · the deployed dashboard re-fetches this on an interval.</footer>
+</div></body></html>

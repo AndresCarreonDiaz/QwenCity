@@ -6,6 +6,30 @@ run before moving on.
 
 ---
 
+## Iteration 18 — 2026-07-08 · real-Qwen demo capture ✅ (deployment-layer phase complete)
+
+**Done**
+- **`src/sim/capture.ts`** (`npm run capture`): a bounded live world (3 agents, 3 ticks, reflection off to
+  conserve quota) run against **real Qwen**; writes `web/viewer.html` + `data/snapshot.json` with authentic
+  content. Ran live (backend=dashscope): 82 memories, real dialogue, and the audience-coupling beat with a
+  real model —
+  - Maya's next action after a judge's reply: *"Tom is walking to the neighborhood café, and @judge advised
+    her to just go apologize."*
+  - Ana → Tom (real gossip): *"Maya? She dashed past the bakery at eight—hair half-b…"*
+- **Committed samples** for zero-setup browsing: `docs/sample-viewer.html` + `docs/sample-snapshot.json`;
+  README "See it running" section points to them.
+
+**Verified:** live capture OK on dashscope (`npm run capture`); typecheck clean; suite still 85/85.
+
+**Deployment-layer phase COMPLETE.** Remaining work is the user's:
+1. **Deploy** to Alibaba Cloud (follow `docs/DEPLOY.md`) for the live judge URL.
+2. **Record** the 3-minute demo video (script in `strategy/truman-show/`) — the sample viewer + a
+   `npm run capture` run are the footage.
+3. **Submit** on Devpost by Jul 20, 2:00 PM PT (repo + license + Alibaba-deployment proof file + arch
+   diagram + video + track = Agent Society).
+
+---
+
 ## Iteration 17 — 2026-07-08 · deployment layer (proof file + deploy guide) ✅
 
 **Done**

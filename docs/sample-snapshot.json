@@ -1,0 +1,321 @@
+{
+  "t": 1783678500000,
+  "clock": "10:15",
+  "agents": [
+    {
+      "id": "maya",
+      "name": "Maya",
+      "action": "Reordering milk and flour from the supplier.",
+      "planActivity": "Reordering milk and flour from the supplier.",
+      "top": [
+        {
+          "kind": "injection",
+          "importance": 10,
+          "text": "On 2026-07-10, @judge replied to my post: \"life's short — just go apologize to Tom\""
+        },
+        {
+          "kind": "plan",
+          "importance": 7,
+          "text": "Plan 15:00–16:30: Chat softly with a loyal customer who’s having a rough day—listen more than speak"
+        },
+        {
+          "kind": "observation",
+          "importance": 6,
+          "text": "Maya and Tom argued last night at the café and it still stings."
+        }
+      ]
+    },
+    {
+      "id": "tom",
+      "name": "Tom",
+      "action": "Overhear Maya laughing with another regular; feel stung but stay quiet",
+      "planActivity": "Overhear Maya laughing with another regular; feel stung but stay quiet",
+      "top": [
+        {
+          "kind": "plan",
+          "importance": 8,
+          "text": "Plan 23:00–23:45: Lie in bed scrolling through photos of them from college, wondering where things changed"
+        },
+        {
+          "kind": "plan",
+          "importance": 7,
+          "text": "Plan 14:30–16:00: Take a long walk through the park, kicking pebbles and rehearsing what he should’ve said"
+        },
+        {
+          "kind": "plan",
+          "importance": 7,
+          "text": "Plan 17:30–18:00: Return to the café for evening coffee, hoping for a second chance encounter"
+        }
+      ]
+    },
+    {
+      "id": "ana",
+      "name": "Ana",
+      "action": "Chat with regulars at the counter, subtly fishing for updates on the new couple down the street",
+      "planActivity": "Chat with regulars at the counter, subtly fishing for updates on the new couple down the street",
+      "top": [
+        {
+          "kind": "plan",
+          "importance": 6,
+          "text": "Plan 15:45–16:30: Deliver cookies, linger outside the florist’s shop to catch up with Maria about the rumored café opening across town"
+        },
+        {
+          "kind": "dialogue",
+          "importance": 6,
+          "text": "Tom said to Ana: \"“Hey Ana—coffee black, usual spot. And… uh, have you seen Maya around this morning?”\""
+        },
+        {
+          "kind": "dialogue",
+          "importance": 6,
+          "text": "Ana said to Tom: \"“Maya? She dashed past the bakery at eight—hair half-braided, clutching that lavender tote, looked like she was late for something *very* important… or avoiding someone.”\""
+        }
+      ]
+    }
+  ],
+  "ticker": [
+    {
+      "t": 1783678500000,
+      "agentId": "maya",
+      "agentName": "Maya",
+      "kind": "observation",
+      "importance": 3,
+      "text": "Tom is talking with Ana."
+    },
+    {
+      "t": 1783678500000,
+      "agentId": "maya",
+      "agentName": "Maya",
+      "kind": "observation",
+      "importance": 3,
+      "text": "Ana is talking with Tom."
+    },
+    {
+      "t": 1783678500000,
+      "agentId": "tom",
+      "agentName": "Tom",
+      "kind": "observation",
+      "importance": 2,
+      "text": "Maya is Check inventory quietly, reorder milk and flour to avoid running low."
+    },
+    {
+      "t": 1783678500000,
+      "agentId": "tom",
+      "agentName": "Tom",
+      "kind": "observation",
+      "importance": 3,
+      "text": "Ana is talking with Tom."
+    },
+    {
+      "t": 1783678500000,
+      "agentId": "ana",
+      "agentName": "Ana",
+      "kind": "observation",
+      "importance": 2,
+      "text": "Maya is Check inventory quietly, reorder milk and flour to avoid running low."
+    },
+    {
+      "t": 1783678500000,
+      "agentId": "ana",
+      "agentName": "Ana",
+      "kind": "observation",
+      "importance": 3,
+      "text": "Tom is talking with Ana."
+    },
+    {
+      "t": 1783678500000,
+      "agentId": "maya",
+      "agentName": "Maya",
+      "kind": "injection",
+      "importance": 10,
+      "text": "On 2026-07-10, @judge replied to my post: \"life's short — just go apologize to Tom\""
+    },
+    {
+      "t": 1783675860000,
+      "agentId": "ana",
+      "agentName": "Ana",
+      "kind": "dialogue",
+      "importance": 6,
+      "text": "Ana said to Tom: \"“Maya? She dashed past the bakery at eight—hair half-braided, clutching that lavender tote, looked like she was late for something *very* important… or avoiding someone.”\""
+    },
+    {
+      "t": 1783675860000,
+      "agentId": "tom",
+      "agentName": "Tom",
+      "kind": "dialogue",
+      "importance": 6,
+      "text": "Ana said to Tom: \"“Maya? She dashed past the bakery at eight—hair half-braided, clutching that lavender tote, looked like she was late for something *very* important… or avoiding someone.”\""
+    },
+    {
+      "t": 1783675800000,
+      "agentId": "maya",
+      "agentName": "Maya",
+      "kind": "observation",
+      "importance": 2,
+      "text": "Tom is walking to the neighborhood café.."
+    },
+    {
+      "t": 1783675800000,
+      "agentId": "maya",
+      "agentName": "Maya",
+      "kind": "observation",
+      "importance": 4,
+      "text": "Ana is Starting the day by greeting regulars at the counter.."
+    },
+    {
+      "t": 1783675800000,
+      "agentId": "tom",
+      "agentName": "Tom",
+      "kind": "observation",
+      "importance": 3,
+      "text": "Maya is unlocking the café doors and starting the coffee brew.."
+    },
+    {
+      "t": 1783675800000,
+      "agentId": "tom",
+      "agentName": "Tom",
+      "kind": "observation",
+      "importance": 4,
+      "text": "Ana is Starting the day by greeting regulars at the counter.."
+    },
+    {
+      "t": 1783675800000,
+      "agentId": "ana",
+      "agentName": "Ana",
+      "kind": "observation",
+      "importance": 3,
+      "text": "Maya is unlocking the café doors and starting the coffee brew.."
+    },
+    {
+      "t": 1783675800000,
+      "agentId": "ana",
+      "agentName": "Ana",
+      "kind": "observation",
+      "importance": 2,
+      "text": "Tom is walking to the neighborhood café.."
+    },
+    {
+      "t": 1783675800000,
+      "agentId": "tom",
+      "agentName": "Tom",
+      "kind": "dialogue",
+      "importance": 6,
+      "text": "Tom said to Ana: \"“Hey Ana—coffee black, usual spot. And… uh, have you seen Maya around this morning?”\""
+    },
+    {
+      "t": 1783675800000,
+      "agentId": "ana",
+      "agentName": "Ana",
+      "kind": "dialogue",
+      "importance": 6,
+      "text": "Tom said to Ana: \"“Hey Ana—coffee black, usual spot. And… uh, have you seen Maya around this morning?”\""
+    },
+    {
+      "t": 1783673100000,
+      "agentId": "maya",
+      "agentName": "Maya",
+      "kind": "observation",
+      "importance": 2,
+      "text": "Tom is starting the day."
+    },
+    {
+      "t": 1783673100000,
+      "agentId": "maya",
+      "agentName": "Maya",
+      "kind": "observation",
+      "importance": 2,
+      "text": "Ana is starting the day."
+    },
+    {
+      "t": 1783673100000,
+      "agentId": "tom",
+      "agentName": "Tom",
+      "kind": "observation",
+      "importance": 3,
+      "text": "Maya is starting the day."
+    },
+    {
+      "t": 1783673100000,
+      "agentId": "tom",
+      "agentName": "Tom",
+      "kind": "observation",
+      "importance": 2,
+      "text": "Ana is starting the day."
+    },
+    {
+      "t": 1783673100000,
+      "agentId": "ana",
+      "agentName": "Ana",
+      "kind": "observation",
+      "importance": 3,
+      "text": "Maya is starting the day."
+    },
+    {
+      "t": 1783673100000,
+      "agentId": "ana",
+      "agentName": "Ana",
+      "kind": "observation",
+      "importance": 2,
+      "text": "Tom is starting the day."
+    },
+    {
+      "t": 1783670400000,
+      "agentId": "maya",
+      "agentName": "Maya",
+      "kind": "observation",
+      "importance": 6,
+      "text": "Maya and Tom argued last night at the café and it still stings."
+    }
+  ],
+  "relationships": [
+    {
+      "a": "ana",
+      "b": "tom",
+      "weight": 2
+    }
+  ],
+  "feed": [],
+  "highlights": [
+    {
+      "t": 1783678500000,
+      "kind": "injection",
+      "importance": 10,
+      "text": "On 2026-07-10, @judge replied to my post: \"life's short — just go apologize to Tom\""
+    },
+    {
+      "t": 1783641600000,
+      "kind": "plan",
+      "importance": 8,
+      "text": "Plan 23:00–23:45: Lie in bed scrolling through photos of them from college, wondering where things changed"
+    },
+    {
+      "t": 1783641600000,
+      "kind": "plan",
+      "importance": 7,
+      "text": "Plan 15:00–16:30: Chat softly with a loyal customer who’s having a rough day—listen more than speak"
+    },
+    {
+      "t": 1783641600000,
+      "kind": "plan",
+      "importance": 7,
+      "text": "Plan 14:30–16:00: Take a long walk through the park, kicking pebbles and rehearsing what he should’ve said"
+    },
+    {
+      "t": 1783641600000,
+      "kind": "plan",
+      "importance": 7,
+      "text": "Plan 17:30–18:00: Return to the café for evening coffee, hoping for a second chance encounter"
+    },
+    {
+      "t": 1783675860000,
+      "kind": "dialogue",
+      "importance": 6,
+      "text": "Ana said to Tom: \"“Maya? She dashed past the bakery at eight—hair half-braided, clutching that lavender tote, looked like she was late for something *very* important… or avoiding someone.”\""
+    }
+  ],
+  "stats": {
+    "agents": 3,
+    "memories": 82,
+    "posts": 0,
+    "edges": 1
+  }
+}
