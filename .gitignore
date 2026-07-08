@@ -16,3 +16,5 @@ strategy/playbook-dashboard.html
 *.log
 .DS_Store
 data/
+
+web/

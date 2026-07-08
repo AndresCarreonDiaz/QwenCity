@@ -6,6 +6,36 @@ run before moving on.
 
 ---
 
+## Iteration 9 — 2026-07-08 · self-contained HTML spectator viewer ✅
+
+**Done**
+- **Renderer** (`src/view/render.ts`): `renderSnapshotHtml(snapshot)` → a complete, dependency-free,
+  CSP-safe HTML page — a 2D town (agents on a circle, relationship graph as SVG edges, current action
+  labels), the color-coded thought-ticker with importance bars, and the feed. Pure function (testable
+  offline); the deployed dashboard re-fetches the snapshot on an interval but renders identical markup.
+  **All model-generated text is HTML-escaped** (`escapeHtml`) — untrusted memory/dialogue content can
+  never inject markup.
+- **Viewer generator** (`src/sim/viewer.ts` · `npm run sim:viewer`): runs a 4-agent town + conversations
+  + a post, renders, writes `web/viewer.html` (open in a browser). Structural self-checks pass.
+- **Tests**: +`render.test.ts` (5, incl. an XSS-injection escape test + empty-feed) → **55/55 passing**.
+- `web/` gitignored (generated output; the renderer is the source of truth).
+
+**Caught by running:** a verification helper escaped only `&<>` while the renderer also escapes `'`
+(Maya's post has "can't"), so the feed check falsely failed → pointed the check at the renderer's own
+`escapeHtml`. The render was correct; the check was inconsistent.
+
+**Verified:** all nine sims exit 0 · `npm test` 55/55, exit 0.
+
+**Next (no cloud key needed)**
+1. Wire dialogue + planning into the World tick (one run yields conversations, plans, and edges).
+2. Daily-highlight selection (importance-driven "editor": the day's top events → a recap list).
+3. A README "how it maps to the rubric" section + architecture diagram (Mermaid) for the submission.
+
+**Blocked (needs you)**
+- DashScope API key (`.env`) + region for the real-Qwen swap and deployment.
+
+---
+
 ## Iteration 8 — 2026-07-08 · live-view world snapshot (the frontend contract) ✅
 
 **Done**
