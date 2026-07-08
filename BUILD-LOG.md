@@ -6,6 +6,31 @@ run before moving on.
 
 ---
 
+## Iteration 7 — 2026-07-08 · fast-forward buffer + persistence (the cost linchpin) ✅
+
+**Done**
+- **Fast-forward buffer + replay** (`src/world/replay.ts`): `groupIntoFrames` (tick entries → per-timestamp
+  frames), NDJSON tick-log persistence (`writeTickLog` / `appendTick` / `readTickLog`), and
+  `FastForwardBuffer` — generation runs ahead of a playhead that can never overtake the frontier, so
+  spectators watch "as if live" while all generation is offline (Batch-eligible, and it can't go dark).
+- **Buffer sim** (`src/sim/buffer.ts` · `npm run sim:buffer`): generates 8 ticks, persists to
+  `data/run.ndjson`, reloads (round-trip OK), and plays back showing the buffer lead draining 7→0 with the
+  playhead trailing the frontier; a caught-up buffer returns null rather than a phantom frame.
+- **Tests**: +`replay.test.ts` (5, incl. NDJSON round-trip in a tmp file + the no-overtake invariant) → **45/45 passing**.
+- `data/` runtime output gitignored.
+
+**Verified:** all seven sims exit 0 · `npm test` 45/45, exit 0.
+
+**Next (no cloud key needed)**
+1. Integrate planning into the World tick (agents act from their plan; salient observation → re-plan).
+2. 2D live-view / thought-ticker data shape — a frontend-facing JSON snapshot of the world at a frame.
+3. Daily-highlight selection (reuse importance scores → pick the day's top events).
+
+**Blocked (needs you)**
+- DashScope API key (`.env`) + region for the real-Qwen swap and deployment.
+
+---
+
 ## Iteration 6 — 2026-07-08 · recursive daily planning ✅
 
 **Done**

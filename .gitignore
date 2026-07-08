@@ -15,5 +15,4 @@ strategy/playbook-dashboard.html
 .env.local
 *.log
 .DS_Store
-data/*.sqlite
-data/*.db
+data/

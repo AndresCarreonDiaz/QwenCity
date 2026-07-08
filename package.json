@@ -12,6 +12,7 @@
     "sim:audience": "tsx src/sim/audience.ts",
     "sim:ablation": "tsx src/sim/ablation.ts",
     "sim:planning": "tsx src/sim/planning.ts",
+    "sim:buffer": "tsx src/sim/buffer.ts",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
