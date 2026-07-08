@@ -61,6 +61,24 @@ export class MockAdapter implements ModelAdapter {
     if (/high-level insights/i.test(prompt)) {
       return "1. A recurring concern connects the recent events (because of 1, 2).";
     }
+    // Daily plan: a deterministic schedule, activities varied per agent by hash.
+    if (/hh:mm - activity/i.test(prompt)) {
+      const seed = hash(prompt);
+      const skeleton: Array<[number, number]> = [
+        [7, 0], [8, 30], [10, 0], [12, 0], [13, 0], [15, 30], [18, 0], [20, 0], [22, 0],
+      ];
+      return skeleton
+        .map(([h, m], i) => {
+          const act =
+            i === 0
+              ? "waking up and morning routine"
+              : i === skeleton.length - 1
+                ? "winding down and sleeping"
+                : ACTIVITIES[(seed + i) % ACTIVITIES.length]!;
+          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")} - ${act}`;
+        })
+        .join("\n");
+    }
     // Social post: first-person line about the salient memory in the prompt.
     if (/social post/i.test(prompt)) {
       const top = firstMemoryLine(prompt);

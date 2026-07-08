@@ -6,6 +6,35 @@ run before moving on.
 
 ---
 
+## Iteration 6 — 2026-07-08 · recursive daily planning ✅
+
+**Done**
+- **Planning** (`src/agent/planning.ts` + `Agent.planDay/currentPlanStep/replan`): top-down day plans
+  parsed into an ordered schedule that tiles the day (each step ends where the next begins), stored as
+  `plan` memories. `currentPlanStep(now)` answers "what is the agent doing now"; `replan(now, activity)`
+  re-plans from the current moment forward — keeping the past, replacing the remainder (paper §4d reaction).
+- **Mock** emits a deterministic per-agent schedule ("HH:MM - activity" lines).
+- **Planning sim** (`src/sim/planning.ts` · `npm run sim:planning`): Maya plans a full day, we query her
+  activity at five times, then a 14:00 reaction ("Tom shows up upset") re-plans — the 15:00 slot changes,
+  the 09:00 morning is preserved. All 6 checks pass.
+- **Tests**: +`planning.test.ts` (5) → **40/40 passing**.
+
+**Verified:** all six sims (`day2 | town | gossip | audience | ablation | planning`) exit 0 · `npm test` 40/40, exit 0.
+
+**Deferred (needs the key to verify, so not yet):** the `dashscope` adapter — I can write it, but the loop's
+"verify it runs" rule means I hold it until there's a key to validate against. It's a ~1-hour job the moment
+the key lands.
+
+**Next (no cloud key needed)**
+1. Integrate planning into the World tick (agents act from their plan; reactions trigger re-plan).
+2. Fast-forward buffer + SQLite tick-log persistence (cost linchpin; enables replay).
+3. 2D live-view / thought-ticker data shape (frontend-facing JSON snapshot).
+
+**Blocked (needs you)**
+- DashScope API key (`.env`) for the real-Qwen swap + deployment. Region (intl vs China) to confirm.
+
+---
+
 ## Iteration 5 — 2026-07-08 · ablation eval harness (the track-winning claim) ✅
 
 **Done — the novelty is now *measured*, not asserted:**

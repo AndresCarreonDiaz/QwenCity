@@ -9,6 +9,15 @@ import {
   parseInsights,
 } from "./reflection.ts";
 import { buildPostPrompt, parsePost } from "../social/post.ts";
+import {
+  buildDailyPlanPrompt,
+  fmtMin,
+  minutesSinceMidnight,
+  parsePlan,
+  type Plan,
+  replanFrom,
+  stepAt,
+} from "./planning.ts";
 
 /** salience bias applied to an ingested human reply, so it reliably surfaces next cycle */
 export const AUDIENCE_SALIENCE_BIAS = 2;
@@ -53,6 +62,8 @@ export class Agent {
   private accumulatedImportance = 0;
   /** audience-injection memory ids already surfaced to a decision (so each lands once) */
   private readonly responded = new Set<string>();
+  /** today's schedule (empty until planDay is called) */
+  plan: Plan = [];
 
   constructor(
     readonly profile: AgentProfile,
@@ -165,6 +176,39 @@ export class Agent {
       parts: { recency: 1, relevance: 1, importance: 1 },
     };
     return [promoted, ...retrieved.filter((s) => s.node.id !== latest.id)].slice(0, k);
+  }
+
+  /**
+   * Generate today's plan top-down and store each step as a `plan` memory.
+   * Returns the schedule and also sets `this.plan`.
+   */
+  async planDay(now: number): Promise<Plan> {
+    const day = new Date(now).toISOString().slice(0, 10);
+    const raw = await this.model.complete(
+      buildDailyPlanPrompt(this.profile.bio, this.profile.name, day),
+      { task: "plan", temperature: 0 },
+    );
+    this.plan = parsePlan(raw);
+    for (const s of this.plan) {
+      await this.memory.add({
+        agentId: this.profile.id,
+        kind: "plan",
+        description: `Plan ${fmtMin(s.startMin)}–${fmtMin(s.endMin)}: ${s.activity}`,
+        now,
+      });
+    }
+    return this.plan;
+  }
+
+  /** what this agent is scheduled to be doing at `now`, per its current plan */
+  currentPlanStep(now: number) {
+    return stepAt(this.plan, minutesSinceMidnight(now));
+  }
+
+  /** re-plan from `now` forward, inserting `activity` for the current slot (reaction) */
+  replan(now: number, activity: string): Plan {
+    this.plan = replanFrom(this.plan, minutesSinceMidnight(now), activity);
+    return this.plan;
   }
 
   /**
