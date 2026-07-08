@@ -73,7 +73,11 @@ function readBody(req: IncomingMessage): Promise<string> {
 // Standalone entry: `npm run serve` (add DASHSCOPE via .env for real Qwen).
 if (import.meta.url === `file://${process.argv[1]}`) {
   const port = Number(process.env.PORT ?? 8787);
-  const world = new LiveWorld({ logPath: "data/live.ndjson" });
+  const world = new LiveWorld({
+    logPath: "data/live.ndjson",
+    // Slow ticks in production to conserve the token budget (env override).
+    tickIntervalMs: Number(process.env.TICK_INTERVAL_MS ?? 4000),
+  });
   world.init().then(() => {
     world.start();
     createFeedServer(world).listen(port, () => {
