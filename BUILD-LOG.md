@@ -6,6 +6,35 @@ run before moving on.
 
 ---
 
+## Iteration 10 — 2026-07-08 · daily-highlight editor (Salience Engine, use 2 of 3) ✅
+
+**Done**
+- **Highlight editor** (`src/view/highlights.ts`): `selectHighlights` picks the day's top beats purely
+  from stored importance scores (no extra model call), with a token-Jaccard near-duplicate filter so the
+  reel doesn't repeat a beat; `buildRecap` assembles cold-open (hottest) → chronological beats →
+  cliffhanger (latest *notable* beat). This is the second of the "one score, three uses" payoffs — the
+  memory poignancy IS the edit decision.
+- **Highlights sim** (`src/sim/highlights.ts` · `npm run sim:highlights`): a mixed day + an audience reply;
+  the recap leads with the argument, dedups a paraphrase, drops mundane beats, and leaves the cliffhanger
+  on the audience's "apologize to Tom" — the audience earning screen time on salience alone.
+- **Tests**: +`highlights.test.ts` (4, incl. dedupe + empty-day) → **59/59 passing**.
+
+**Caught by running:** (1) the sim's "near-duplicate" was too reworded (~0.36 Jaccard) to trip the 0.5
+dedupe — tightened the paraphrase to a genuine near-dup; (2) the cliffhanger picked the latest *mundane*
+beat — changed it to the latest *notable* (importance ≥ 5) beat so the recap ends on something that matters.
+
+**Verified:** all ten sims exit 0 · `npm test` 59/59, exit 0.
+
+**Next (no cloud key needed)**
+1. Wire dialogue + planning into the World tick (opt-in flags → one run yields conversations, plans, edges).
+2. README "how it maps to the rubric" + a Mermaid architecture diagram (submission deliverables).
+3. Surface the recap in the snapshot/viewer (a "Today's highlights" panel).
+
+**Blocked (needs you)**
+- DashScope API key (`.env`) + region for the real-Qwen swap and deployment.
+
+---
+
 ## Iteration 9 — 2026-07-08 · self-contained HTML spectator viewer ✅
 
 **Done**
