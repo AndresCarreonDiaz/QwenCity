@@ -6,6 +6,28 @@ run before moving on.
 
 ---
 
+## Iteration 13 — 2026-07-08 · highlights in the snapshot + viewer ✅
+
+**Done**
+- **Snapshot** now carries `highlights` — the town-wide daily top beats via `selectHighlights` over all
+  memories (importance-driven; USE 2 of the Salience Engine surfaced in the product).
+- **Viewer** renders a "Today's highlights — editor picks by salience" panel (kind-colored, time-stamped),
+  in a bottom row alongside the feed. All model text stays HTML-escaped.
+- **Tests**: +2 (snapshot includes importance-ranked highlights; viewer renders one row per beat;
+  render fixture updated) → **68/68 passing**.
+
+**Verified:** all eleven sims exit 0 · `npm test` 68/68, exit 0 · `web/viewer.html` regenerates with the panel.
+
+**Next (no cloud key needed)**
+1. Scaffold `deploy/alicloud.ts` — the required Alibaba Cloud proof-of-deployment file shape (env-guarded
+   client init for DashScope + OSS + pgvector; structurally verifiable, live once the key lands).
+2. Thread the fast-forward buffer through the life run (generate → persist → replay in one flow).
+
+**Blocked (needs you)**
+- DashScope API key (`.env`) + region for the real-Qwen swap and deployment.
+
+---
+
 ## Iteration 12 — 2026-07-08 · integrated World tick (plans + conversations in one run) ✅
 
 **Done**

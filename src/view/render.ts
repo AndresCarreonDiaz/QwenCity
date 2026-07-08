@@ -78,6 +78,16 @@ export function renderSnapshotHtml(snap: WorldSnapshot): string {
     })
     .join("");
 
+  const highlights = snap.highlights.length
+    ? snap.highlights
+        .map((b) => {
+          const color = KIND_COLOR[b.kind] ?? "#8a93a0";
+          const clock = new Date(b.t).toISOString().slice(11, 16);
+          return `<li class="hl"><span class="hlt">${clock}</span><span class="hlk" style="color:${color}">${escapeHtml(b.kind)}·${b.importance}</span><span class="hltx">${escapeHtml(b.text)}</span></li>`;
+        })
+        .join("")
+    : `<li class="hl empty">nothing notable yet</li>`;
+
   const feed = snap.feed.length
     ? snap.feed
         .map(
@@ -115,6 +125,9 @@ export function renderSnapshotHtml(snap: WorldSnapshot): string {
   .impbar{height:6px;background:#222922;border-radius:3px;overflow:hidden;} .impbar i{display:block;height:100%;}
   .post{padding:7px 0;border-bottom:1px solid #1b212c;font-size:13px;} .post .handle{color:var(--amber);font-weight:700;}
   .post .rc{color:var(--dim);font-size:11px;margin-left:6px;} .post.empty{color:var(--dim);}
+  .hl{display:grid;grid-template-columns:46px 96px 1fr;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px solid #1b212c;font-size:12px;}
+  .hl .hlt{color:var(--dim);} .hl .hlk{font-weight:700;font-size:10px;text-transform:uppercase;} .hl .hltx{color:var(--ink);}
+  .hl.empty{color:var(--dim);}
   footer{color:#626c7a;font-size:11px;margin-top:18px;}
 </style></head>
 <body><div class="wrap">
@@ -132,7 +145,10 @@ export function renderSnapshotHtml(snap: WorldSnapshot): string {
       <ul>${ticker}</ul>
     </div>
   </div>
-  <div class="card" style="margin-top:16px"><h2>The Feed</h2><ul>${feed}</ul></div>
+  <div class="grid" style="margin-top:16px">
+    <div class="card"><h2>Today's highlights — editor picks by salience</h2><ol>${highlights}</ol></div>
+    <div class="card"><h2>The Feed</h2><ul>${feed}</ul></div>
+  </div>
   <footer>The Feed — audience-coupled generative agents · rendered from a world snapshot · the deployed dashboard re-fetches this on an interval.</footer>
 </div></body></html>`;
 }

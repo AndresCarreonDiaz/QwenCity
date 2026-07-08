@@ -16,6 +16,7 @@ const SNAP: WorldSnapshot = {
   ],
   relationships: [{ a: "a", b: "b", weight: 2 }],
   feed: [{ id: "p0", agentId: "a", text: "rough day", replies: 1 }],
+  highlights: [{ t: 2, kind: "reflection", importance: 8, text: "I value my friends" }],
   stats: { agents: 2, memories: 2, posts: 1, edges: 1 },
 };
 
@@ -35,6 +36,13 @@ test("renders every agent, one edge line, and one ticker row per entry", () => {
   assert.equal(html.match(/<line /g)!.length, 1);
   assert.equal(html.match(/class="tk"/g)!.length, 2);
   assert.ok(html.includes("rough day")); // feed post
+});
+
+test("renders the highlights panel with one row per beat", () => {
+  const html = renderSnapshotHtml(SNAP);
+  assert.ok(html.includes("Today&#39;s highlights") || html.includes("Today's highlights"));
+  assert.equal(html.match(/class="hl"/g)!.length, 1);
+  assert.ok(html.includes("I value my friends"));
 });
 
 test("HTML-escapes model-generated memory text (no injection)", () => {

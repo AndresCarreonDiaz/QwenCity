@@ -58,6 +58,16 @@ test("feed posts appear with accepted-reply counts", async () => {
   assert.equal(snap.feed[0]!.replies, 1); // only the accepted one
 });
 
+test("snapshot includes importance-ranked town highlights", async () => {
+  const { store, a, b } = await setup();
+  await a.perceive("Ana had a huge dramatic falling-out and felt betrayed.", T0 + 5e5); // poignant
+  const snap = buildSnapshot({ now: T0 + 1e6, agents: [a, b], store, currentActions: {} });
+  assert.ok(snap.highlights.length > 0);
+  // the most poignant memory should lead the reel
+  const maxImp = Math.max(...store.all().map((n) => n.importance));
+  assert.equal(snap.highlights[0]!.importance, maxImp);
+});
+
 test("snapshot is JSON-serializable and round-trips", async () => {
   const { store, a, b } = await setup();
   const snap = buildSnapshot({ now: T0 + 1e6, agents: [a, b], store, currentActions: { a: "x", b: "y" } });

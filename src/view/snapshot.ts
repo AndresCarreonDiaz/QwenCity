@@ -2,6 +2,7 @@ import type { Agent } from "../agent/agent.ts";
 import type { MemoryKind } from "../memory/types.ts";
 import type { MemoryStore } from "../memory/store.ts";
 import type { Feed } from "../social/feed.ts";
+import { selectHighlights, type HighlightBeat } from "./highlights.ts";
 
 /**
  * The frontend contract: a JSON-serializable snapshot of the world at one
@@ -48,6 +49,8 @@ export interface WorldSnapshot {
   ticker: TickerEntry[];
   relationships: Edge[];
   feed: PostView[];
+  /** the day's top events town-wide (importance-driven), for the "Today's highlights" panel */
+  highlights: HighlightBeat[];
   stats: { agents: number; memories: number; posts: number; edges: number };
 }
 
@@ -58,6 +61,7 @@ export interface SnapshotInput {
   currentActions: Record<string, string>;
   feed?: Feed;
   tickerLimit?: number;
+  highlightLimit?: number;
 }
 
 export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
@@ -116,6 +120,9 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     replies: (input.feed?.replies ?? []).filter((r) => r.postId === p.id && r.status === "accepted").length,
   }));
 
+  // Town-wide daily highlights (importance-driven; USE 2 of the Salience Engine).
+  const highlights = selectHighlights([...store.all()], { k: input.highlightLimit ?? 6 });
+
   return {
     t: now,
     clock: new Date(now).toISOString().slice(11, 16),
@@ -123,6 +130,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     ticker,
     relationships,
     feed: feedPosts,
+    highlights,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },
   };
 }
