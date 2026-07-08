@@ -6,6 +6,30 @@ run before moving on.
 
 ---
 
+## Iteration 16 — 2026-07-08 · spectator server (the judge-visitable URL) ✅
+
+**Done**
+- **LiveWorld** (`src/server/liveworld.ts`): the always-on world behind the server — fast-forwards on a
+  timer, caches the rendered snapshot + HTML for cheap reads, appends the tick log for replay, and accepts
+  moderated, rate-capped audience replies into memory. Backend-agnostic (mock or Qwen via getModel()).
+- **HTTP server** (`src/server/server.ts`, `npm run serve`): dependency-free (Node's built-in `http`, so it
+  drops onto a bare ECS box with just tsx). Routes: `GET /` (rendered viewer), `GET /snapshot.json`
+  (polling), `GET /health` (heartbeat), `POST /reply` (audience reply → moderation → memory). Reads are
+  cached → unlimited viewers ≈ free; the only write path is capped + moderated (judge-safety).
+- **Tests** (`test/server.test.ts`, 5): boots the server on an ephemeral port and does real TCP fetches —
+  health, snapshot, HTML, a good reply accepted + a prompt-injection reply rejected, and 404s. → **80/80 passing**.
+
+**Verified:** `npm test` 80/80 · `npm run typecheck` clean · server serves real HTTP.
+
+**Next (deployment layer → then demo capture, autonomous)**
+1. `deploy/alicloud.ts` proof-of-deployment file (DashScope + OSS + pgvector wiring, env-guarded).
+2. `docs/DEPLOY.md` — ECS + systemd + env step-by-step (+ judge-safety, golden-run replay).
+3. Real-Qwen demo capture: one `life`-style run on Qwen, persisted, viewer rendered with authentic content.
+
+**Blocked (needs you):** the actual `deploy` to your Alibaba Cloud account (outward-facing, your infra/budget).
+
+---
+
 ## Iteration 15 — 2026-07-08 · LIVE on real Qwen Cloud 🎉 + self-contained toolchain ✅
 
 **Done**

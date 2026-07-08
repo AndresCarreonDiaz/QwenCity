@@ -19,6 +19,7 @@
     "sim:life": "tsx src/sim/life.ts",
     "smoke": "tsx src/sim/smoke.ts",
     "smoke:live": "tsx --env-file-if-exists=.env src/sim/smoke.ts",
+    "serve": "tsx --env-file-if-exists=.env src/server/server.ts",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
