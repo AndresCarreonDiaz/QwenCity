@@ -6,6 +6,35 @@ run before moving on.
 
 ---
 
+## Iteration 8 — 2026-07-08 · live-view world snapshot (the frontend contract) ✅
+
+**Done**
+- **World snapshot** (`src/view/snapshot.ts` + `World.currentActions`): a JSON-serializable view of the
+  world at one moment — the **thought-ticker** (newest memories across all agents, color-coded by kind +
+  importance = the "watch the mind" hook), per-agent current action + plan step + top memories, the
+  **relationship graph** inferred from stored dialogue ("X said to Y"), and the social feed with
+  accepted-reply counts. Pure derivation, so it works identically over a live run or a replayed golden run.
+- **Snapshot sim** (`src/sim/snapshot.ts` · `npm run sim:snapshot`): runs a town, holds two conversations
+  and a post, serializes → prints the ticker/agents/relationships/feed and writes `data/snapshot.json`
+  (the file the future dashboard reads). All 6 checks pass.
+- **Tests**: +`snapshot.test.ts` (5, incl. edges-appear-after-converse and JSON round-trip) → **50/50 passing**.
+
+**Caught by running:** the sim's relationship graph was empty because the World tick emits co-presence
+*observations*, not *dialogues* — added explicit conversations to the sim so the graph populates (honest:
+edges = real conversations). Confirms dialogue isn't yet wired into the tick loop (a known next item).
+
+**Verified:** all eight sims exit 0 · `npm test` 50/50, exit 0.
+
+**Next (no cloud key needed)**
+1. A self-contained HTML **spectator viewer** that renders `data/snapshot.json` (2D town + thought-ticker) — the demo surface.
+2. Wire dialogue + planning into the World tick (so a single run produces conversations, plans, and edges).
+3. Daily-highlight selection (importance-driven "editor": the day's top events).
+
+**Blocked (needs you)**
+- DashScope API key (`.env`) + region for the real-Qwen swap and deployment.
+
+---
+
 ## Iteration 7 — 2026-07-08 · fast-forward buffer + persistence (the cost linchpin) ✅
 
 **Done**

@@ -125,4 +125,11 @@ export class World {
   async run(ticks: number): Promise<void> {
     for (let i = 0; i < ticks; i++) await this.tick();
   }
+
+  /** each agent's current action label, keyed by agent id (for the live view) */
+  currentActions(): Record<string, string> {
+    const out: Record<string, string> = {};
+    for (const r of this.runtimes) out[r.agent.profile.id] = r.action;
+    return out;
+  }
 }
