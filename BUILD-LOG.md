@@ -6,6 +6,34 @@ run before moving on.
 
 ---
 
+## Iteration 15 — 2026-07-08 · LIVE on real Qwen Cloud 🎉 + self-contained toolchain ✅
+
+**Done**
+- **Went live on real Qwen Cloud.** Key added to `.env` (gitignored). Live smoke test passed against
+  DashScope International:
+  - `embed()` → real 1024-dim `text-embedding-v4` vector
+  - `complete()` (`qwen-plus`) → *"Hey there—great to see you again! What can I get started for you today?"*
+  - `scoreImportance()` (`qwen-flash`) → poignant **9**, mundane **1**
+  The entire offline-built engine runs on real Qwen with just `MODEL_BACKEND=dashscope` — as designed.
+- **Backend-agnostic smoke test** (`src/sim/smoke.ts` · `npm run smoke` / `npm run smoke:live`): checks the
+  configured backend returns sane shapes (works for mock and dashscope).
+- **Self-contained toolchain:** ran `npm install` (tsx + typescript + `@types/node`); `npm run <script>`
+  now works without npx. Committed `package-lock.json` (node_modules gitignored).
+- **First real typecheck** (`npm run typecheck`): **clean** — the whole codebase is type-sound under strict
+  mode + `noUncheckedIndexedAccess` (tsx had only been stripping types).
+
+**Verified:** live smoke PASS on dashscope · `npm test` 75/75 · `npm run typecheck` clean · `.env` never staged.
+
+**Next (needs you / outward-facing)**
+1. Deploy to Alibaba Cloud (ECS + RDS/pgvector + OSS) and write `deploy/alicloud.ts` proof file.
+2. Record the 3-minute demo video (script in `strategy/truman-show/`).
+3. Optional: a short real-Qwen run of the `life` sim to capture demo footage (spends free-quota tokens).
+
+**No longer blocked:** the key works. Remaining items are deployment + video, which are yours to drive
+(or say the word and I'll build the deploy scaffolding and a Next.js dashboard).
+
+---
+
 ## Iteration 14 — 2026-07-08 · real DashScope adapter (key-swap, verified to the wire) ✅
 
 **Done**

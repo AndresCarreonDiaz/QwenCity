@@ -17,10 +17,13 @@
     "sim:viewer": "tsx src/sim/viewer.ts",
     "sim:highlights": "tsx src/sim/highlights.ts",
     "sim:life": "tsx src/sim/life.ts",
+    "smoke": "tsx src/sim/smoke.ts",
+    "smoke:live": "tsx --env-file-if-exists=.env src/sim/smoke.ts",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/node": "^22.20.1",
     "tsx": "^4.23.0",
     "typescript": "^5.5.0"
   }
