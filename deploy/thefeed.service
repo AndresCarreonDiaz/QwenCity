@@ -1,0 +1,15 @@
+[Unit]
+Description=The Feed - spectator server
+After=network-online.target
+
+[Service]
+WorkingDirectory=/root/QwenCity
+ExecStart=/usr/bin/npm run serve
+EnvironmentFile=/root/QwenCity/.env
+Environment=HOME=/root
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
