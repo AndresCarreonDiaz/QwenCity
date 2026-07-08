@@ -1,5 +1,6 @@
 import { Agent } from "../agent/agent.ts";
 import type { MemoryStore } from "../memory/store.ts";
+import { converse } from "./conversation.ts";
 
 const MS_PER_MIN = 60_000;
 
@@ -10,6 +11,12 @@ export interface WorldOptions {
   actionMinutes?: number;
   /** perceiving something at/above this poignancy forces an out-of-schedule decision (a reaction) */
   reactThreshold?: number;
+  /** opt-in: agents follow a daily plan (call planAll first); reactions re-plan */
+  usePlans?: boolean;
+  /** opt-in: co-present agents hold scheduled conversations (forms the relationship graph) */
+  enableConversations?: boolean;
+  /** with enableConversations, run one conversation every N ticks (default 3) */
+  conversationEveryTicks?: number;
 }
 
 interface Runtime {
@@ -51,7 +58,13 @@ export class World {
   private readonly stepMs: number;
   private readonly actionMs: number;
   private readonly reactThreshold: number;
+  private readonly usePlans: boolean;
+  private readonly enableConversations: boolean;
+  private readonly convEvery: number;
   private readonly runtimes: Runtime[] = [];
+  private tickCount = 0;
+  /** realized conversational edges, keyed "idA|idB" (sorted) → exchange count */
+  private readonly edgeWeights = new Map<string, number>();
 
   constructor(
     readonly store: MemoryStore,
@@ -62,6 +75,24 @@ export class World {
     this.stepMs = (opts.stepMinutes ?? 15) * MS_PER_MIN;
     this.actionMs = (opts.actionMinutes ?? 60) * MS_PER_MIN;
     this.reactThreshold = opts.reactThreshold ?? 7;
+    this.usePlans = opts.usePlans ?? false;
+    this.enableConversations = opts.enableConversations ?? false;
+    this.convEvery = Math.max(1, opts.conversationEveryTicks ?? 3);
+  }
+
+  /** plan each agent's day (call before run when usePlans is on) */
+  async planAll(): Promise<void> {
+    const d = new Date(this.clock);
+    const dayStart = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0);
+    for (const r of this.runtimes) await r.agent.planDay(dayStart);
+  }
+
+  /** relationship edges realized so far, as {a, b, weight} */
+  edges(): Array<{ a: string; b: string; weight: number }> {
+    return [...this.edgeWeights.entries()].map(([key, weight]) => {
+      const [a, b] = key.split("|") as [string, string];
+      return { a, b, weight };
+    });
   }
 
   add(agent: Agent, initialAction = "starting the day"): void {
@@ -71,6 +102,7 @@ export class World {
 
   async tick(): Promise<void> {
     this.clock += this.stepMs;
+    this.tickCount++;
 
     // 1. PERCEPTION — event-driven: only when another agent's action changed.
     const salient = new Map<string, boolean>();
@@ -85,12 +117,32 @@ export class World {
       }
     }
 
+    // 1.5 CONVERSATION (opt-in) — on cadence, one co-present pair talks; this is
+    // how relationships form and information spreads within a single run.
+    const conversed = new Set<string>();
+    if (this.enableConversations && this.runtimes.length >= 2 && this.tickCount % this.convEvery === 0) {
+      const pairs = this.runtimes.length;
+      const i = Math.floor(this.tickCount / this.convEvery) % pairs;
+      const a = this.runtimes[i]!;
+      const b = this.runtimes[(i + 1) % pairs]!;
+      await converse(a.agent, b.agent, this.clock, this.store, { maxTurns: 2, topic: "the most important thing on my mind lately" });
+      a.action = `talking with ${b.agent.profile.name}`;
+      b.action = `talking with ${a.agent.profile.name}`;
+      a.nextDecisionAt = b.nextDecisionAt = this.clock + this.actionMs;
+      const key = [a.agent.profile.id, b.agent.profile.id].sort().join("|");
+      this.edgeWeights.set(key, (this.edgeWeights.get(key) ?? 0) + 1);
+      conversed.add(a.agent.profile.id).add(b.agent.profile.id);
+    }
+
     // 2. DECISION — only if due, or reacting to a salient new observation.
     for (const r of this.runtimes) {
+      const id = r.agent.profile.id;
       const due = this.clock >= r.nextDecisionAt;
-      const reacting = salient.get(r.agent.profile.id) === true;
+      const reacting = salient.get(id) === true;
       let decided = false;
-      if (due || reacting) {
+      if (conversed.has(id)) {
+        decided = true; // the conversation was this agent's action this tick
+      } else if (due || reacting) {
         const situation =
           `It is ${new Date(this.clock).toISOString()}. ${r.agent.profile.name} is currently ${r.action}. ` +
           `What does ${r.agent.profile.name} do next?`;
@@ -99,8 +151,14 @@ export class World {
         r.nextDecisionAt = this.clock + this.actionMs;
         this.decisions++;
         decided = true;
+        if (this.usePlans) r.agent.replan(this.clock, r.action); // reaction re-plans the day
       } else {
         this.idleAgentTicks++;
+        // Following the plan is free (no model call): action tracks the schedule.
+        if (this.usePlans) {
+          const step = r.agent.currentPlanStep(this.clock);
+          if (step) r.action = step.activity;
+        }
       }
 
       // 3. REFLECTION — fires when accumulated poignancy crosses the threshold.
@@ -113,7 +171,7 @@ export class World {
 
       this.tickLog.push({
         t: this.clock,
-        agentId: r.agent.profile.id,
+        agentId: id,
         name: r.agent.profile.name,
         action: r.action,
         reflected,

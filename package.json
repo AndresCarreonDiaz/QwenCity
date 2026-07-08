@@ -16,6 +16,7 @@
     "sim:snapshot": "tsx src/sim/snapshot.ts",
     "sim:viewer": "tsx src/sim/viewer.ts",
     "sim:highlights": "tsx src/sim/highlights.ts",
+    "sim:life": "tsx src/sim/life.ts",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },

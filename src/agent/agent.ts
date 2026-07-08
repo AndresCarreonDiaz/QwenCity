@@ -262,12 +262,11 @@ export class Agent {
     now: number,
     topic = "recent important news",
   ): Promise<string> {
-    const relevant = await this.memory.retrieve(
-      this.profile.id,
-      `${topic} — talking with ${listener.name}`,
-      now,
-      5,
-    );
+    // Retrieve what's most on-mind for the topic. Deliberately does NOT mention
+    // the listener here — that would bias toward mundane co-presence memories
+    // about them and crowd out genuinely salient news. Relationship context is a
+    // separate retrieval below.
+    const relevant = await this.memory.retrieve(this.profile.id, topic, now, 5);
     const rel = await this.memory.retrieve(
       this.profile.id,
       `${this.profile.name}'s relationship with ${listener.name}`,

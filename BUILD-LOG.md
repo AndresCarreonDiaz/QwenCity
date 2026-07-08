@@ -6,6 +6,38 @@ run before moving on.
 
 ---
 
+## Iteration 12 — 2026-07-08 · integrated World tick (plans + conversations in one run) ✅
+
+**Done**
+- **World integration** (opt-in flags on `World`): `usePlans` (idle agents' actions track their daily
+  plan for free — no model call — and reactions re-plan) and `enableConversations` (a co-present pair
+  converses on a cadence, forming the relationship graph and spreading information within a single run).
+  `planAll()` plans every agent's day; `edges()` exposes the realized relationship graph. **All new
+  behavior is behind flags, so the default World is byte-identical** (a test asserts flags-off forms no
+  edges / dialogue).
+- **Life sim** (`src/sim/life.ts` · `npm run sim:life`): one `world.run()` with both flags → agents plan,
+  converse, reflect; the seeded rumor spreads **4/4** through in-run conversations; serializes to the
+  snapshot. All 6 checks pass.
+- **Tests**: +`world-integration.test.ts` (4, incl. default-unchanged + plan-tracking + sorted edges) → **66/66 passing**.
+
+**Caught by running:** the rumor didn't spread at first — the `speak` content query included "talking
+with <listener>", which pulled mundane co-presence memories about that listener above the actual news.
+Fixed `speak` to retrieve on the topic alone (relationship context stays a separate retrieval) and set the
+in-world conversation topic to "the most important thing on my mind" → salient news surfaces → 4/4 spread.
+Gossip sim re-verified (no regression).
+
+**Verified:** all eleven sims exit 0 · `npm test` 66/66, exit 0.
+
+**Next (no cloud key needed)**
+1. Surface the daily recap in the snapshot + viewer ("Today's highlights" panel).
+2. Scaffold `deploy/alicloud.ts` proof-file shape (structure only; validates when the key lands).
+3. Wire the fast-forward buffer into the live sim end-to-end (generate → persist → replay in one flow).
+
+**Blocked (needs you)**
+- DashScope API key (`.env`) + region for the real-Qwen swap and deployment.
+
+---
+
 ## Iteration 11 — 2026-07-08 · README rubric-mapping + architecture diagram (submission deliverables) ✅
 
 **Done**
