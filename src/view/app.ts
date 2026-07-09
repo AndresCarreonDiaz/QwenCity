@@ -96,6 +96,19 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var T=0, sheets={};
   function getSheet(id){var i=(hue(id)%5)+1;if(!sheets[i]){var im=new Image();im.src=base()+"/assets/characters/c"+i+".png";sheets[i]=im;}return sheets[i];}
 
+  // --- decoration layer: real LimeZu props scattered to make it a lived-in town ---
+  var props={};
+  var SCATTER=[
+    {k:"tree_green",x:9,y:13},{k:"tree_autumn",x:23,y:7},{k:"tree_green",x:39,y:9},{k:"tree_autumn",x:57,y:7},{k:"tree_green",x:73,y:9},{k:"tree_autumn",x:91,y:13},
+    {k:"tree_green",x:5,y:31},{k:"tree_autumn",x:95,y:33},{k:"tree_autumn",x:6,y:56},{k:"tree_green",x:94,y:59},
+    {k:"tree_green",x:18,y:92},{k:"tree_autumn",x:33,y:94},{k:"tree_green",x:67,y:94},{k:"tree_autumn",x:83,y:92},
+    {k:"lamp",x:40,y:63},{k:"lamp",x:61,y:61},
+    {k:"bush_pink",x:28,y:36},{k:"bush_white",x:73,y:33},{k:"bush_pink",x:47,y:67},
+    {k:"flowers",x:32,y:22},{k:"flowers",x:69,y:21},{k:"flowers",x:23,y:47},{k:"flowers",x:79,y:50},{k:"flowers",x:50,y:88},{k:"flowers",x:36,y:71},{k:"flowers",x:64,y:70}
+  ];
+  function propH(k){return k.slice(0,4)==="tree"?58:k==="lamp"?52:k==="fountain"?48:(k==="bush_pink"||k==="bush_white")?15:k==="bench"?24:16;}
+  function drawProp(im,cx,cy,h){if(!(im&&im.complete&&im.naturalWidth))return;var s=h/im.naturalHeight,w=im.naturalWidth*s;ctx.drawImage(im,Math.round(cx-w/2),Math.round(cy-h),Math.round(w),Math.round(h));}
+
   var canvas=document.getElementById("c"), ctx=canvas.getContext("2d");
   var stage=document.getElementById("stage");
   var W=0,H=0,DPR=Math.min(2,window.devicePixelRatio||1);
@@ -135,11 +148,16 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var roof={cafe:"#c8623e",bakery:"#d9a441",home:"#7d6bb0",plaza:"#8a94a6",park:"#4f9d54"}[p.type]||"#8a94a6";
     var wall={cafe:"#efe3d0",bakery:"#f2ead2",home:"#e7e2ef",plaza:"#d9dde4",park:"#cfeccd"}[p.type]||"#e7e2ef";
     if(p.type==="park"){
-      ctx.fillStyle="#5aa85a";ctx.beginPath();ctx.arc(c.x,c.y,w*0.55,0,7);ctx.fill();
-      ["#3f8f45","#4c9a4f","#3f8f45"].forEach(function(cl,i){ctx.fillStyle=cl;ctx.beginPath();ctx.arc(c.x-16+i*16,c.y-4,8,0,7);ctx.fill();});
+      // a little grove + bench instead of a flat disc
+      ctx.fillStyle="rgba(70,140,70,.28)";ctx.beginPath();ctx.ellipse(c.x,c.y+16,w*0.78,w*0.44,0,0,7);ctx.fill();
+      drawProp(props.tree_green,c.x-17,c.y+9,56);
+      drawProp(props.tree_autumn,c.x+17,c.y+11,52);
+      drawProp(props.bench,c.x,c.y+22,24);
     } else if(p.type==="plaza"){
-      ctx.fillStyle="#c9cdd6";ctx.beginPath();ctx.arc(c.x,c.y,w*0.5,0,7);ctx.fill();
-      ctx.fillStyle="#9fd0e6";ctx.beginPath();ctx.arc(c.x,c.y,7,0,7);ctx.fill();
+      // paved circle + a real stone fountain
+      ctx.fillStyle="#cdd2da";ctx.beginPath();ctx.arc(c.x,c.y+6,w*0.64,0,7);ctx.fill();
+      ctx.fillStyle="#c1c7d0";ctx.beginPath();ctx.arc(c.x,c.y+6,w*0.46,0,7);ctx.fill();
+      drawProp(props.fountain,c.x,c.y+14,48);
     } else {
       // shadow, wall, roof
       ctx.fillStyle="rgba(0,0,0,.16)";rr(x+3,y+6,w,h,7);ctx.fill();
@@ -191,6 +209,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       var plaza=(snap.places||[]).filter(function(p){return p.id==="plaza";})[0];
       if(plaza){var pc=px(plaza);ctx.strokeStyle="rgba(216,195,154,.85)";ctx.lineWidth=10;ctx.lineCap="round";
         (snap.places||[]).forEach(function(p){if(p.id!=="plaza"){var c=px(p);ctx.beginPath();ctx.moveTo(pc.x,pc.y);ctx.lineTo(c.x,c.y);ctx.stroke();}});}
+      // decoration layer (edge trees, lamps, bushes, flowers) — behind buildings & people
+      SCATTER.forEach(function(d){var c=px(d);drawProp(props[d.k],c.x,c.y,propH(d.k));});
       (snap.places||[]).forEach(drawBuilding);
       // move + draw characters (sorted by y for depth)
       var list=Object.keys(sprites).map(function(id){return sprites[id];}).sort(function(a,b){return a.y-b.y;});
@@ -250,6 +270,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       .catch(function(e){lastErr="waiting for the world…";});
   }
   for(var _p=1;_p<=5;_p++){var _im=new Image();_im.src=base()+"/assets/characters/c"+_p+".png";sheets[_p]=_im;}
+  ["tree_green","tree_autumn","bush_pink","bush_white","bench","flowers","fountain","lamp"].forEach(function(n){var im=new Image();im.src=base()+"/assets/props/"+n+".png";props[n]=im;});
   resize();frame();
   if(EMBEDDED&&EMBEDDED.agents)ingest(EMBEDDED);
   poll();setInterval(poll,4000);
