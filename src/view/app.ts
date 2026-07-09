@@ -115,8 +115,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     (s.agents||[]).forEach(function(a){
       var pl=places[a.location]||places.plaza||{x:50,y:50};
       var group=atPlace[a.location], idx=group.indexOf(a.id), n=group.length;
-      var ang=(idx/Math.max(1,n))*Math.PI*2, r=n>1?4.2:0;
-      var t=px({x:pl.x+Math.cos(ang)*r, y:pl.y+Math.sin(ang)*r+3});
+      // stand in a row IN FRONT OF (below) the building so people are readable, not on the roof
+      var spread=(n>1?(idx-(n-1)/2):0)*7;
+      var t=px({x:pl.x+spread, y:pl.y+11});
       var sp=sprites[a.id]||(sprites[a.id]={x:t.x,y:t.y,tx:t.x,ty:t.y});
       sp.tx=t.x; sp.ty=t.y; sp.a=a;
     });
@@ -153,26 +154,28 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   function drawChar(a,sp){
     var talking=/talking|chat|conversation/i.test(a.action||"");
     var sel=selected===a.id;
-    var img=getSheet(a.id), dw=46,dh=46, footY=sp.y+9, topY=footY-dh;
-    // shadow + selection ring
-    ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.ellipse(sp.x,footY-3,13,5,0,0,7);ctx.fill();
-    if(sel){ctx.strokeStyle="#ecb44a";ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(sp.x,footY-3,15,6,0,0,7);ctx.stroke();}
+    var img=getSheet(a.id), dw=68,dh=68, footY=sp.y+2, topY=footY-dh;
+    // shadow + selection ring at the feet
+    ctx.fillStyle="rgba(0,0,0,.25)";ctx.beginPath();ctx.ellipse(sp.x,footY-4,15,6,0,0,7);ctx.fill();
+    if(sel){ctx.strokeStyle="#ecb44a";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sp.x,footY-4,18,7,0,0,7);ctx.stroke();}
     if(img&&img.complete&&img.naturalWidth){
       var fcol=sp.moving?Math.floor(T/7)%6:0, sx=fcol*32;
       ctx.save();
       if(sp.face===-1){ctx.translate(sp.x,0);ctx.scale(-1,1);ctx.translate(-sp.x,0);}
       ctx.drawImage(img,sx,0,32,32,sp.x-dw/2,topY,dw,dh);
       ctx.restore();
-    } else { // fallback dot while the sheet loads
-      ctx.fillStyle=color(a.id);ctx.beginPath();ctx.arc(sp.x,footY-16,10,0,7);ctx.fill();
+    } else { // fallback figure while the sheet loads
+      ctx.fillStyle=color(a.id);ctx.beginPath();ctx.arc(sp.x,footY-22,13,0,7);ctx.fill();
     }
-    // activity emoji (unflipped)
-    ctx.font="14px serif";ctx.textAlign="center";ctx.fillText(emojiFor(a.action),sp.x+14,topY+11);
-    // name
-    ctx.fillStyle=sel?"#fff":"rgba(255,255,255,.95)";ctx.font=(sel?"800":"700")+" 12px ui-sans-serif";ctx.textAlign="center";
-    ctx.strokeStyle="rgba(0,0,0,.6)";ctx.lineWidth=3;ctx.strokeText(a.name,sp.x,topY-3);ctx.fillText(a.name,sp.x,topY-3);
+    // name plate above the head
+    ctx.textAlign="center";ctx.font="700 13px ui-sans-serif";
+    var nw=ctx.measureText(a.name).width+12, ny=topY+8;
+    ctx.fillStyle="rgba(10,14,20,.72)";rr(sp.x-nw/2,ny-13,nw,17,8);ctx.fill();
+    ctx.fillStyle=sel?"#ecb44a":"#fff";ctx.fillText(a.name,sp.x,ny);
+    // activity emoji badge
+    ctx.font="16px serif";ctx.fillText(emojiFor(a.action),sp.x+dw/2-6,footY-dh/2);
     // speech bubble
-    if(talking){ctx.fillStyle="#fff";rr(sp.x+9,topY-8,20,15,6);ctx.fill();ctx.fillStyle="#333";ctx.font="11px serif";ctx.fillText("💬",sp.x+19,topY+3);}
+    if(talking){ctx.fillStyle="#fff";rr(sp.x+dw/2-8,topY+14,22,16,7);ctx.fill();ctx.fillStyle="#333";ctx.font="12px serif";ctx.fillText("💬",sp.x+dw/2+3,topY+26);}
   }
 
   function frame(){
@@ -243,6 +246,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     fetch(base()+"/snapshot.json",{cache:"no-store"}).then(function(r){return r.json();}).then(function(s){lastErr="";if(s&&s.agents)ingest(s);})
       .catch(function(e){lastErr="waiting for the world…";});
   }
+  for(var _p=1;_p<=5;_p++){var _im=new Image();_im.src=base()+"/assets/characters/c"+_p+".png";sheets[_p]=_im;}
   resize();frame();
   if(EMBEDDED&&EMBEDDED.agents)ingest(EMBEDDED);
   poll();setInterval(poll,4000);
