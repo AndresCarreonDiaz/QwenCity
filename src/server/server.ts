@@ -1,8 +1,28 @@
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { extname, join, resolve } from "node:path";
 import { renderAppHtml } from "../view/app.ts";
 import { LiveWorld } from "./liveworld.ts";
 
 const APP_HTML = renderAppHtml();
+const WEB_ROOT = resolve(process.cwd(), "web");
+const MIME: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".gif": "image/gif", ".json": "application/json" };
+
+function serveStatic(pathname: string, res: ServerResponse): void {
+  const rel = decodeURIComponent(pathname.replace(/^\/assets\/?/, ""));
+  const full = resolve(WEB_ROOT, "assets", rel);
+  if (!full.startsWith(join(WEB_ROOT, "assets")) || !existsSync(full) || !statSync(full).isFile()) {
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end('{"ok":false,"reason":"asset not found"}');
+    return;
+  }
+  res.writeHead(200, {
+    "Content-Type": MIME[extname(full).toLowerCase()] ?? "application/octet-stream",
+    "Cache-Control": "public, max-age=86400",
+    "Access-Control-Allow-Origin": "*",
+  });
+  res.end(readFileSync(full));
+}
 
 /**
  * The spectator server — dependency-free (Node's built-in http), so it drops
@@ -30,6 +50,9 @@ async function handle(req: IncomingMessage, res: ServerResponse, world: LiveWorl
   try {
     if (req.method === "GET" && url.pathname === "/") {
       return send(200, "text/html; charset=utf-8", APP_HTML);
+    }
+    if (req.method === "GET" && url.pathname.startsWith("/assets/")) {
+      return serveStatic(url.pathname, res);
     }
     if (req.method === "GET" && url.pathname === "/snapshot.json") {
       return json(200, world.snapshot() ?? { status: "starting" });

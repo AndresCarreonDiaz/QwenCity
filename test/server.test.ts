@@ -69,3 +69,8 @@ test("unknown routes 404", async () => {
   const r = await fetch(`${base}/nope`);
   assert.equal(r.status, 404);
 });
+
+test("static assets: missing → 404, path traversal is blocked", async () => {
+  assert.equal((await fetch(`${base}/assets/does-not-exist.png`)).status, 404);
+  assert.equal((await fetch(`${base}/assets/../../package.json`)).status, 404);
+});

@@ -93,6 +93,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   function emojiFor(a){a=(a||"").toLowerCase();for(var i=0;i<EMOJI.length;i++)if(EMOJI[i][0].test(a))return EMOJI[i][1];return "🙂";}
   function hue(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return h%360;}
   function color(id){return "hsl("+hue(id)+",62%,58%)";}
+  var T=0, sheets={};
+  function getSheet(id){var i=(hue(id)%5)+1;if(!sheets[i]){var im=new Image();im.src=base()+"/assets/characters/c"+i+".png";sheets[i]=im;}return sheets[i];}
 
   var canvas=document.getElementById("c"), ctx=canvas.getContext("2d");
   var stage=document.getElementById("stage");
@@ -151,24 +153,31 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   function drawChar(a,sp){
     var talking=/talking|chat|conversation/i.test(a.action||"");
     var sel=selected===a.id;
-    // shadow
-    ctx.fillStyle="rgba(0,0,0,.2)";ctx.beginPath();ctx.ellipse(sp.x,sp.y+11,10,4,0,0,7);ctx.fill();
-    // body
-    ctx.fillStyle=color(a.id);ctx.strokeStyle=sel?"#fff":"rgba(0,0,0,.35)";ctx.lineWidth=sel?3:2;
-    rr(sp.x-8,sp.y-4,16,15,5);ctx.fill();ctx.stroke();
-    // head
-    ctx.fillStyle="#f2d3b0";ctx.beginPath();ctx.arc(sp.x,sp.y-9,6.5,0,7);ctx.fill();ctx.stroke();
-    // activity emoji
-    ctx.font="13px serif";ctx.textAlign="center";ctx.fillText(emojiFor(a.action),sp.x+11,sp.y-9);
+    var img=getSheet(a.id), dw=46,dh=46, footY=sp.y+9, topY=footY-dh;
+    // shadow + selection ring
+    ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.ellipse(sp.x,footY-3,13,5,0,0,7);ctx.fill();
+    if(sel){ctx.strokeStyle="#ecb44a";ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(sp.x,footY-3,15,6,0,0,7);ctx.stroke();}
+    if(img&&img.complete&&img.naturalWidth){
+      var fcol=sp.moving?Math.floor(T/7)%6:0, sx=fcol*32;
+      ctx.save();
+      if(sp.face===-1){ctx.translate(sp.x,0);ctx.scale(-1,1);ctx.translate(-sp.x,0);}
+      ctx.drawImage(img,sx,0,32,32,sp.x-dw/2,topY,dw,dh);
+      ctx.restore();
+    } else { // fallback dot while the sheet loads
+      ctx.fillStyle=color(a.id);ctx.beginPath();ctx.arc(sp.x,footY-16,10,0,7);ctx.fill();
+    }
+    // activity emoji (unflipped)
+    ctx.font="14px serif";ctx.textAlign="center";ctx.fillText(emojiFor(a.action),sp.x+14,topY+11);
     // name
-    ctx.fillStyle=sel?"#fff":"rgba(255,255,255,.92)";ctx.font=(sel?"800":"700")+" 12px ui-sans-serif";
-    ctx.strokeStyle="rgba(0,0,0,.55)";ctx.lineWidth=3;ctx.strokeText(a.name,sp.x,sp.y-20);ctx.fillText(a.name,sp.x,sp.y-20);
+    ctx.fillStyle=sel?"#fff":"rgba(255,255,255,.95)";ctx.font=(sel?"800":"700")+" 12px ui-sans-serif";ctx.textAlign="center";
+    ctx.strokeStyle="rgba(0,0,0,.6)";ctx.lineWidth=3;ctx.strokeText(a.name,sp.x,topY-3);ctx.fillText(a.name,sp.x,topY-3);
     // speech bubble
-    if(talking){ctx.fillStyle="#fff";rr(sp.x+7,sp.y-30,20,15,6);ctx.fill();ctx.fillStyle="#333";ctx.font="11px serif";ctx.fillText("💬",sp.x+17,sp.y-19);}
+    if(talking){ctx.fillStyle="#fff";rr(sp.x+9,topY-8,20,15,6);ctx.fill();ctx.fillStyle="#333";ctx.font="11px serif";ctx.fillText("💬",sp.x+19,topY+3);}
   }
 
   function frame(){
     if(!W||!H)resize();
+    T++; ctx.imageSmoothingEnabled=false;
     // grass with subtle checker
     for(var gy=0;gy<H;gy+=44)for(var gx=0;gx<W;gx+=44){ctx.fillStyle=((gx+gy)/44)%2?"#7bbf6a":"#74b863";ctx.fillRect(gx,gy,44,44);}
     if(snap){
@@ -179,7 +188,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       (snap.places||[]).forEach(drawBuilding);
       // move + draw characters (sorted by y for depth)
       var list=Object.keys(sprites).map(function(id){return sprites[id];}).sort(function(a,b){return a.y-b.y;});
-      list.forEach(function(sp){sp.x+=(sp.tx-sp.x)*0.08;sp.y+=(sp.ty-sp.y)*0.08;if(sp.a)drawChar(sp.a,sp);});
+      list.forEach(function(sp){var dx=sp.tx-sp.x,dy=sp.ty-sp.y;sp.moving=Math.hypot(dx,dy)>1.5;if(Math.abs(dx)>0.6)sp.face=dx<0?-1:1;sp.x+=dx*0.08;sp.y+=dy*0.08;if(sp.a)drawChar(sp.a,sp);});
     } else {
       ctx.fillStyle="rgba(0,0,0,.5)";ctx.font="14px ui-sans-serif";ctx.textAlign="center";
       ctx.fillText(lastErr||"connecting to the town…",W/2,H/2);
