@@ -6,6 +6,30 @@ run before moving on.
 
 ---
 
+## Iteration 19 — 2026-07-08 · a real town you can watch (LimeZu tileset) ✅
+
+**Done**
+- **Self-screenshot loop.** Set up headless-Chrome verification (per user's Appium suggestion): run the
+  app locally with the mock backend, screenshot with Chrome `--headless=new --screenshot`, `Read` the
+  PNG, iterate — no more asking the user for screenshots. Also used to screenshot the live deploy.
+- **Right-sized sprites.** Character draw size 68px → 40px (fixed "heads too big"); buildings slightly
+  smaller; co-located characters now fan out with a pixel-based gap so nameplates never merge.
+- **Decoration layer (`src/view/app.ts`).** Real LimeZu Modern Exteriors props: green/autumn trees
+  framing the map, a stone **fountain + street lamps** at the plaza, a **grove + bench** at the park,
+  **flower planters + ground flowers** scattered. Deterministic hand-placed scatter; drawn behind
+  buildings/people. Props preloaded from `/assets/props/*.png`.
+- **Assets** copied from the paid tileset into `web/assets/props/` (gitignored) and `scp`'d to the ECS
+  box alongside the character sheets.
+
+**Verified:** `npm run typecheck` clean · `npm test` → 89/89 · self-screenshotted local + live
+(`http://47.237.78.57/`) — town renders with real props and live Qwen content (e.g. Leo's plan:
+"lie awake worrying he's becoming invisible"). Deployed via git pull + `systemctl restart thefeed`.
+
+**Blocked (needs you)**
+- Alibaba Cloud Workbench "running resources" screenshot · 3-min demo video · Devpost writeup.
+
+---
+
 ## Iteration 18 — 2026-07-08 · real-Qwen demo capture ✅ (deployment-layer phase complete)
 
 **Done**
