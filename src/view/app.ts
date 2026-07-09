@@ -19,7 +19,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
-  #app{display:flex;flex-direction:column;height:100vh}
+  #app{display:flex;flex-direction:column;height:100vh;height:100dvh}
   header{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex:0 0 auto}
   .live{display:inline-flex;align-items:center;gap:7px;color:var(--live);font-weight:700;font-size:12px;letter-spacing:.12em;font-family:ui-monospace,Menlo,monospace}
   .dot{width:9px;height:9px;border-radius:50%;background:var(--live);animation:pulse 1.6s infinite}
@@ -30,11 +30,19 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   .stat{font-family:ui-monospace,Menlo,monospace;color:var(--dim);font-size:12px}
   main{flex:1;display:flex;min-height:0}
   #stage{position:relative;flex:1;min-width:0;background:var(--grass)}
-  canvas{display:block;width:100%;height:100%}
+  canvas{display:block;width:100%;height:100%;touch-action:manipulation}
   #hint{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;pointer-events:none}
   aside{flex:0 0 340px;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-  @media(max-width:820px){aside{flex-basis:290px}}
-  .apanel{padding:14px 15px;overflow-y:auto}
+  .apanel{padding:14px 15px;overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+  @media(max-width:980px){aside{flex-basis:300px}}
+  @media(max-width:760px){
+    main{flex-direction:column}
+    #stage{flex:0 0 54dvh;min-height:240px}
+    aside{flex:1 1 auto;flex-basis:auto;border-left:none;border-top:1px solid var(--line)}
+    header{flex-wrap:wrap;gap:6px 12px;padding:8px 12px}
+    h1{font-size:16px}.stat{flex-basis:100%;order:9}
+    #hint{font-size:11px;left:8px;bottom:8px}
+  }
   .ptitle{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:2px 0 10px}
   .who{display:flex;align-items:center;gap:10px;margin-bottom:8px}
   .avatar{width:34px;height:34px;border-radius:50%;flex:0 0 auto;border:2px solid #0007}
@@ -181,7 +189,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
 
   canvas.addEventListener("click",function(e){
     var r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,best=null,bd=1e9;
-    Object.keys(sprites).forEach(function(id){var sp=sprites[id];var d=Math.hypot(sp.x-mx,sp.y-my);if(d<26&&d<bd){bd=d;best=id;}});
+    Object.keys(sprites).forEach(function(id){var sp=sprites[id];var d=Math.hypot(sp.x-mx,sp.y-my);if(d<34&&d<bd){bd=d;best=id;}});
     selected=best; document.getElementById("hint").style.display=best?"none":"block"; renderPanel();
   });
 
