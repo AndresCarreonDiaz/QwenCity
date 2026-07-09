@@ -115,9 +115,12 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     (s.agents||[]).forEach(function(a){
       var pl=places[a.location]||places.plaza||{x:50,y:50};
       var group=atPlace[a.location], idx=group.indexOf(a.id), n=group.length;
-      // stand in a row IN FRONT OF (below) the building so people are readable, not on the roof
-      var spread=(n>1?(idx-(n-1)/2):0)*7;
-      var t=px({x:pl.x+spread, y:pl.y+11});
+      var c=px({x:pl.x, y:pl.y});
+      // stand in a row IN FRONT OF (below) the building; pixel-based gap so
+      // co-located folks never merge into one blob regardless of screen size.
+      var spreadPx=(n>1?(idx-(n-1)/2):0)*54;
+      var downPx=Math.max(44, H*0.05);
+      var t={x:c.x+spreadPx, y:c.y+downPx};
       var sp=sprites[a.id]||(sprites[a.id]={x:t.x,y:t.y,tx:t.x,ty:t.y});
       sp.tx=t.x; sp.ty=t.y; sp.a=a;
     });
@@ -127,7 +130,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
 
   function drawBuilding(p){
-    var c=px(p), w=Math.max(46,W*0.075), h=w*0.72;
+    var c=px(p), w=Math.max(40,W*0.066), h=w*0.72;
     var x=c.x-w/2, y=c.y-h/2;
     var roof={cafe:"#c8623e",bakery:"#d9a441",home:"#7d6bb0",plaza:"#8a94a6",park:"#4f9d54"}[p.type]||"#8a94a6";
     var wall={cafe:"#efe3d0",bakery:"#f2ead2",home:"#e7e2ef",plaza:"#d9dde4",park:"#cfeccd"}[p.type]||"#e7e2ef";
@@ -154,7 +157,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   function drawChar(a,sp){
     var talking=/talking|chat|conversation/i.test(a.action||"");
     var sel=selected===a.id;
-    var img=getSheet(a.id), dw=68,dh=68, footY=sp.y+2, topY=footY-dh;
+    var img=getSheet(a.id), dw=40,dh=40, footY=sp.y+2, topY=footY-dh;
     // shadow + selection ring at the feet
     ctx.fillStyle="rgba(0,0,0,.25)";ctx.beginPath();ctx.ellipse(sp.x,footY-4,15,6,0,0,7);ctx.fill();
     if(sel){ctx.strokeStyle="#ecb44a";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sp.x,footY-4,18,7,0,0,7);ctx.stroke();}
