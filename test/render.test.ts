@@ -7,8 +7,8 @@ const SNAP: WorldSnapshot = {
   t: Date.UTC(2026, 6, 10, 9, 30),
   clock: "09:30",
   agents: [
-    { id: "a", name: "Ana", action: "opening the shop", planActivity: "work", top: [] },
-    { id: "b", name: "Bo", action: "reading", planActivity: null, top: [] },
+    { id: "a", name: "Ana", action: "opening the shop", planActivity: "work", location: "cafe", top: [] },
+    { id: "b", name: "Bo", action: "reading", planActivity: null, location: "plaza", top: [] },
   ],
   ticker: [
     { t: 2, agentId: "a", agentName: "Ana", kind: "reflection", importance: 8, text: "I value my friends" },
@@ -17,6 +17,7 @@ const SNAP: WorldSnapshot = {
   relationships: [{ a: "a", b: "b", weight: 2 }],
   feed: [{ id: "p0", agentId: "a", text: "rough day", replies: 1 }],
   highlights: [{ t: 2, kind: "reflection", importance: 8, text: "I value my friends" }],
+  places: [],
   stats: { agents: 2, memories: 2, posts: 1, edges: 1 },
 };
 

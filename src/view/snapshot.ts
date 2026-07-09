@@ -3,6 +3,7 @@ import type { MemoryKind } from "../memory/types.ts";
 import type { MemoryStore } from "../memory/store.ts";
 import type { Feed } from "../social/feed.ts";
 import { selectHighlights, type HighlightBeat } from "./highlights.ts";
+import { locationForAction, PLACES, type Place } from "./places.ts";
 
 /**
  * The frontend contract: a JSON-serializable snapshot of the world at one
@@ -26,6 +27,8 @@ export interface AgentView {
   name: string;
   action: string;
   planActivity: string | null;
+  /** id of the place the character is currently at (for the map) */
+  location: string;
   top: Array<{ kind: MemoryKind; importance: number; text: string }>;
 }
 
@@ -51,6 +54,8 @@ export interface WorldSnapshot {
   feed: PostView[];
   /** the day's top events town-wide (importance-driven), for the "Today's highlights" panel */
   highlights: HighlightBeat[];
+  /** the town map places (static, but included so the frontend is self-describing) */
+  places: Place[];
   stats: { agents: number; memories: number; posts: number; edges: number };
 }
 
@@ -84,16 +89,20 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     }));
 
   // Per-agent view.
-  const agentViews: AgentView[] = agents.map((a) => ({
-    id: a.profile.id,
-    name: a.profile.name,
-    action: currentActions[a.profile.id] ?? "…",
-    planActivity: a.currentPlanStep(now)?.activity ?? null,
-    top: [...store.forAgent(a.profile.id)]
-      .sort((x, y) => y.importance - x.importance)
-      .slice(0, 3)
-      .map((n) => ({ kind: n.kind, importance: n.importance, text: n.description })),
-  }));
+  const agentViews: AgentView[] = agents.map((a) => {
+    const action = currentActions[a.profile.id] ?? "…";
+    return {
+      id: a.profile.id,
+      name: a.profile.name,
+      action,
+      planActivity: a.currentPlanStep(now)?.activity ?? null,
+      location: locationForAction(a.profile.id, action),
+      top: [...store.forAgent(a.profile.id)]
+        .sort((x, y) => y.importance - x.importance)
+        .slice(0, 3)
+        .map((n) => ({ kind: n.kind, importance: n.importance, text: n.description })),
+    };
+  });
 
   // Relationship graph: edges inferred from stored dialogue ("X said to Y: …").
   const edgeWeights = new Map<string, number>();
@@ -131,6 +140,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     relationships,
     feed: feedPosts,
     highlights,
+    places: PLACES,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },
   };
 }

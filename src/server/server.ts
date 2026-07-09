@@ -1,5 +1,8 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { renderAppHtml } from "../view/app.ts";
 import { LiveWorld } from "./liveworld.ts";
+
+const APP_HTML = renderAppHtml();
 
 /**
  * The spectator server — dependency-free (Node's built-in http), so it drops
@@ -26,7 +29,7 @@ async function handle(req: IncomingMessage, res: ServerResponse, world: LiveWorl
 
   try {
     if (req.method === "GET" && url.pathname === "/") {
-      return send(200, "text/html; charset=utf-8", world.html() || "<!doctype html><p>starting…</p>");
+      return send(200, "text/html; charset=utf-8", APP_HTML);
     }
     if (req.method === "GET" && url.pathname === "/snapshot.json") {
       return json(200, world.snapshot() ?? { status: "starting" });
