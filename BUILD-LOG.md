@@ -6,6 +6,46 @@ run before moving on.
 
 ---
 
+## Iteration 20 — 2026-07-13 · the town becomes a soap opera ✅
+
+**Done**
+- **Full-body directional characters.** Discovered the app had been drawing 32×32 *head crops* of the
+  LimeZu atlases all along (the 1792×1312 sheets hold 32×64 characters; idle band at y=64, walk at
+  y=128, 6 frames × 4 directions). Characters now render whole (34×68), walk with real animation in
+  the direction of travel, face each other in conversation, and face the camera when idle.
+- **Walkable street-grid town.** `places.ts` re-laid on a road network (main street + side streets +
+  park avenue); `route()` walks characters along the roads with a southern dip *around* the plaza
+  fountain; plaza visitors stand in a ring around it (**fixes #14**); conversation pairs get adjacent
+  ring slots. Idle micro-wander so nobody freezes between 5-minute prod ticks.
+- **Real LimeZu buildings.** Distinct villas per character + a coffee-cup café kiosk + striped-awning
+  bakery (label painted onto its blank sign board), patio + flower-cart props — staged into
+  `web/assets/buildings/` (gitignored, scp'd) with procedural fallback if a sheet is missing.
+- **The soap layer.** New `snapshot.dialogue` field (speaker/listener ids, deduped both-sides copies,
+  last 12 lines, +2 tests → 91) plays as timed speech bubbles over the speaker with listener typing
+  dots; reflections surface as thought bubbles; a red-bug **news chyron** crawls today's highlights;
+  header reads "S1 · Day N"; sidebar gained a 🎬 LIVE SCENE card + Bonds (hearts) list.
+- **Alive layer.** Sim-clock day/night grade (dawn/golden/dusk/night keyframes), lamp + window glow,
+  stars + moon, chimney smoke, birds, butterflies, fountain spray. `?hh=N` debug override for
+  screenshot verification of any hour.
+- **Ultracode review (64 agents) → fixes.** Reply box no longer wiped by the 4s poll re-render (the
+  flagship interaction was unusable); typing dots can't cover bubble text; nameplates nudge apart in
+  gathering scenes; chyron keeps its crawl position across refreshes (was permanently blank); no walk
+  path through the fountain; arrival-facing bug; refresh-rate-independent animation (120Hz); image
+  load retry + lazy per-cast atlas loading (~9MB each).
+- **Server (#16 partial).** Asset path-guard trailing-separator hardening; `/snapshot.html` now serves
+  the per-tick cached no-JS dashboard render (was dead work every tick).
+- **Docs truth pass (#13).** README/ARCHITECTURE: 91 tests + 11 sims, deployment section rewritten to
+  the *live* stack (no more "planned" Next.js/RDS), DashScope adapter no longer "(pending)", live URL
+  added, canvas SPA documented.
+
+**Verified:** `npm run typecheck` clean · `npm test` → 91/91 · self-screenshot loop at 1280×800 +
+430×900, day/dawn/dusk/night (`?hh=`), plus live-deploy screenshot after rollout.
+
+**Blocked (needs you)**
+- Alibaba Cloud Workbench "running resources" screenshot · 3-min demo video · Devpost writeup.
+
+---
+
 ## Iteration 19 — 2026-07-08 · a real town you can watch (LimeZu tileset) ✅
 
 **Done**
