@@ -63,7 +63,7 @@ deployment detail: [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
 | Criterion | Weight | What serves it |
 |---|---|---|
 | **Innovation & AI Creativity** | 30% | Audience-Coupled Salience Memory — one `I(m)` driving retrieval, highlight editing, and render gating; real human replies rewire agents (`Agent.ingestAudienceReply` + `surfacePendingInjection`). A nameable algorithm, not a prompt wrapper. |
-| **Technical Depth & Engineering** | 30% | Faithful memory stream / `I(m)` retrieval / reflection tree / recursive planning; event-driven multi-agent tick loop; fast-forward buffer + NDJSON persistence; a deterministic offline harness with **59 tests + 10 runnable sims**, all green. |
+| **Technical Depth & Engineering** | 30% | Faithful memory stream / `I(m)` retrieval / reflection tree / recursive planning; event-driven multi-agent tick loop; fast-forward buffer + NDJSON persistence; a deterministic offline harness with **91 tests + 11 runnable sims**, all green. |
 | **Problem Value & Impact** | 25% | A *perturbable* social-simulation testbed — information diffusion, social contagion, and how human feedback steers an agent society — with zero human-subjects risk. Entertainment / game NPCs / synthetic user research as reach. |
 | **Presentation & Documentation** | 15% | The spectator viewer + thought-ticker, this README + architecture diagram + reproducible ablation numbers, and the 3-minute demo script in [`strategy/truman-show/`](./strategy/truman-show/). |
 
@@ -94,13 +94,18 @@ npm run sim:buffer      # fast-forward buffer + NDJSON persistence / replay
 npm run sim:snapshot    # frontend world-snapshot JSON  (→ data/snapshot.json)
 npm run sim:viewer      # render the spectator UI       (→ web/viewer.html, open it)
 npm run sim:highlights  # importance-driven daily recap
+npm run sim:life        # the integrated living town: plans + conversations in one World tick
 
-npm test                # 59 unit + integration tests
+npm test                # 91 unit + integration tests
 ```
 
 ## See it running
 
-Live on Qwen: `npm run smoke:live` (needs a key in `.env`). Capture a small real-Qwen world with
+**Watch the live town: <http://47.237.78.57>** — real Qwen agents on Alibaba Cloud ECS, 24/7. Click a
+character to follow their thoughts and reply to them; your message becomes a memory that can change
+what they do next.
+
+Live on Qwen locally: `npm run smoke:live` (needs a key in `.env`). Capture a small real-Qwen world with
 `npm run capture` → open `web/viewer.html`. A committed sample of authentic Qwen output is at
 [`docs/sample-viewer.html`](./docs/sample-viewer.html) (open locally) and
 [`docs/sample-snapshot.json`](./docs/sample-snapshot.json) — including an audience reply steering a
@@ -134,20 +139,24 @@ src/
   agent/     cognitive loop: perceive/retrieve/act, reflection, planning, dialogue, audience ingest
   social/    moderation gate, social feed, post composition
   world/     event-driven tick loop, conversation orchestrator, fast-forward buffer + persistence
-  view/      world snapshot (frontend contract), HTML renderer, daily-highlight editor
+  view/      world snapshot (frontend contract), canvas town SPA (walkable pixel town with
+             speech-bubble dialogue, news chyron, day/night cycle), HTML renderer, highlight editor
   eval/      ablation scenario + metrics
-  sim/       10 runnable, self-asserting scenarios
-test/        59 node:test cases
+  sim/       11 runnable, self-asserting scenarios
+test/        91 node:test cases
 docs/        architecture + deployment
 strategy/    design brief, paper spec, cost model, deployment research (truman-show/)
 ```
 
-## Deployment (Alibaba Cloud, planned)
+## Deployment (Alibaba Cloud, live)
 
-Single always-on **ECS** box (free tier) running a Node worker (`systemd`, `Restart=always`) that ticks
-the world in fast-forward; **RDS PostgreSQL + pgvector** for memory + state; **OSS** for rendered media;
-a Next.js spectator dashboard that polls the snapshot. The `deploy/alicloud.ts` proof file traces
-request → Qwen model → OSS → DB, all on Alibaba Cloud. Details in [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
+Deployed and running at **<http://47.237.78.57>**: a single always-on **ECS** box running the
+dependency-free Node spectator server (`systemd` unit `thefeed`, `Restart=always`) that ticks the world
+against real Qwen via DashScope and serves the self-contained canvas town SPA at `GET /` (no-JS fallback
+at `/snapshot.html`). World state lives in-process with an NDJSON tick log for golden-run replay;
+**RDS PostgreSQL + pgvector** and **OSS** are the documented scale-out path for larger casts and rendered
+media. The `deploy/alicloud.ts` proof file traces request → Qwen model → OSS → DB, all on Alibaba Cloud.
+Details in [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and [`docs/DEPLOY.md`](./docs/DEPLOY.md).
 
 ## Built during the hackathon
 

@@ -1,19 +1,19 @@
 # Architecture
 
 The Feed is a society of generative agents rendered as a watchable, audience-steerable livestream.
-This doc covers the runtime components and the planned Alibaba Cloud deployment. For the "why" and the
+This doc covers the runtime components and the live Alibaba Cloud deployment. For the "why" and the
 research behind each choice, see [`../strategy/truman-show/`](../strategy/truman-show/).
 
 ## Components
 
 | Layer | Module | Responsibility |
 |---|---|---|
-| Model seam | `src/model/` | `ModelAdapter` interface; deterministic `MockAdapter` (offline) and (pending) DashScope adapter, chosen by `MODEL_BACKEND`. Nothing else knows which backend is live. |
+| Model seam | `src/model/` | `ModelAdapter` interface; deterministic `MockAdapter` (offline) and the real DashScope adapter (`dashscope.ts` — task→model routing across qwen-flash/plus/max + embeddings, wire-verified in tests), chosen by `MODEL_BACKEND`. Nothing else knows which backend is live. |
 | Memory | `src/memory/` | `MemoryNode` (ConceptNode-faithful), the `I(m)` retrieval math, and the store (in-memory now; pgvector-shaped API for later). |
 | Cognition | `src/agent/` | perceive → store → retrieve → act; reflection tree (poignancy-threshold trigger, evidence-cited insights); recursive daily planning; dialogue; audience-reply ingestion. |
 | Social | `src/social/` | moderation gate, the social feed, first-person post composition. |
 | World | `src/world/` | event-driven tick loop; conversation orchestrator (stores each utterance in both streams → diffusion); fast-forward buffer + NDJSON persistence. |
-| View | `src/view/` | world snapshot (frontend contract), self-contained HTML renderer, the importance-driven highlight editor. |
+| View | `src/view/` | world snapshot (frontend contract, incl. recent dialogue lines), the self-contained canvas town SPA (walkable street-grid town, speech-bubble dialogue playback, news chyron, sim-clock day/night cycle), a no-JS HTML renderer, the importance-driven highlight editor. |
 | Eval | `src/eval/` | the controlled ablation scenario + metrics (diffusion, density, divergence). |
 
 ## The Salience Engine — one score, three uses
@@ -46,7 +46,7 @@ flowchart LR
   TICK -->|model calls| DS[("DashScope / Qwen Cloud")]
   TICK -->|memory + state| RDS[("RDS PostgreSQL + pgvector")]
   JOBS -->|rendered media| OSS[("OSS object storage")]
-  FE["Next.js spectator dashboard"] -->|poll snapshot every 3-5s| RDS
+  FE["Canvas town SPA (served by the worker at GET /)"] -->|"poll /snapshot.json every 4s"| TICK
   FE --> OSS
   JUDGE["Judge / viewer"] -->|reply to a post| FE
   FE -->|"?mode=replay on stale heartbeat"| GOLDEN["Golden-run replay"]
@@ -64,5 +64,7 @@ request from Qwen model → OSS write → DB row, entirely on Alibaba Cloud.
 
 ## Status
 
-Offline engine complete and verified (10 sims, 59 tests). The DashScope adapter and the deployment above
-are wired the moment a Qwen Cloud API key is available — a one-env-var swap at the model seam, then infra.
+Engine verified offline (11 sims, 91 tests) and **deployed live at http://47.237.78.57** — ECS, systemd
+unit `thefeed`, real Qwen via `MODEL_BACKEND=dashscope`. The current deployment keeps world state
+in-process with an NDJSON tick log (golden-run replay); the RDS/pgvector + OSS pieces in the diagram are
+the scale-out path for larger casts and rendered media.
