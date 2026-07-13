@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import { extname, join, resolve } from "node:path";
+import { extname, join, resolve, sep } from "node:path";
 import { renderAppHtml } from "../view/app.ts";
 import { LiveWorld } from "./liveworld.ts";
 
@@ -11,7 +11,7 @@ const MIME: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg"
 function serveStatic(pathname: string, res: ServerResponse): void {
   const rel = decodeURIComponent(pathname.replace(/^\/assets\/?/, ""));
   const full = resolve(WEB_ROOT, "assets", rel);
-  if (!full.startsWith(join(WEB_ROOT, "assets")) || !existsSync(full) || !statSync(full).isFile()) {
+  if (!full.startsWith(join(WEB_ROOT, "assets") + sep) || !existsSync(full) || !statSync(full).isFile()) {
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end('{"ok":false,"reason":"asset not found"}');
     return;
@@ -31,6 +31,7 @@ function serveStatic(pathname: string, res: ServerResponse): void {
  * rate-capped audience reply.
  *
  *   GET  /              → the rendered spectator viewer (HTML)
+ *   GET  /snapshot.html → server-rendered dashboard of the current tick (no-JS fallback)
  *   GET  /snapshot.json → the current world snapshot (for polling / a SPA)
  *   GET  /health        → liveness + heartbeat
  *   POST /reply         → {agentId, handle, text} → moderated → into memory
@@ -53,6 +54,9 @@ async function handle(req: IncomingMessage, res: ServerResponse, world: LiveWorl
     }
     if (req.method === "GET" && url.pathname.startsWith("/assets/")) {
       return serveStatic(url.pathname, res);
+    }
+    if (req.method === "GET" && url.pathname === "/snapshot.html") {
+      return send(200, "text/html; charset=utf-8", world.html() || "<!doctype html><p>starting…</p>");
     }
     if (req.method === "GET" && url.pathname === "/snapshot.json") {
       return json(200, world.snapshot() ?? { status: "starting" });
