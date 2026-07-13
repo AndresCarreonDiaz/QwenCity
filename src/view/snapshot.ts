@@ -45,6 +45,16 @@ export interface PostView {
   replies: number;
 }
 
+/** One spoken line, parsed back out of a stored `dialogue` memory (for speech bubbles). */
+export interface DialogueLine {
+  t: number;
+  speakerId: string;
+  speakerName: string;
+  listenerId: string;
+  listenerName: string;
+  text: string;
+}
+
 export interface WorldSnapshot {
   t: number;
   clock: string;
@@ -52,6 +62,8 @@ export interface WorldSnapshot {
   ticker: TickerEntry[];
   relationships: Edge[];
   feed: PostView[];
+  /** the most recent spoken lines town-wide, oldest→newest (for speech bubbles) */
+  dialogue: DialogueLine[];
   /** the day's top events town-wide (importance-driven), for the "Today's highlights" panel */
   highlights: HighlightBeat[];
   /** the town map places (static, but included so the frontend is self-describing) */
@@ -68,6 +80,9 @@ export interface SnapshotInput {
   tickerLimit?: number;
   highlightLimit?: number;
 }
+
+/** how many of the most recent dialogue lines a snapshot carries */
+const DIALOGUE_LIMIT = 12;
 
 export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
   const { now, agents, store, currentActions } = input;
@@ -122,6 +137,32 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     return { a, b, weight: Math.ceil(w / 2) };
   });
 
+  // Recent dialogue for speech bubbles. Each utterance is stored twice (once in
+  // the speaker's stream, once in the listener's) with identical created +
+  // description, so dedupe on that pair; parse names back to ids and skip
+  // anything that doesn't match the canonical `X said to Y: "…"` shape (e.g.
+  // audience injections). The trailing `"$` anchor keeps the regex tolerant of
+  // double quotes inside the spoken text itself.
+  const dialogueRe = /^(.+?) said to (.+?): "([\s\S]*)"$/;
+  const seenLines = new Set<string>();
+  const dialogue: DialogueLine[] = [];
+  for (const n of store.all()) {
+    if (n.kind !== "dialogue") continue;
+    const key = `${n.created}|${n.description}`;
+    if (seenLines.has(key)) continue;
+    seenLines.add(key);
+    const m = n.description.match(dialogueRe);
+    if (!m) continue;
+    const speakerName = m[1]!.trim();
+    const listenerName = m[2]!.trim();
+    const speakerId = idByName.get(speakerName);
+    const listenerId = idByName.get(listenerName);
+    if (!speakerId || !listenerId) continue;
+    dialogue.push({ t: n.created, speakerId, speakerName, listenerId, listenerName, text: m[3]! });
+  }
+  dialogue.sort((x, y) => x.t - y.t);
+  const recentDialogue = dialogue.slice(-DIALOGUE_LIMIT);
+
   const feedPosts: PostView[] = (input.feed?.posts ?? []).map((p) => ({
     id: p.id,
     agentId: p.agentId,
@@ -139,6 +180,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     ticker,
     relationships,
     feed: feedPosts,
+    dialogue: recentDialogue,
     highlights,
     places: PLACES,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },

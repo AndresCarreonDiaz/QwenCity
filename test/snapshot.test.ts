@@ -68,6 +68,60 @@ test("snapshot includes importance-ranked town highlights", async () => {
   assert.equal(snap.highlights[0]!.importance, maxImp);
 });
 
+/** Store one utterance the way converse() does: same description + t in BOTH streams. */
+async function sayBothSides(
+  store: MemoryStore,
+  speaker: Agent,
+  listener: Agent,
+  text: string,
+  t: number,
+) {
+  const desc = `${speaker.profile.name} said to ${listener.profile.name}: "${text}"`;
+  await store.add({ agentId: speaker.profile.id, kind: "dialogue", description: desc, now: t });
+  await store.add({ agentId: listener.profile.id, kind: "dialogue", description: desc, now: t });
+}
+
+test("snapshot dialogue dedupes both-sides copies and resolves speaker/listener ids", async () => {
+  const { store, a, b } = await setup();
+  await sayBothSides(store, a, b, "Morning, Bo!", T0 + 1e5);
+  await sayBothSides(store, b, a, 'They call it "the best" coffee in town.', T0 + 2e5);
+  // an unresolvable speaker and a non-matching description are skipped gracefully
+  await store.add({ agentId: "a", kind: "dialogue", description: 'Zed said to Ana: "hi"', now: T0 + 3e5 });
+  await store.add({ agentId: "a", kind: "dialogue", description: "the crowd whispered a rumor", now: T0 + 4e5 });
+
+  const snap = buildSnapshot({ now: T0 + 1e6, agents: [a, b], store, currentActions: {} });
+  assert.equal(snap.dialogue.length, 2); // 4 stored dialogue copies → 2 deduped lines
+  assert.deepEqual(
+    snap.dialogue.map((d) => [d.speakerId, d.listenerId]),
+    [["a", "b"], ["b", "a"]],
+  );
+  assert.equal(snap.dialogue[0]!.speakerName, "Ana");
+  assert.equal(snap.dialogue[0]!.listenerName, "Bo");
+  assert.equal(snap.dialogue[0]!.text, "Morning, Bo!");
+  // inner double quotes survive extraction
+  assert.equal(snap.dialogue[1]!.text, 'They call it "the best" coffee in town.');
+  // ascending by t
+  for (let i = 1; i < snap.dialogue.length; i++) {
+    assert.ok(snap.dialogue[i]!.t >= snap.dialogue[i - 1]!.t);
+  }
+});
+
+test("snapshot dialogue keeps only the last 12 lines", async () => {
+  const { store, a, b } = await setup();
+  for (let i = 1; i <= 14; i++) {
+    await sayBothSides(store, a, b, `line ${i}`, T0 + i * 1e4);
+  }
+  const snap = buildSnapshot({ now: T0 + 1e6, agents: [a, b], store, currentActions: {} });
+  assert.equal(snap.dialogue.length, 12);
+  assert.deepEqual(
+    snap.dialogue.map((d) => d.text),
+    Array.from({ length: 12 }, (_, i) => `line ${i + 3}`), // lines 3..14
+  );
+  for (let i = 1; i < snap.dialogue.length; i++) {
+    assert.ok(snap.dialogue[i]!.t >= snap.dialogue[i - 1]!.t);
+  }
+});
+
 test("snapshot is JSON-serializable and round-trips", async () => {
   const { store, a, b } = await setup();
   const snap = buildSnapshot({ now: T0 + 1e6, agents: [a, b], store, currentActions: { a: "x", b: "y" } });

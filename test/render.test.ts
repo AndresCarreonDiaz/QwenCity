@@ -16,6 +16,9 @@ const SNAP: WorldSnapshot = {
   ],
   relationships: [{ a: "a", b: "b", weight: 2 }],
   feed: [{ id: "p0", agentId: "a", text: "rough day", replies: 1 }],
+  dialogue: [
+    { t: 2, speakerId: "a", speakerName: "Ana", listenerId: "b", listenerName: "Bo", text: "hi Bo" },
+  ],
   highlights: [{ t: 2, kind: "reflection", importance: 8, text: "I value my friends" }],
   places: [],
   stats: { agents: 2, memories: 2, posts: 1, edges: 1 },
