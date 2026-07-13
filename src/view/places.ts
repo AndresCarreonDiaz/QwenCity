@@ -14,14 +14,19 @@ export interface Place {
   type: PlaceType;
 }
 
+// Laid out on a street grid: a horizontal main street at y=52 with the plaza at
+// its center, vertical side streets at x=16 and x=84 serving the four homes, and
+// a short avenue from the plaza down to the park. The frontend draws these roads
+// and routes characters along them, so coordinates here are load-bearing for the
+// walkability of the town.
 export const PLACES: Place[] = [
-  { id: "cafe", label: "Maya's Café", x: 38, y: 44, type: "cafe" },
-  { id: "bakery", label: "Ana's Bakery", x: 62, y: 40, type: "bakery" },
-  { id: "maya_home", label: "Maya's Place", x: 16, y: 20, type: "home" },
-  { id: "tom_home", label: "Tom's Place", x: 84, y: 22, type: "home" },
-  { id: "ana_home", label: "Ana's Place", x: 86, y: 72, type: "home" },
-  { id: "leo_home", label: "Leo's Place", x: 14, y: 76, type: "home" },
-  { id: "park", label: "The Park", x: 50, y: 78, type: "park" },
+  { id: "cafe", label: "Maya's Café", x: 31, y: 40, type: "cafe" },
+  { id: "bakery", label: "Ana's Bakery", x: 69, y: 40, type: "bakery" },
+  { id: "maya_home", label: "Maya's Place", x: 16, y: 18, type: "home" },
+  { id: "tom_home", label: "Tom's Place", x: 84, y: 18, type: "home" },
+  { id: "ana_home", label: "Ana's Place", x: 84, y: 80, type: "home" },
+  { id: "leo_home", label: "Leo's Place", x: 16, y: 80, type: "home" },
+  { id: "park", label: "The Park", x: 50, y: 82, type: "park" },
   { id: "plaza", label: "Town Plaza", x: 50, y: 52, type: "plaza" },
 ];
 
@@ -46,10 +51,10 @@ export function placeById(id: string): Place | undefined {
  */
 export function locationForAction(agentId: string, action: string): string {
   const a = action.toLowerCase();
-  if (/\bbakery|pastry|bread|flour|dough|inventory|restock|oven\b/.test(a)) return "bakery";
+  if (/\bbakery|pastry|bread|flour|dough|inventory|restock|shelv\w*|oven\b/.test(a)) return "bakery";
   if (/\bcaf[eé]|coffee|barista|tables|counter|opening up|brew|espresso|shop\b/.test(a)) return "cafe";
   if (/\bpark|stroll|walk|outside|air|garden|bench|neighbou?r\b/.test(a)) return "park";
-  if (/\bhome|shower|dress|sleep|bed|waking|nap|rest|breakfast|winding down\b/.test(a)) {
+  if (/\bhome|shower|dress|sleep|bed|waking|nap|rest|breakfast|winding down|\bread|journal|window\b/.test(a)) {
     return HOME_BY_AGENT[agentId] ?? "plaza";
   }
   if (/\btalking with|chat|conversation|catch up|clear the air|apolog\b/.test(a)) return "plaza";
