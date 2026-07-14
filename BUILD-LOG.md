@@ -6,6 +6,24 @@ run before moving on.
 
 ---
 
+## Iteration 31 — 2026-07-14 · relationship trajectory: root for the bonds (watchability loop, 7/n) ✅
+
+**Done** — soap operas run on relationships you're invested in, but bonds here only ever grew (hearts =
+exchange count, monotonic) — no sense of a friendship warming or souring. Each bond now carries an
+emotional **tone** read from the sentiment of that pair's recent dialogue.
+- **`snapshot.ts`**: `Edge.tone` (warming / tension / strained / steady) via `toneFrom()` → reuses the
+  `mood.ts` lexicon on the pair's last ~6 exchanged lines (happy/warm/excited → warming; tense →
+  tension; sad/worried → strained). Refactored the relationship pass to collect per-pair texts while
+  it counts edges. +1 test (warm exchange → warming, hostile exchange → tension).
+- **View**: a tone icon (💚 / ⚡ / 💔) beside each bond in the town **Bonds** panel and the follow
+  panel's "Who X knows". Honest — reflects real dialogue; during the rent arc the café/bakery bond
+  reads 💔 strained, exactly the soap read.
+
+**Verified:** typecheck · 103/103 · syntax gate · CDP screenshot (Bonds shows "Ana ↔ Tom 💔") ·
+deployed, live OK.
+
+---
+
 ## Iteration 30 — 2026-07-14 · the town meeting: appointment viewing (watchability loop, 6/n) ✅
 
 **Done** — reality TV is built around the big group scene everyone tunes in for; the sim only ever had
