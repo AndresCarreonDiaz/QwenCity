@@ -2,6 +2,7 @@ import type { Agent } from "../agent/agent.ts";
 import type { MemoryKind } from "../memory/types.ts";
 import type { MemoryStore } from "../memory/store.ts";
 import type { Feed } from "../social/feed.ts";
+import { weatherFor, type Weather } from "../world/weather.ts";
 import { selectHighlights, type HighlightBeat } from "./highlights.ts";
 import { locationForAction, PLACES, type Place } from "./places.ts";
 
@@ -55,15 +56,28 @@ export interface DialogueLine {
   text: string;
 }
 
+/** One audience reply, parsed back out of a stored `injection` memory (shown on the broadcast). */
+export interface AudienceLine {
+  t: number;
+  agentId: string;
+  agentName: string;
+  handle: string;
+  text: string;
+}
+
 export interface WorldSnapshot {
   t: number;
   clock: string;
+  /** deterministic town weather for this moment (engine + view share it) */
+  weather: Weather;
   agents: AgentView[];
   ticker: TickerEntry[];
   relationships: Edge[];
   feed: PostView[];
   /** the most recent spoken lines town-wide, oldest→newest (for speech bubbles) */
   dialogue: DialogueLine[];
+  /** the most recent audience replies, oldest→newest (surfaced on the broadcast) */
+  audience: AudienceLine[];
   /** the day's top events town-wide (importance-driven), for the "Today's highlights" panel */
   highlights: HighlightBeat[];
   /** the town map places (static, but included so the frontend is self-describing) */
@@ -83,6 +97,8 @@ export interface SnapshotInput {
 
 /** how many of the most recent dialogue lines a snapshot carries */
 const DIALOGUE_LIMIT = 12;
+/** how many of the most recent audience replies a snapshot carries */
+const AUDIENCE_LIMIT = 6;
 
 export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
   const { now, agents, store, currentActions } = input;
@@ -163,6 +179,25 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
   dialogue.sort((x, y) => x.t - y.t);
   const recentDialogue = dialogue.slice(-DIALOGUE_LIMIT);
 
+  // Recent audience replies (injection memories) — first-class in the contract
+  // so the broadcast can surface them even after the ticker has moved on.
+  const audienceRe = /^On [^,]+, @([\w.-]+) replied to my post: "([\s\S]*)"$/;
+  const audience: AudienceLine[] = [];
+  for (const n of store.all()) {
+    if (n.kind !== "injection") continue;
+    const m = n.description.match(audienceRe);
+    if (!m) continue;
+    audience.push({
+      t: n.created,
+      agentId: n.agentId,
+      agentName: nameById.get(n.agentId) ?? n.agentId,
+      handle: m[1]!,
+      text: m[2]!,
+    });
+  }
+  audience.sort((x, y) => x.t - y.t);
+  const recentAudience = audience.slice(-AUDIENCE_LIMIT);
+
   const feedPosts: PostView[] = (input.feed?.posts ?? []).map((p) => ({
     id: p.id,
     agentId: p.agentId,
@@ -176,11 +211,13 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
   return {
     t: now,
     clock: new Date(now).toISOString().slice(11, 16),
+    weather: weatherFor(now),
     agents: agentViews,
     ticker,
     relationships,
     feed: feedPosts,
     dialogue: recentDialogue,
+    audience: recentAudience,
     highlights,
     places: PLACES,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },

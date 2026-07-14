@@ -6,6 +6,8 @@ import type { WorldSnapshot } from "../src/view/snapshot.ts";
 const SNAP: WorldSnapshot = {
   t: Date.UTC(2026, 6, 10, 9, 30),
   clock: "09:30",
+  weather: "clear",
+  audience: [],
   agents: [
     { id: "a", name: "Ana", action: "opening the shop", planActivity: "work", location: "cafe", top: [] },
     { id: "b", name: "Bo", action: "reading", planActivity: null, location: "plaza", top: [] },

@@ -2,6 +2,7 @@ import { Agent } from "../agent/agent.ts";
 import type { MemoryStore } from "../memory/store.ts";
 import { locationForAction, placeById } from "../view/places.ts";
 import { converse } from "./conversation.ts";
+import { weatherPhrase } from "./weather.ts";
 
 const MS_PER_MIN = 60_000;
 
@@ -164,7 +165,7 @@ export class World {
           .map((o) => `${o.agent.profile.name} (${o.action})`)
           .join(", ");
         const situation =
-          `It is ${new Date(this.clock).toISOString()}. ${r.agent.profile.name} is at ${here?.label ?? "the Town Plaza"} — around them: ${here?.flavor ?? "the fountain and benches"}. ` +
+          `It is ${new Date(this.clock).toISOString()}. ${weatherPhrase(this.clock)}${r.agent.profile.name} is at ${here?.label ?? "the Town Plaza"} — around them: ${here?.flavor ?? "the fountain and benches"}. ` +
           (copresent ? `Also here: ${copresent}. ` : "") +
           `${r.agent.profile.name} is currently ${r.action}. ` +
           `What does ${r.agent.profile.name} do next, here or nearby? Prefer concrete actions that use the surroundings or the people present.`;

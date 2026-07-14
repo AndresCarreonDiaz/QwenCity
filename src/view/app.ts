@@ -120,7 +120,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // Band y=64 is idle, y=128 is walk. Direction column offsets within a band:
   var DIRCOL={R:0,U:6,L:12,D:18}, IDLE_Y=64, WALK_Y=128;
   var CW=34, CH=68; // on-screen character size
-  var HHOVR=null,DBG=false,NOCOLD=false; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";NOCOLD=usp.get("nocold")==="1";}catch(e){}
+  var HHOVR=null,DBG=false,NOCOLD=false,WXOVR=null; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";NOCOLD=usp.get("nocold")==="1";var wq=usp.get("wx");if(wq==="rain"||wq==="overcast"||wq==="clear")WXOVR=wq;}catch(e){}
+  function wxNow(){return WXOVR||((snap&&snap.weather)||"clear");}
 
   // --- image assets: character sheets, legacy props, LimeZu buildings + CITY set ---
   var props={}, buildings={}, citybld={};
@@ -403,7 +404,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     }
     if(lastDay&&day!==lastDay&&day>=1)dayCard={text:"DAY "+day,start:performance.now()};
     if(day>=1)lastDay=day;
-    var ph=nn>0.6?"🌙":h<8?"🌅":h<17?"☀️":"🌇";
+    var wx=wxNow();
+    var ph=wx==="rain"?"🌧":wx==="overcast"?"☁️":nn>0.6?"🌙":h<8?"🌅":h<17?"☀️":"🌇";
     document.getElementById("clock").textContent=(day>=1&&day<1000?"S1 · Day "+day+" · ":"")+ph+" "+(s.clock||"--:--");
     document.getElementById("stat").textContent=(s.stats?(s.stats.agents+" souls · "+s.stats.memories+" memories · "+s.stats.edges+" bonds"):"");
     var places={}; (s.places||[]).forEach(function(p){places[p.id]=p;});
@@ -471,18 +473,29 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   function beatKey(l){return l.t+"|"+l.speakerId+"|"+l.text;}
   function sayDur(len){return clamp(2600+62*len,4200,9000);}
   function pushBeats(s){
-    var freshBeats=[];
+    var freshBeats=[], firstPush=!everPushed;
+    everPushed=true;
     // on first load skip straight to the latest scene instead of replaying
     // minutes of backlog line by line
     var lines=((s.dialogue)||[]);
-    var startAt=everPushed?0:Math.max(0,lines.length-5);
+    var startAt=firstPush?Math.max(0,lines.length-5):0;
     lines.forEach(function(l,li){
       var k=beatKey(l); if(seen[k])return; seen[k]=1;
       if(li<startAt)return;
       freshBeats.push({kind:"say",sid:l.speakerId,lid:l.listenerId,text:l.text,dur:sayDur(l.text.length)});
     });
-    everPushed=true;
     if(freshBeats.length){replayPool=[];((s.dialogue)||[]).slice(-4).forEach(function(l){replayPool.push({kind:"say",sid:l.speakerId,lid:l.listenerId,text:l.text,dur:sayDur(l.text.length)});});}
+    // audience replies surface ON the broadcast — the viewer's message becomes
+    // part of the show, over the character who received it. They jump the
+    // queue (play next) and are never evicted by the beat cap. On first load
+    // only the latest one replays.
+    var audl=((s.audience)||[]);
+    audl.forEach(function(r,ai){
+      var k=r.t+"|"+r.agentId+"|inj"; if(seen[k])return; seen[k]=1;
+      if(firstPush&&ai<audl.length-1)return;
+      var txt="📨 @"+r.handle+": “"+r.text+"”";
+      beats.unshift({kind:"aud",sid:r.agentId,lid:null,text:txt,dur:clamp(1800+50*txt.length,3600,7500),at:performance.now()+1200});
+    });
     // a couple of fresh reflections become thought bubbles (watch the mind)
     var refl=(s.ticker||[]).filter(function(t){return t.kind==="reflection";}).slice(0,2);
     refl.forEach(function(r){
@@ -499,7 +512,11 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       freshBeats.forEach(function(b,i){b.at=t0+i*spacing+(i?(Math.random()*4000-2000):0);beats.push(b);});
       lastSchedAt=Math.min(t0+(freshBeats.length-1)*spacing,nw+tickGapMs*1.2);
     }
-    if(beats.length>10)beats=beats.slice(-10);
+    if(beats.length>10){
+      var audK=beats.filter(function(b){return b.kind==="aud";});
+      var oth=beats.filter(function(b){return b.kind!=="aud";}).slice(-(Math.max(0,10-audK.length)));
+      beats=audK.concat(oth).sort(function(a,b){return a.at-b.at;});
+    }
   }
   function stepBeats(now){
     if(cur&&now>curUntil){cur=null;gapUntil=now+800;}
@@ -625,22 +642,23 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     return {lines:lines,bw:bw};
   }
   function drawBubble(sp,beat){
-    var think=beat.kind==="think", stage=beat.kind==="stage";
+    var think=beat.kind==="think", stage=beat.kind==="stage", aud=beat.kind==="aud";
     ctx.font=stage?"italic 600 11px ui-sans-serif":think?"italic 600 12px ui-sans-serif":"600 12.5px ui-sans-serif";
     var mw=stage?Math.min(180,W*0.4):Math.min(210,W*0.45);
     if(!beat.w||beat.mw!==mw){beat.mw=mw;var wr=wrap(beat.text,mw);beat.lines=wr.lines;beat.w=wr.bw;}
     var lh=stage?14:16, bw=beat.w+(stage?16:20), bh=beat.lines.length*lh+(stage?10:12);
     var vb=viewBounds();
     var bx=clamp(sp.x-bw/2,vb.x1+6,vb.x2-bw-6), by=sp.y-CH-(stage?14:22)-bh; if(by<vb.y1+6)by=vb.y1+6;
-    ctx.fillStyle=stage?"rgba(16,22,32,.78)":think?"rgba(224,229,238,.94)":"rgba(255,255,255,.96)";
+    ctx.fillStyle=aud?"rgba(255,241,212,.97)":stage?"rgba(16,22,32,.78)":think?"rgba(224,229,238,.94)":"rgba(255,255,255,.96)";
     rr(bx,by,bw,bh,stage?7:9);ctx.fill();
+    if(aud){ctx.strokeStyle="#d9a441";ctx.lineWidth=1.5;rr(bx,by,bw,bh,9);ctx.stroke();}
     if(think){
       ctx.beginPath();ctx.arc(sp.x-4,by+bh+5,3.4,0,7);ctx.fill();
       ctx.beginPath();ctx.arc(sp.x+1,by+bh+11,2.1,0,7);ctx.fill();
     } else if(!stage){
       ctx.beginPath();ctx.moveTo(clamp(sp.x-7,bx+8,bx+bw-22),by+bh-1);ctx.lineTo(clamp(sp.x+7,bx+22,bx+bw-8),by+bh-1);ctx.lineTo(sp.x,by+bh+9);ctx.closePath();ctx.fill();
     }
-    ctx.fillStyle=stage?"#dfe7f4":think?"#3c4759":"#182230";ctx.textAlign="left";
+    ctx.fillStyle=aud?"#453110":stage?"#dfe7f4":think?"#3c4759":"#182230";ctx.textAlign="left";
     for(var i=0;i<beat.lines.length;i++)ctx.fillText(beat.lines[i],bx+(stage?8:10),by+(stage?14:16)+i*lh);
     ctx.textAlign="center";
   }
@@ -1081,8 +1099,16 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     for(var gy=0;gy<H;gy+=44)for(var gx=0;gx<W;gx+=44){ctx.fillStyle=((gx+gy)/44)%2?"#7bbf6a":"#74b863";ctx.fillRect(gx,gy,44,44);}
     plates=[];namePlates=[];
     if(snap){
-      var h=HHOVR!==null?HHOVR:hourNow(), tint=ambTint(h), nn=nightness(h);
+      var h=HHOVR!==null?HHOVR:hourNow(), tint=ambTint(h), nn=nightness(h), wx=wxNow();
       drawGround(nn);
+      // drifting cloud shadows under grey skies
+      if(wx!=="clear"){
+        ctx.fillStyle="rgba(18,26,40,.09)";
+        for(var ci=0;ci<3;ci++){
+          var cx2=((T*(0.5+ci*0.2)+ci*W*0.45)%(W+520))-260, cy2=H*(0.18+ci*0.3);
+          ctx.beginPath();ctx.ellipse(cx2,cy2,W*0.22,H*0.13,0,0,7);ctx.fill();
+        }
+      }
       stepBeats(now);
       stepEmotes(now);
       pumpVoices();
@@ -1100,11 +1126,23 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       });
       items.sort(function(a,b){return a.y-b.y;});
       items.forEach(function(it){it.f();});
-      // ambient life above the world
+      // ambient life above the world (birds and butterflies sit out the rain)
       spawnSmoke();drawSmoke(dt);
-      stepBirds(now,dt,nn);
-      drawButterflies(nn);
-      // day/night grade
+      if(wx!=="rain")stepBirds(now,dt,nn);
+      if(wx==="clear")drawButterflies(nn);
+      // rain: slanted streaks over the whole set
+      if(wx==="rain"){
+        ctx.strokeStyle="rgba(178,198,228,.34)";ctx.lineWidth=1;
+        ctx.beginPath();
+        for(var ri=0;ri<140;ri++){
+          var rx2=(((ri*127)^(ri<<3))+T*9)%(W+60)-30, ry2=((ri*211+T*23)%(H+40))-20;
+          ctx.moveTo(rx2,ry2);ctx.lineTo(rx2-2.5,ry2+10);
+        }
+        ctx.stroke();
+      }
+      // day/night grade (+ grey weather grade)
+      if(wx==="rain"){ctx.fillStyle="rgba(56,68,90,.20)";ctx.fillRect(0,0,W,H);}
+      else if(wx==="overcast"){ctx.fillStyle="rgba(84,96,114,.15)";ctx.fillRect(0,0,W,H);}
       if(tint[3]>0.004){ctx.fillStyle="rgba("+Math.round(tint[0])+","+Math.round(tint[1])+","+Math.round(tint[2])+","+tint[3].toFixed(3)+")";ctx.fillRect(0,0,W,H);}
       if(nn>0.02){
         ctx.save();ctx.globalCompositeOperation="lighter";
