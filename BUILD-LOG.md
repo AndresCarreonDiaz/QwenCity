@@ -6,6 +6,25 @@ run before moving on.
 
 ---
 
+## Iteration 26 — 2026-07-14 · cast & story: get attached to the characters (watchability loop, 3/n) ✅
+
+**Done** — the biggest all-day-watchability gap was that viewers couldn't tell WHO the cast were or
+what the show was ABOUT; the rich engine bios + the seeded rent-hike conflict were never surfaced.
+- **"📺 THE STORY" premise card** (top of the town sidebar): states the season's stakes ("Rent Day —
+  a rumor the landlord will raise everyone's rent; Maya's café vs Ana's bakery; talk to the cast to
+  change what happens"). New `snapshot.premise` (exported `PREMISE`, tied to the real seed event so
+  it stays honest).
+- **Character identity in the follow panel**: new `AgentView.bio` (from `agent.profile.bio`, never
+  before exposed) renders as a role clause + personality traits — "Maya runs the corner café / warm,
+  conflict-avoidant, values friendships" — so a drop-in viewer instantly knows who they're watching.
+- **Relationships from their POV**: the follow panel now lists who that character has bonded with
+  (hearts by exchange count), turning the abstract bond graph into "who Maya knows".
+
+**Verified:** typecheck · 94/94 · syntax gate · CDP screenshots (premise card in town view, Maya's
+bio in the follow panel) · live snapshot confirms `premise` + all four `bio`s present.
+
+---
+
 ## Iteration 25 — 2026-07-13 · weather + the audience on the broadcast (watchability loop, 2/n) ✅
 
 **Done**
