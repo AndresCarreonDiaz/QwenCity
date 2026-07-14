@@ -9,8 +9,8 @@ const SNAP: WorldSnapshot = {
   weather: "clear",
   audience: [],
   agents: [
-    { id: "a", name: "Ana", bio: "Ana runs the bakery.", action: "opening the shop", planActivity: "work", location: "cafe", top: [] },
-    { id: "b", name: "Bo", bio: "Bo reads a lot.", action: "reading", planActivity: null, location: "plaza", top: [] },
+    { id: "a", name: "Ana", bio: "Ana runs the bakery.", mood: "neutral", action: "opening the shop", planActivity: "work", location: "cafe", top: [] },
+    { id: "b", name: "Bo", bio: "Bo reads a lot.", mood: "sad", action: "reading", planActivity: null, location: "plaza", top: [] },
   ],
   ticker: [
     { t: 2, agentId: "a", agentName: "Ana", kind: "reflection", importance: 8, text: "I value my friends" },

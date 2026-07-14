@@ -112,6 +112,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var KIND_COLOR = {observation:"#57b6ce",dialogue:"#5fc28e",reflection:"#9e8cff",plan:"#ecb44a",injection:"#f0a020"};
   var EMOJI = [[/bakery|pastry|bread|flour|dough|oven/,"🥐"],[/caf|coffee|barista|brew|espresso|tables|counter|shop/,"☕"],[/park|walk|stroll|garden|air|outside/,"🌳"],[/home|shower|dress|sleep|bed|waking|nap|rest|breakfast|winding/,"🏠"],[/talking|chat|conversation|apolog|clear the air/,"💬"],[/read|journal|note/,"📓"],[/greet|neighbou?r/,"👋"]];
   function emojiFor(a){a=(a||"").toLowerCase();for(var i=0;i<EMOJI.length;i++)if(EMOJI[i][0].test(a))return EMOJI[i][1];return "🙂";}
+  // emotional read (from snapshot.mood) → emoji, aura color, panel label
+  var MOOD={happy:{e:"😊",c:"#7bd88f",l:"content"},warm:{e:"🫶",c:"#f2a9c0",l:"warm"},excited:{e:"✨",c:"#ffd45e",l:"excited"},worried:{e:"😟",c:"#e0b062",l:"worried"},tense:{e:"😠",c:"#e07a5f",l:"on edge"},sad:{e:"😔",c:"#8fb0e0",l:"down"},neutral:{e:"",c:null,l:""}};
+  function moodOf(a){return MOOD[a&&a.mood]||MOOD.neutral;}
   function hue(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return h%360;}
   function color(id){return "hsl("+hue(id)+",62%,58%)";}
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
@@ -885,6 +888,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       ctx.fillStyle="rgba(10,14,20,.72)";rr(nx-nw/2,p.y-13,nw,17,8);ctx.fill();
       ctx.fillStyle=p.sel?"#ecb44a":"#fff";ctx.fillText(p.name,nx,p.y);
       ctx.font="13px serif";ctx.fillText(p.em,clamp(p.emX+dx,10,W-10),p.emY);
+      // mood emoji floats just above the nameplate — read the room at a glance
+      if(p.mood){ctx.font="13px serif";ctx.fillText(p.mood,nx,p.y-17);}
     });
   }
   function plateLabel(text,x,y,dark){
@@ -951,6 +956,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   function drawChar(a,sp){
     var sel=selected===a.id;
     var img=getSheet(a.id), footY=sp.y+2, topY=footY-CH;
+    var md=moodOf(a);
+    // a soft mood-colored aura at the feet — subliminal emotional read
+    if(md.c){ctx.save();ctx.globalAlpha=0.5;ctx.fillStyle=md.c;ctx.beginPath();ctx.ellipse(sp.x,footY-3,17,7,0,0,7);ctx.fill();ctx.restore();}
     ctx.fillStyle="rgba(0,0,0,.25)";ctx.beginPath();ctx.ellipse(sp.x,footY-3,13,5,0,0,7);ctx.fill();
     if(sel){ctx.strokeStyle="#ecb44a";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sp.x,footY-3,17,7,0,0,7);ctx.stroke();}
     if(ok(img)){
@@ -961,7 +969,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     } else {
       ctx.fillStyle=color(a.id);ctx.beginPath();ctx.arc(sp.x,footY-22,13,0,7);ctx.fill();
     }
-    namePlates.push({x:sp.x,y:topY-4,name:a.name,sel:sel,em:emojiFor(a.action),emX:sp.x+CW/2+6,emY:topY+16});
+    namePlates.push({x:sp.x,y:topY-4,name:a.name,sel:sel,em:emojiFor(a.action),emX:sp.x+CW/2+6,emY:topY+16,mood:md.e});
   }
 
   // --- vignettes: idle characters use the environment around them ---
@@ -1240,7 +1248,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         var pa=(snap.agents||[]).filter(function(x){return x.id===pk;})[0];
         sceneHtml='<div class="scene">🎬 LIVE SCENE · '+esc(nameOf[pk])+' &amp; '+esc(nameOf[pairs[pk]])+(pa?' at '+esc(placeOf[pa.location]||pa.location):"")+'</div>';
       }
-      var roster=(snap.agents||[]).map(function(a){return '<div class="rrow" data-id="'+a.id+'"><span class="rdot" style="background:'+color(a.id)+'"></span><div style="min-width:0"><div class="rn">'+esc(a.name)+'</div><div class="ra">'+emojiFor(a.action)+" "+esc(a.action)+'</div></div></div>';}).join("");
+      var roster=(snap.agents||[]).map(function(a){var md=moodOf(a);return '<div class="rrow" data-id="'+a.id+'"><span class="rdot" style="background:'+color(a.id)+'"></span><div style="min-width:0"><div class="rn">'+esc(a.name)+(md.e?' <span title="'+md.l+'">'+md.e+'</span>':"")+'</div><div class="ra">'+emojiFor(a.action)+" "+esc(a.action)+'</div></div></div>';}).join("");
       var hls=(snap.highlights||[]).slice(0,5).map(function(b){return '<div class="hl">'+esc(b.text)+'</div>';}).join("")||'<div class="hl">the day is just beginning…</div>';
       var bonds=(snap.relationships||[]).slice().sort(function(a,b){return b.weight-a.weight;}).slice(0,6).map(function(e){
         var hearts="";for(var i2=0;i2<Math.min(5,e.weight);i2++)hearts+="♥";
@@ -1262,7 +1270,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var postHtml=posts.map(function(p){return '<div class="post">'+esc(p.text)+' <span style="color:var(--dim);font-size:11px">· '+p.replies+' repl'+(p.replies===1?"y":"ies")+'</span></div>';}).join("")||'<div style="color:var(--dim);font-size:12px">no posts yet</div>';
     // who is this: split the bio into a role clause + personality traits
     var bio=a.bio||"", si=bio.indexOf(";"), role=si<0?bio:bio.slice(0,si), traits=si<0?"":bio.slice(si+1).trim();
-    var bioHtml=bio?'<div class="bio"><div class="role">'+esc(role.replace(/\\.$/,""))+'</div>'+(traits?'<div class="traits">'+esc(traits.replace(/\\.$/,""))+'</div>':"")+'</div>':"";
+    var md=moodOf(a), moodChip=md.e?'<div class="traits" style="margin-top:5px">Mood right now: '+md.e+' <b style="color:'+(md.c||"#95a0b3")+'">'+md.l+'</b></div>':"";
+    var bioHtml=bio?'<div class="bio"><div class="role">'+esc(role.replace(/\\.$/,""))+'</div>'+(traits?'<div class="traits">'+esc(traits.replace(/\\.$/,""))+'</div>':"")+moodChip+'</div>':"";
     // their relationships, from their point of view (who they've bonded with)
     var rels=(snap.relationships||[]).filter(function(e){return e.a===selected||e.b===selected;})
       .sort(function(x,y){return y.weight-x.weight;}).map(function(e){

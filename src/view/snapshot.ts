@@ -4,6 +4,7 @@ import type { MemoryStore } from "../memory/store.ts";
 import type { Feed } from "../social/feed.ts";
 import { weatherFor, type Weather } from "../world/weather.ts";
 import { selectHighlights, type HighlightBeat } from "./highlights.ts";
+import { moodFor, type MoodKey } from "./mood.ts";
 import { locationForAction, PLACES, type Place } from "./places.ts";
 
 /**
@@ -28,6 +29,8 @@ export interface AgentView {
   name: string;
   /** one-line identity/bio (who this character is) — surfaced so viewers attach */
   bio: string;
+  /** current emotional read, derived from recent memories (for the map + panel) */
+  mood: MoodKey;
   action: string;
   planActivity: string | null;
   /** id of the place the character is currently at (for the map) */
@@ -133,10 +136,13 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
   // Per-agent view.
   const agentViews: AgentView[] = agents.map((a) => {
     const action = currentActions[a.profile.id] ?? "…";
+    const recent = store.forAgent(a.profile.id);
+    const mood = moodFor(recent.slice(-14).map((n) => n.description));
     return {
       id: a.profile.id,
       name: a.profile.name,
       bio: a.profile.bio,
+      mood,
       action,
       planActivity: a.currentPlanStep(now)?.activity ?? null,
       location: locationForAction(a.profile.id, action),
