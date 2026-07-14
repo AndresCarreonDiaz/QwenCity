@@ -39,10 +39,23 @@ export interface AgentView {
   top: Array<{ kind: MemoryKind; importance: number; text: string }>;
 }
 
+/** the emotional trajectory of a bond, read from the pair's recent dialogue */
+export type EdgeTone = "warming" | "tension" | "strained" | "steady";
+
 export interface Edge {
   a: string;
   b: string;
   weight: number;
+  tone: EdgeTone;
+}
+
+/** map the sentiment of a pair's recent lines to a relationship trajectory */
+function toneFrom(texts: string[]): EdgeTone {
+  const m = moodFor(texts);
+  if (m === "happy" || m === "warm" || m === "excited") return "warming";
+  if (m === "tense") return "tension";
+  if (m === "sad" || m === "worried") return "strained";
+  return "steady";
 }
 
 export interface PostView {
@@ -158,22 +171,30 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     };
   });
 
-  // Relationship graph: edges inferred from stored dialogue ("X said to Y: …").
+  // Relationship graph + tone: edges inferred from stored dialogue ("X said to
+  // Y: …"), each carrying an emotional trajectory read from the sentiment of the
+  // pair's most recent exchanges (so a bond can be "warming" or in "tension").
+  const dialogueRe = /^(.+?) said to (.+?): "([\s\S]*)"$/;
   const edgeWeights = new Map<string, number>();
+  const edgeTexts = new Map<string, Array<{ t: number; text: string }>>();
   for (const n of store.all()) {
     if (n.kind !== "dialogue") continue;
-    const m = n.description.match(/^(.+?) said to (.+?):/);
+    const m = n.description.match(dialogueRe);
     if (!m) continue;
     const ida = idByName.get(m[1]!.trim());
     const idb = idByName.get(m[2]!.trim());
     if (!ida || !idb || ida === idb) continue;
     const key = [ida, idb].sort().join("|");
     edgeWeights.set(key, (edgeWeights.get(key) ?? 0) + 1);
+    const arr = edgeTexts.get(key) ?? [];
+    arr.push({ t: n.created, text: m[3]! });
+    edgeTexts.set(key, arr);
   }
   // each exchange is stored in both agents' streams → halve to get exchange count
   const relationships: Edge[] = [...edgeWeights.entries()].map(([key, w]) => {
     const [a, b] = key.split("|") as [string, string];
-    return { a, b, weight: Math.ceil(w / 2) };
+    const recentTexts = (edgeTexts.get(key) ?? []).sort((x, y) => x.t - y.t).slice(-6).map((e) => e.text);
+    return { a, b, weight: Math.ceil(w / 2), tone: toneFrom(recentTexts) };
   });
 
   // Recent dialogue for speech bubbles. Each utterance is stored twice (once in
@@ -182,7 +203,6 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
   // anything that doesn't match the canonical `X said to Y: "…"` shape (e.g.
   // audience injections). The trailing `"$` anchor keeps the regex tolerant of
   // double quotes inside the spoken text itself.
-  const dialogueRe = /^(.+?) said to (.+?): "([\s\S]*)"$/;
   const seenLines = new Set<string>();
   const dialogue: DialogueLine[] = [];
   for (const n of store.all()) {

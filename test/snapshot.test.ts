@@ -128,3 +128,17 @@ test("snapshot is JSON-serializable and round-trips", async () => {
   const json = JSON.stringify(snap);
   assert.equal(JSON.stringify(JSON.parse(json)), json);
 });
+
+test("a bond's tone reflects the sentiment of its recent dialogue", async () => {
+  const warm = await setup();
+  await sayBothSides(warm.store, warm.a, warm.b, "I'm so grateful for you, my dear friend.", T0 + 1e5);
+  await sayBothSides(warm.store, warm.b, warm.a, "You always make me smile and feel warm.", T0 + 2e5);
+  const ws = buildSnapshot({ now: T0 + 1e6, agents: [warm.a, warm.b], store: warm.store, currentActions: {} });
+  assert.equal(ws.relationships[0]!.tone, "warming");
+
+  const tense = await setup();
+  await sayBothSides(tense.store, tense.a, tense.b, "I'm angry — you're always so competitive and cold.", T0 + 1e5);
+  await sayBothSides(tense.store, tense.b, tense.a, "That's a bitter, jealous thing to say.", T0 + 2e5);
+  const ts = buildSnapshot({ now: T0 + 1e6, agents: [tense.a, tense.b], store: tense.store, currentActions: {} });
+  assert.equal(ts.relationships[0]!.tone, "tension");
+});

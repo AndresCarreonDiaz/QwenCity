@@ -115,6 +115,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // emotional read (from snapshot.mood) → emoji, aura color, panel label
   var MOOD={happy:{e:"😊",c:"#7bd88f",l:"content"},warm:{e:"🫶",c:"#f2a9c0",l:"warm"},excited:{e:"✨",c:"#ffd45e",l:"excited"},worried:{e:"😟",c:"#e0b062",l:"worried"},tense:{e:"😠",c:"#e07a5f",l:"on edge"},sad:{e:"😔",c:"#8fb0e0",l:"down"},neutral:{e:"",c:null,l:""}};
   function moodOf(a){return MOOD[a&&a.mood]||MOOD.neutral;}
+  // relationship trajectory (from snapshot edge.tone) → icon + label
+  var TONE={warming:{e:"💚",l:"warming"},tension:{e:"⚡",l:"tension"},strained:{e:"💔",l:"strained"},steady:{e:"",l:"steady"}};
+  function toneOf(e){return TONE[e&&e.tone]||TONE.steady;}
   function hue(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return h%360;}
   function color(id){return "hsl("+hue(id)+",62%,58%)";}
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
@@ -1316,8 +1319,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       var roster=(snap.agents||[]).map(function(a){var md=moodOf(a);return '<div class="rrow" data-id="'+a.id+'"><span class="rdot" style="background:'+color(a.id)+'"></span><div style="min-width:0"><div class="rn">'+esc(a.name)+(md.e?' <span title="'+md.l+'">'+md.e+'</span>':"")+'</div><div class="ra">'+emojiFor(a.action)+" "+esc(a.action)+'</div></div></div>';}).join("");
       var hls=(snap.highlights||[]).slice(0,5).map(function(b){return '<div class="hl">'+esc(b.text)+'</div>';}).join("")||'<div class="hl">the day is just beginning…</div>';
       var bonds=(snap.relationships||[]).slice().sort(function(a,b){return b.weight-a.weight;}).slice(0,6).map(function(e){
-        var hearts="";for(var i2=0;i2<Math.min(5,e.weight);i2++)hearts+="♥";
-        return '<div class="bond"><span>'+esc(nameOf[e.a]||e.a)+' ↔ '+esc(nameOf[e.b]||e.b)+'</span><span class="hearts">'+hearts+'</span></div>';
+        var hearts="";for(var i2=0;i2<Math.min(5,e.weight);i2++)hearts+="♥";var tn=toneOf(e);
+        return '<div class="bond"><span>'+esc(nameOf[e.a]||e.a)+' ↔ '+esc(nameOf[e.b]||e.b)+(tn.e?' <span title="'+tn.l+'">'+tn.e+'</span>':"")+'</span><span class="hearts">'+hearts+'</span></div>';
       }).join("");
       var storyHtml=snap.premise?'<div class="story"><div class="st">📺 The Story</div><div class="sp">'+esc(snap.premise)+'</div></div>':"";
       el.innerHTML='<div class="ptitle">The Town · Today</div>'+sceneHtml+storyHtml+'<div class="roster">'+roster+'</div>'+
@@ -1340,8 +1343,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     // their relationships, from their point of view (who they've bonded with)
     var rels=(snap.relationships||[]).filter(function(e){return e.a===selected||e.b===selected;})
       .sort(function(x,y){return y.weight-x.weight;}).map(function(e){
-        var other=e.a===selected?e.b:e.a, hearts="";for(var i3=0;i3<Math.min(5,e.weight);i3++)hearts+="♥";
-        return '<div class="bond"><span>'+esc(nameOf[other]||other)+'</span><span class="hearts">'+hearts+'</span></div>';
+        var other=e.a===selected?e.b:e.a, hearts="";for(var i3=0;i3<Math.min(5,e.weight);i3++)hearts+="♥";var tn=toneOf(e);
+        return '<div class="bond"><span>'+esc(nameOf[other]||other)+(tn.e?' <span title="'+tn.l+'">'+tn.e+'</span>':"")+'</span><span class="hearts">'+hearts+'</span></div>';
       }).join("");
     el.innerHTML=
       '<div class="back" id="back">← back to town</div>'+
