@@ -6,6 +6,35 @@ run before moving on.
 
 ---
 
+## Iteration 22 — 2026-07-13 · the show gets a director (pacing + environment-awareness) ✅
+
+**Done**
+- **The director** (`src/view/app.ts`): dialogue beats are no longer dumped in one ~30s burst per tick —
+  they're SCHEDULED across the measured gap between sim ticks (a line every ~9–40s, self-healing if the
+  schedule runs away; first page load skips straight to the latest scene). Stage-direction bubbles
+  (dark italic) narrate idle characters' current actions between scenes; prop vignettes send idle
+  characters to nearby benches/stalls/phone booth/mailbox with a line-of-sight check; departures are
+  staggered (1–13s) and walk speed dropped to a watchable stroll — no more everyone-marches-at-once.
+- **Environment-aware engine** (`src/world/world.ts`): decision prompts now say WHERE the agent is
+  ("Maya is at Maya's Café…, prefer concrete actions that use the surroundings") and conversations are
+  grounded "by the fountain at Town Plaza" (where the view stages them). Live effect was immediate:
+  "walking toward the café, hands in pockets, eyes fixed on the pavement ahead", "arranging pastries in
+  the display case with strategic pricing tags". Conversations are 4 turns in the live world
+  (`conversationTurns` option; sims/ablation keep 2 so the published numbers are untouched).
+- **Verification lesson**: Chrome's `--virtual-time-budget` does NOT drive rAF — time-based behavior is
+  invisible to one-shot screenshots (a `?dbg=1` title probe proved `t≈0` at any budget). Built a CDP
+  driver (`scratchpad/cdp-shots.mjs`, Node 22 WebSocket, no deps) that keeps one real headless session
+  alive and captures timed screenshots; measured ~60% dialogue-bubble duty cycle + emotes cycling
+  between characters, locally and on the live deploy.
+
+**Verified:** typecheck clean · 91/91 tests · client-JS syntax gate OK · CDP timed captures local + live
+(first live 4-turn scene: Tom & Ana at the fountain on the 20% rent hike, paced line by line).
+
+**Blocked (needs you)**
+- Alibaba Cloud Workbench "running resources" screenshot · 3-min demo video · Devpost writeup.
+
+---
+
 ## Iteration 21 — 2026-07-13 · the town becomes a CITY (Opus subagent crew) ✅
 
 **Done** (built by a three-agent Opus 4.8 crew — asset curator ∥ layout designer → implementer — with
