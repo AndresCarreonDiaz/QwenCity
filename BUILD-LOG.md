@@ -6,6 +6,23 @@ run before moving on.
 
 ---
 
+## Iteration 28 — 2026-07-14 · broadcast lower-third: name the drama (watchability loop, 5/n) ✅
+
+**Done** — things always happen now, but a casual/all-day viewer couldn't tell a big moment from
+filler. A broadcast **lower-third** now names the live scene ON the video itself, so you know when to
+lean in (and it makes the demo reel read like real TV).
+- During any live scene (a conversing pair), a fading bottom-right strip shows a dramatic title +
+  the two names + location, derived from data already in the snapshot:
+  **💥 THE RIVALRY** (bios show café-owner vs bakery-owner + "competitive"), **🤝 OLD FRIENDS** (a
+  bio says "old friend"), else from moods — **🔥 TENSIONS RISING** (both down) / **☕ GOOD VIBES**
+  (both up), else **🎬 LIVE SCENE**. Colored accent bar per type; smooth fade in/out.
+- Positioned bottom-right to balance the "THE FEED" chyron brand and clear the follow-hint.
+
+**Verified:** typecheck · 100/100 · syntax gate · CDP screenshots caught all three variants live
+("TENSIONS RISING · Leo & Maya", "OLD FRIENDS · Maya & Tom") · deployed + live OK.
+
+---
+
 ## Iteration 27 — 2026-07-14 · emotional read: watch how they feel (watchability loop, 4/n) ✅
 
 **Done** — the reality-TV hook is seeing genuine emotional life; each character's feelings were
