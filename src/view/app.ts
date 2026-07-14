@@ -75,6 +75,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   .bio{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12.5px;line-height:1.5}
   .bio .role{color:var(--ink);font-weight:600}
   .bio .traits{color:var(--dim);margin-top:3px}
+  .want{background:var(--panel2);border:1px solid var(--line);border-left:3px solid #b98bd9;border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12.5px;line-height:1.5}
+  .want .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#c9a6e6;font-weight:800;margin-bottom:3px}
+  .want .q{color:#e6d6f2}
   .inf{background:linear-gradient(90deg,#3a2c10,#241a12);border:1px solid var(--amber);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12.5px;line-height:1.5}
   .inf .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);font-weight:800;margin-bottom:3px}
   .inf .q{color:#ffe6b0}
@@ -1420,6 +1423,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       '<div class="back" id="back">← back to town</div>'+
       '<div class="who" style="margin-top:10px"><span class="avatar" style="background:'+color(a.id)+'"></span><div><div class="wn">'+esc(a.name)+'</div><div class="wl">'+emojiFor(a.action)+" at "+esc(place?place.label:a.location)+'</div></div></div>'+
       bioHtml+
+      (a.desire?'<div class="want"><div class="k">✧ What '+esc(a.name)+' wants</div><span class="q">'+esc(a.desire)+'</span></div>':"")+
       (a.influencedBy?'<div class="inf"><div class="k">🎙️ Acting on your message</div>'+esc(a.name)+'\\'s next move was shaped by <b>@'+esc(a.influencedBy.handle)+'</b>: <span class="q">“'+esc(a.influencedBy.text)+'”</span></div>':"")+
       '<div class="doing"><div class="k">Right now</div>'+esc(a.action)+(a.planActivity?'<div style="color:var(--dim);margin-top:5px;font-size:12px">📋 plan: '+esc(a.planActivity)+'</div>':"")+'</div>'+
       '<div class="sec"><div class="h">💬 Say something to '+esc(a.name)+'</div><div class="replybox"><input id="rin" maxlength="240" placeholder="a message they\\'ll remember…"/><button id="rbtn">Send</button></div><div class="replymsg" id="rmsg">Your reply becomes a memory that can change what they do next.</div></div>'+

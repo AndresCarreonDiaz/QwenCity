@@ -21,11 +21,19 @@ export interface LiveWorldOptions {
   model?: ModelAdapter;
 }
 
-const DEFAULT_CAST: Array<[string, string, string]> = [
-  ["maya", "Maya", "Maya runs the corner café; warm, conflict-avoidant, values friendships."],
-  ["tom", "Tom", "Tom is a café regular and Maya's old friend; blunt, easily hurt."],
-  ["ana", "Ana", "Ana runs the bakery next door; ambitious, competitive with the café."],
-  ["leo", "Leo", "Leo delivers for both shops; cheerful, a bit of a gossip."],
+// Each character carries a standing desire (4th field) — the throughline that
+// drives them across days. The sim never scripts how these resolve; the wants
+// only tilt what each character reaches for, so arcs *emerge* (will Tom and Maya
+// find their way back? does Ana's rivalry cost her more than it wins?).
+const DEFAULT_CAST: Array<[string, string, string, string]> = [
+  ["maya", "Maya", "Maya runs the corner café; warm, conflict-avoidant, values friendships.",
+    "Maya quietly wishes she and Tom could be close again the way they once were, but she's afraid that reaching out would only push him further away."],
+  ["tom", "Tom", "Tom is a café regular and Maya's old friend; blunt, easily hurt.",
+    "Tom still cares about Maya and wants to bridge the old distance between them, but his pride keeps getting in the way of saying so."],
+  ["ana", "Ana", "Ana runs the bakery next door; ambitious, competitive with the café.",
+    "Ana is determined to prove her bakery can outshine Maya's café — though a part of her wonders whether winning is worth standing alone."],
+  ["leo", "Leo", "Leo delivers for both shops; cheerful, a bit of a gossip.",
+    "Leo wants the neighbours to finally see him as someone who matters, not just the kid who carries the boxes."],
 ];
 
 /**
@@ -79,8 +87,8 @@ export class LiveWorld {
         ],
       },
     });
-    for (const [id, name, bio] of DEFAULT_CAST) {
-      const a = new Agent({ id, name, bio }, this.store, model, { reflectionThreshold: 200 });
+    for (const [id, name, bio, desire] of DEFAULT_CAST) {
+      const a = new Agent({ id, name, bio, desire }, this.store, model, { reflectionThreshold: 200 });
       this.world.add(a);
       this.agents.push(a);
       this.nameById.set(id, name);

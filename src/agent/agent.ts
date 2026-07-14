@@ -27,6 +27,14 @@ export interface AgentProfile {
   name: string;
   /** one-line identity/bio, prepended to reasoning prompts (paper: summary description) */
   bio: string;
+  /**
+   * A standing want that drives this character across days — the arc engine.
+   * Woven into every cognitive module (plan / act / speak / reflect) as part of
+   * the agent's identity, so behaviour is *motivated* over time (a soap-opera
+   * throughline the audience can root for) rather than reactive turn-to-turn.
+   * The sim never scripts the outcome; the desire only tilts choices.
+   */
+  desire?: string;
 }
 
 export interface AgentOptions {
@@ -107,7 +115,7 @@ export class Agent {
     const created: MemoryNode[] = [];
 
     const qText = await this.model.complete(
-      buildFocalPrompt(this.profile.bio, this.profile.name, recent),
+      buildFocalPrompt(this.identity(), this.profile.name, recent),
       { task: "reflect-questions", temperature: 0 },
     );
     let questions = parseFocalQuestions(qText, 3);
@@ -121,7 +129,7 @@ export class Agent {
       if (scored.length === 0) continue;
       const mems = scored.map((s) => s.node);
       const iText = await this.model.complete(
-        buildInsightPrompt(this.profile.bio, this.profile.name, q, mems),
+        buildInsightPrompt(this.identity(), this.profile.name, q, mems),
         { task: "reflect-insights", temperature: 0 },
       );
       for (const parsed of parseInsights(iText, mems.length)) {
@@ -197,7 +205,7 @@ export class Agent {
   async planDay(now: number): Promise<Plan> {
     const day = new Date(now).toISOString().slice(0, 10);
     const raw = await this.model.complete(
-      buildDailyPlanPrompt(this.profile.bio, this.profile.name, day),
+      buildDailyPlanPrompt(this.identity(), this.profile.name, day),
       { task: "plan", temperature: 0 },
     );
     this.plan = parsePlan(raw);
@@ -240,7 +248,7 @@ export class Agent {
       .sort((a, b) => b.importance - a.importance)[0];
     if (!salient) return null;
     const raw = await this.model.complete(
-      buildPostPrompt(this.profile.bio, this.profile.name, salient.description),
+      buildPostPrompt(this.identity(), this.profile.name, salient.description),
       { task: "post", temperature: 0 },
     );
     return { text: parsePost(raw), sourceMemoryId: salient.id };
@@ -289,7 +297,7 @@ export class Agent {
       ? `Context about ${listener.name}: ${rel.map((s) => s.node.description).join("; ")}`
       : "";
     const prompt = buildUtterancePrompt({
-      speakerBio: this.profile.bio,
+      speakerBio: this.identity(),
       speakerName: this.profile.name,
       listenerName: listener.name,
       relationship,
@@ -301,12 +309,23 @@ export class Agent {
     return parseUtterance(raw);
   }
 
+  /**
+   * The character's identity as fed to every cognitive module: the bio plus, if
+   * present, the standing desire that drives their arc. Returns exactly the bio
+   * when no desire is set, so prompts (and deterministic mock outputs) are
+   * unchanged for the plain profiles used across the tests.
+   */
+  private identity(): string {
+    const d = this.profile.desire?.trim();
+    return d ? `${this.profile.bio}\nDeep down, ${d}` : this.profile.bio;
+  }
+
   private buildActionPrompt(situation: string, now: number, retrieved: ScoredMemory[]): string {
     const memBlock = retrieved.length
       ? retrieved.map((s) => `- ${s.node.description}`).join("\n")
       : "- (no memories yet)";
     return [
-      this.profile.bio,
+      this.identity(),
       `It is sim-time ${new Date(now).toISOString()}.`,
       `Situation: ${situation}`,
       ``,

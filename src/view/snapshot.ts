@@ -30,6 +30,8 @@ export interface AgentView {
   name: string;
   /** one-line identity/bio (who this character is) — surfaced so viewers attach */
   bio: string;
+  /** the standing want that drives this character's arc — surfaced so viewers root for it */
+  desire?: string;
   /** current emotional read, derived from recent memories (for the map + panel) */
   mood: MoodKey;
   /** if this agent's current action was shaped by an audience reply (the causal loop, visible) */
@@ -163,6 +165,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
       id: a.profile.id,
       name: a.profile.name,
       bio: a.profile.bio,
+      desire: a.profile.desire,
       mood,
       influencedBy: inf ? { handle: inf.handle, text: inf.text } : null,
       action,
