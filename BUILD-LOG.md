@@ -6,6 +6,35 @@ run before moving on.
 
 ---
 
+## Iteration 21 — 2026-07-13 · the town becomes a CITY (Opus subagent crew) ✅
+
+**Done** (built by a three-agent Opus 4.8 crew — asset curator ∥ layout designer → implementer — with
+final QA + deploy by the orchestrator)
+- **City asset pack** (`web/assets/city/`, gitignored, scp'd): 22 curated LimeZu sprites + manifest —
+  3 storefronts, "LIME CORP" office tower, red-brick clock tower (civic), grand teal HOTEL landmark,
+  terraced + Japanese background houses, 2 parked cars, traffic light, hydrant, bus shelter, mailbox,
+  trash bin, planter, city bench, signpost, phone booth, modern street lamp, planted city tree.
+- **Downtown layout** (collision-proven at desktop AND 430px phone by a re-runnable checker):
+  Main Street (y=48) strip with café vs bakery facing off across the central boulevard crosswalk,
+  plaza dead-center (y=60), promenade (y=70), residential avenues x=13/x=87, park closing the
+  boulevard. Decorative lots/props/streets flagged `mobile:false` hide <560px so phones keep the clean
+  8-place layout.
+- **Implementation** (`src/view/app.ts`, `src/view/places.ts`): procedural asphalt streets with curb
+  lines, gold dashed centerlines + zebra crosswalks over a sidewalk-concrete downtown district;
+  ladder-graph routing (2 horizontal corridors + 3 routed verticals, fountain-skirt preserved);
+  responsive building unit so the 6-wide downtown fits every stage width; painted shop signs
+  (FLOWERS / BOOKS / DINER); night skyline — window glow on all decorative buildings + street-lamp/
+  traffic-light pools; nameplate/label x-clamping so corner-home labels stay on-canvas.
+
+**Verified:** typecheck clean · 91/91 tests · generated-client-JS syntax gate OK · 0 sprite overlaps
+(checker) · screenshots read at 1280×800 day/dusk/night, 900×700, 430×900 + motion shot · live-deploy
+screenshot after rollout.
+
+**Blocked (needs you)**
+- Alibaba Cloud Workbench "running resources" screenshot · 3-min demo video · Devpost writeup.
+
+---
+
 ## Iteration 20 — 2026-07-13 · the town becomes a soap opera ✅
 
 **Done**
