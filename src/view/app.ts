@@ -750,6 +750,51 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     ctx.font="800 10px ui-monospace,Menlo,monospace";ctx.textAlign="left";ctx.fillStyle="#ffd9dc";ctx.fillText("THE FEED",22,y+16);ctx.textAlign="center";
   }
 
+  // ============ broadcast lower-third: name the drama of a live scene =========
+  // Tells an all-day viewer, on the video itself, when a juicy scene is on and
+  // what kind — derived from the pair's bios (rivalry / old friends) and moods.
+  var lower={a:0,key:"",e:"",label:"",c:"#9e8cff",sub:""};
+  function agById(id){var r=null;((snap&&snap.agents)||[]).forEach(function(x){if(x.id===id)r=x;});return r;}
+  function sceneTitle(id,pid){
+    var A=agById(id),B=agById(pid); if(!A||!B)return null;
+    var ba=(A.bio||"").toLowerCase(), bb=(B.bio||"").toLowerCase();
+    var caf=function(s){return /caf|coffee/.test(s);}, bak=function(s){return /baker/.test(s);}, riv=/rival|competit/;
+    if(((caf(ba)&&bak(bb))||(caf(bb)&&bak(ba)))&&(riv.test(ba)||riv.test(bb)))return {e:"💥",label:"THE RIVALRY",c:"#e0574f"};
+    if(/old friend/.test(ba)||/old friend/.test(bb))return {e:"🤝",label:"OLD FRIENDS",c:"#ecb44a"};
+    var down={worried:1,tense:1,sad:1}, up={happy:1,warm:1,excited:1};
+    if(down[A.mood]&&down[B.mood])return {e:"🔥",label:"TENSIONS RISING",c:"#e07a5f"};
+    if(up[A.mood]&&up[B.mood])return {e:"☕",label:"GOOD VIBES",c:"#7bd88f"};
+    return {e:"🎬",label:"LIVE SCENE",c:"#9e8cff"};
+  }
+  function stepLower(dt){
+    var apk=null; Object.keys(pairs).forEach(function(id){if(id<pairs[id])apk=id;});
+    if(apk){
+      var key=apk+"|"+pairs[apk];
+      if(lower.key!==key){var st=sceneTitle(apk,pairs[apk]); if(st){
+        lower.key=key;lower.e=st.e;lower.label=st.label;lower.c=st.c;
+        var A=agById(apk),B=agById(pairs[apk]),plc=null;
+        (snap.places||[]).forEach(function(p){if(A&&p.id===A.location)plc=p.label;});
+        lower.sub=(A?A.name:"")+" & "+(B?B.name:"")+(plc?"   ·   "+plc:"");
+      }}
+    }
+    lower.a+=((apk?1:0)-lower.a)*Math.min(1,dt*0.006);
+  }
+  function drawLowerThird(){
+    if(lower.a<0.03||!lower.label)return;
+    ctx.globalAlpha=Math.min(1,lower.a);
+    ctx.font="800 12px ui-sans-serif";var lw=ctx.measureText(lower.label).width;
+    ctx.font="600 12px ui-sans-serif";var sw=ctx.measureText(lower.sub).width;
+    var bw=5, ew=19, gap=9, pad=11, h=28;
+    var w=bw+8+ew+lw+gap+sw+pad, y=H-24-8-h, x=Math.max(12,W-w-14);
+    ctx.fillStyle="rgba(8,10,16,.86)";rr(x,y,w,h,7);ctx.fill();
+    ctx.fillStyle=lower.c;rr(x,y,bw,h,3);ctx.fill();
+    ctx.textAlign="left";var tx=x+bw+8;
+    ctx.font="15px serif";ctx.fillText(lower.e,tx,y+20);tx+=ew;
+    ctx.font="800 12px ui-sans-serif";ctx.fillStyle=lower.c;ctx.fillText(lower.label,tx,y+18);tx+=lw+gap;
+    ctx.font="600 12px ui-sans-serif";ctx.fillStyle="#dfe6f2";ctx.fillText(lower.sub,tx,y+18);
+    ctx.textAlign="center";ctx.globalAlpha=1;
+  }
+
   // ===================== ambience: the day/night cycle =====================
   function hourNow(){
     if(HHOVR!==null)return HHOVR;
@@ -1213,6 +1258,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         ctx.fillText("CAM 02 · FOLLOWING "+sprites[selected].a.name.toUpperCase(),36,26);
         ctx.textAlign="center";
       }
+      stepLower(dt);drawLowerThird();
       drawChyron(dt);
       drawDayCard(now);
       drawColdOpen(now);
