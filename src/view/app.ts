@@ -164,17 +164,15 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {y:70,x1:8,x2:92,kind:"side",mobile:false}   // the promenade (plaza-south)
   ];
   var VSTREETS=[
-    {x:13,y1:19,y2:85,kind:"side"},               // west residential ave
-    {x:87,y1:19,y2:85,kind:"side"},               // east residential ave
-    {x:50,y1:48,y2:88,kind:"main"}                // center boulevard
-    // NB: no cross-streets at x=30/x=70 — the DINER (shop_c) and clock tower
-    // (civic) sit there on the downtown sidewalk; a road under them read as a
-    // building standing in the middle of the street.
+    {x:50,y1:48,y2:88,kind:"main"}                // center boulevard (main → plaza → park)
+    // NB: no cross-streets at x=30/x=70 (they ran through the DINER + clock
+    // tower) and no residential avenues at x=13/x=87 (they ran straight up
+    // through the four corner homes). Those buildings would read as standing in
+    // the middle of the street. The homes sit on their lawns; walkers still
+    // route along the x=13/x=87 lines (see route()), just over grass paths.
   ];
   var CROSSWALKS=[
     {x:50,y:48,dir:"v"},                          // the rivalry crossing @ MAIN
-    {x:13,y:48,dir:"h"},
-    {x:87,y:48,dir:"h"},
     {x:50,y:70,dir:"v",mobile:false}
   ];
   var DISTRICT={x1:8,y1:42,x2:92,y2:73};          // paved downtown rectangle
