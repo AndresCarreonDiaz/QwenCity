@@ -133,7 +133,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // Band y=64 is idle, y=128 is walk. Direction column offsets within a band:
   var DIRCOL={R:0,U:6,L:12,D:18}, IDLE_Y=64, WALK_Y=128;
   var CW=34, CH=68; // on-screen character size
-  var HHOVR=null,DBG=false,NOCOLD=false,WXOVR=null; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";NOCOLD=usp.get("nocold")==="1";var wq=usp.get("wx");if(wq==="rain"||wq==="overcast"||wq==="clear")WXOVR=wq;}catch(e){}
+  var HHOVR=null,DBG=false,NOCOLD=false,WXOVR=null,BRKDBG=false; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";NOCOLD=usp.get("nocold")==="1";BRKDBG=usp.get("brk")==="1";var wq=usp.get("wx");if(wq==="rain"||wq==="overcast"||wq==="clear")WXOVR=wq;}catch(e){}
   function wxNow(){return WXOVR||((snap&&snap.weather)||"clear");}
 
   // --- image assets: character sheets, legacy props, LimeZu buildings + CITY set ---
@@ -469,6 +469,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     Object.keys(sprites).forEach(function(id){ if(!(s.agents||[]).some(function(a){return a.id===id;})) delete sprites[id]; });
     pushBeats(s);
     setChyron(s);
+    pushBreaking(s);
     renderPanel();
   }
 
@@ -797,6 +798,47 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     ctx.font="800 13px ui-sans-serif";ctx.fillStyle="#ecb44a";ctx.fillText(label.toUpperCase(),x+pad+ic+gap-4,y+18);
     ctx.font=sf;ctx.fillStyle="#d9c8b0";ctx.fillText(sub,x+pad+ic+gap-4,y+32);
     ctx.textAlign="center";
+  }
+  // ============ breaking news: flash the biggest new moment ==================
+  // The Salience Engine ranks every beat on one importance score; when a genuinely
+  // high-salience beat appears we surface it as a prominent flash, so an all-day
+  // or just-tuned-in viewer never misses the moment that matters.
+  var seenHi={}, breakingQ=[], breaking=null, breakingUntil=0, breakingClear=0, everHi=false;
+  var BREAK_MIN=7; // reserve the flash for the top salience tier (live Qwen tops out ~7-9)
+  function pushBreaking(s){
+    var hs=(s.highlights)||[];
+    hs.forEach(function(b){
+      if((b.importance||0)<BREAK_MIN)return;
+      var k=b.text; if(seenHi[k])return; seenHi[k]=1;
+      if(everHi)breakingQ.push({text:b.text});   // don't flash the backlog on first load
+    });
+    if(BRKDBG&&!everHi&&hs[0])breakingQ.push({text:hs[0].text}); // demo flash for verification
+    everHi=true;
+    var ks=Object.keys(seenHi); if(ks.length>200){for(var i=0;i<ks.length-200;i++)delete seenHi[ks[i]];}
+    if(breakingQ.length>4)breakingQ=breakingQ.slice(-4);
+  }
+  function stepBreaking(now){
+    if(breaking&&now>breakingUntil){breaking=null;breakingClear=now+900;}
+    if(!breaking&&now>breakingClear&&breakingQ.length){breaking=breakingQ.shift();breaking.start=now;breakingUntil=now+5400;}
+  }
+  function drawBreaking(now){
+    if(!breaking)return;
+    var el=now-breaking.start, total=breakingUntil-breaking.start;
+    var a=el<300?el/300:el>total-500?(total-el)/500:1; a=Math.max(0,Math.min(1,a));
+    ctx.font="600 13px ui-sans-serif";
+    var mw=Math.min(W*0.6,520), wr=wrap(breaking.text,mw), tw=wr.bw;
+    ctx.font="800 11px ui-monospace,Menlo,monospace";var lw=ctx.measureText("● BREAKING").width;
+    var pad=14, cw=Math.max(tw,lw)+pad*2, lh=17, ch=18+wr.lines.length*lh+8;
+    var x=(W-cw)/2, y=(snap&&snap.event)?58:12;
+    ctx.globalAlpha=a;
+    ctx.fillStyle="rgba(24,8,10,.94)";rr(x,y,cw,ch,10);ctx.fill();
+    ctx.fillStyle="#f0575f";rr(x,y,cw,6,3);ctx.fill();
+    ctx.textAlign="left";
+    ctx.font="800 11px ui-monospace,Menlo,monospace";ctx.fillStyle="#f0575f";
+    ctx.globalAlpha=a*(0.6+0.4*Math.sin(T*0.18));ctx.fillText("● BREAKING",x+pad,y+22);ctx.globalAlpha=a;
+    ctx.font="600 13px ui-sans-serif";ctx.fillStyle="#ffe6e8";
+    for(var i=0;i<wr.lines.length;i++)ctx.fillText(wr.lines[i],x+pad,y+22+18+i*lh-4);
+    ctx.textAlign="center";ctx.globalAlpha=1;
   }
   function drawLowerThird(){
     if(lower.a<0.03||!lower.label)return;
@@ -1188,7 +1230,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       stepBeats(now);
       stepEmotes(now);
       pumpVoices();
-      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2)+" roam="+(roam?roam.sid:"-")+" cold="+(coldOpen&&!coldOpen.done?"on":"off")+" event="+((snap&&snap.event)?snap.event.kind:"-");
+      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2)+" roam="+(roam?roam.sid:"-")+" cold="+(coldOpen&&!coldOpen.done?"on":"off")+" event="+((snap&&snap.event)?snap.event.kind:"-")+" brk="+(breaking?"ON":"-")+"/"+breakingQ.length;
       // painter list: props + decorative + functional buildings + characters, by baseline
       var items=[], placeGeom={}, decGeom={};
       PROPS.forEach(function(p){if(!shown(p))return;var c=px(p);items.push({y:c.y,f:function(){drawProp(props[p.slot],c.x,c.y,pHeight(p.slot),p.flip);}});});
@@ -1279,6 +1321,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       }
       stepLower(dt);drawLowerThird();
       drawEventBanner(now);
+      stepBreaking(now);drawBreaking(now);
       drawChyron(dt);
       drawDayCard(now);
       drawColdOpen(now);
