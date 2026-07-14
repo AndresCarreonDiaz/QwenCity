@@ -504,6 +504,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     Object.keys(sprites).forEach(function(id){ if(!(s.agents||[]).some(function(a){return a.id===id;})) delete sprites[id]; });
     pushBeats(s);
     setChyron(s);
+    pushMoments(s,reset);
     pushBreaking(s);
     renderPanel();
   }
@@ -845,6 +846,36 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // or just-tuned-in viewer never misses the moment that matters.
   var seenHi={}, breakingQ=[], breaking=null, breakingUntil=0, breakingClear=0, everHi=false;
   var BREAK_MIN=7; // reserve the flash for the top salience tier (live Qwen tops out ~7-9)
+
+  // ============ relationship-arc milestones: the payoff for the slow burn =======
+  // When a bond visibly TURNS between snapshots — a new bond forms, warms, sours,
+  // ruptures, or deepens — we surface it as a rare, transient broadcast "moment"
+  // (reusing the flash lane, no new persistent overlay) and log it under "Turning
+  // points" so a drop-in viewer can catch what changed. The sim decides if/when;
+  // detection is a pure diff of consecutive snapshots and self-dedupes on the
+  // transition (prev tone != cur tone), so nothing re-fires while a state holds.
+  var prevRel=null, momentsLog=[];
+  function relKey(a,b){return a<b?a+"|"+b:b+"|"+a;}
+  function pushMoments(s,reset){
+    if(reset)prevRel=null;
+    var nm={}; (s.agents||[]).forEach(function(a){nm[a.id]=a.name;});
+    var cur={};
+    (s.relationships||[]).forEach(function(e){cur[relKey(e.a,e.b)]={w:e.weight||0,tone:e.tone||"steady",a:e.a,b:e.b};});
+    if(prevRel){
+      Object.keys(cur).forEach(function(k){
+        var c=cur[k], p=prevRel[k], names=(nm[c.a]||c.a)+" & "+(nm[c.b]||c.b), m=null;
+        if(!p){ if(c.w>=2) m={t:names+" have struck up a rapport.",label:"✦ A NEW BOND",color:"#7bd88f"}; }
+        else if(p.tone!=="warming"&&c.tone==="warming") m={t:names+" are warming to each other.",label:"♥ A MOMENT",color:"#f2a9c0"};
+        else if(p.tone!=="tension"&&c.tone==="tension") m={t:"Friction is rising between "+names+".",label:"⚡ TENSION",color:"#e07a5f"};
+        else if(p.tone!=="strained"&&c.tone==="strained") m={t:"Things have cooled between "+names+".",label:"💔 A RIFT",color:"#8fb0e0"};
+        else if(p.w<4&&c.w>=4) m={t:names+" have become inseparable.",label:"♥ A MOMENT",color:"#f2a9c0"};
+        if(m){ breakingQ.push({text:m.t,label:m.label,color:m.color}); momentsLog.unshift(m.t); }
+      });
+      if(momentsLog.length>6)momentsLog=momentsLog.slice(0,6);
+      if(breakingQ.length>4)breakingQ=breakingQ.slice(-4);
+    }
+    prevRel=cur;
+  }
   function pushBreaking(s){
     var hs=(s.highlights)||[];
     hs.forEach(function(b){
@@ -863,20 +894,21 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
   function drawBreaking(now){
     if(!breaking)return;
+    var col=breaking.color||"#f0575f", lbl=breaking.label||"● BREAKING";
     var el=now-breaking.start, total=breakingUntil-breaking.start;
     var a=el<300?el/300:el>total-500?(total-el)/500:1; a=Math.max(0,Math.min(1,a));
     ctx.font="600 13px ui-sans-serif";
     var mw=Math.min(W*0.6,520), wr=wrap(breaking.text,mw), tw=wr.bw;
-    ctx.font="800 11px ui-monospace,Menlo,monospace";var lw=ctx.measureText("● BREAKING").width;
+    ctx.font="800 11px ui-monospace,Menlo,monospace";var lw=ctx.measureText(lbl).width;
     var pad=14, cw=Math.max(tw,lw)+pad*2, lh=17, ch=18+wr.lines.length*lh+8;
     var x=(W-cw)/2, y=(snap&&snap.event)?58:12;
     ctx.globalAlpha=a;
-    ctx.fillStyle="rgba(24,8,10,.94)";rr(x,y,cw,ch,10);ctx.fill();
-    ctx.fillStyle="#f0575f";rr(x,y,cw,6,3);ctx.fill();
+    ctx.fillStyle="rgba(12,14,20,.94)";rr(x,y,cw,ch,10);ctx.fill();
+    ctx.fillStyle=col;rr(x,y,cw,6,3);ctx.fill();
     ctx.textAlign="left";
-    ctx.font="800 11px ui-monospace,Menlo,monospace";ctx.fillStyle="#f0575f";
-    ctx.globalAlpha=a*(0.6+0.4*Math.sin(T*0.18));ctx.fillText("● BREAKING",x+pad,y+22);ctx.globalAlpha=a;
-    ctx.font="600 13px ui-sans-serif";ctx.fillStyle="#ffe6e8";
+    ctx.font="800 11px ui-monospace,Menlo,monospace";ctx.fillStyle=col;
+    ctx.globalAlpha=a*(0.6+0.4*Math.sin(T*0.18));ctx.fillText(lbl,x+pad,y+22);ctx.globalAlpha=a;
+    ctx.font="600 13px ui-sans-serif";ctx.fillStyle="#eef1f6";
     for(var i=0;i<wr.lines.length;i++)ctx.fillText(wr.lines[i],x+pad,y+22+18+i*lh-4);
     ctx.textAlign="center";ctx.globalAlpha=1;
   }
@@ -1275,7 +1307,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       stepBeats(now);
       stepEmotes(now);
       if(!TK)pumpVoices();
-      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2)+" roam="+(roam?roam.sid:"-")+" cold="+(coldOpen&&!coldOpen.done?"on":"off")+" event="+((snap&&snap.event)?snap.event.kind:"-")+" brk="+(breaking?"ON":"-")+"/"+breakingQ.length;
+      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2)+" roam="+(roam?roam.sid:"-")+" cold="+(coldOpen&&!coldOpen.done?"on":"off")+" event="+((snap&&snap.event)?snap.event.kind:"-")+" brk="+(breaking?"ON":"-")+"/"+breakingQ.length+" mom="+momentsLog.length;
       // painter list: props + decorative + functional buildings + characters, by baseline
       var items=[], placeGeom={}, decGeom={};
       PROPS.forEach(function(p){if(!shown(p))return;var c=px(p);items.push({y:c.y,f:function(){drawProp(props[p.slot],c.x,c.y,pHeight(p.slot),p.flip);}});});
@@ -1411,7 +1443,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       }).join("");
       var storyHtml=snap.premise?'<div class="story"><div class="st">📺 The Story</div><div class="sp">'+esc(snap.premise)+'</div></div>':"";
       // "The story so far" drawer — narrative thread, collapsed by default (calm)
-      var storyBody=showStory?('<div class="db">'+storyHtml+'<div class="h" style="margin-top:6px">Today\\'s drama</div>'+hls+(bonds?'<div class="h" style="margin-top:12px">Bonds</div>'+bonds:"")+'</div>'):"";
+      var turns=momentsLog.length?('<div class="h" style="margin-top:6px">Turning points</div>'+momentsLog.map(function(t){return '<div class="hl">'+esc(t)+'</div>';}).join("")):"";
+      var storyBody=showStory?('<div class="db">'+storyHtml+turns+'<div class="h" style="margin-top:12px">Today\\'s drama</div>'+hls+(bonds?'<div class="h" style="margin-top:12px">Bonds</div>'+bonds:"")+'</div>'):"";
       var storyDrawer='<div class="drw"><div class="dh" id="tglStory">The story so far <span class="chv">'+(showStory?'▾':'▸')+'</span></div>'+storyBody+'</div>';
       // "Why this is different" drawer — judges' explainer + engine substrate, collapsed by default
       var statLine=snap.stats?'<p>Under the hood right now: <b>'+snap.stats.memories+'</b> memories across <b>'+snap.stats.edges+'</b> bonds among <b>'+snap.stats.agents+'</b> souls.</p>':"";
