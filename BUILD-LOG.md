@@ -6,6 +6,26 @@ run before moving on.
 
 ---
 
+## Iteration 29 — 2026-07-14 · docs truth pass (keep the submission honest) ✅
+
+**Done** — five watchability iterations had grown the snapshot contract + feature set well past what
+the judge-facing docs described. Reconciled them (Presentation & Documentation is 15% of the rubric).
+- **README**: 91→100 tests (3 places); new **"What you'll see"** section documenting the marquee
+  spectator features that were entirely undocumented — click-to-follow broadcast camera, opt-in
+  in-browser Kokoro voices, per-character mood, the broadcast package (cold open, day cards, chyron,
+  scene lower-thirds), day/night + weather, and audience replies surfacing on the broadcast.
+- **ARCHITECTURE.md**: View row now lists the real frontend contract (`bio`/`mood`/`location`,
+  `dialogue`+`audience`, `relationships`, `highlights`, `weather`, `premise`) and the full canvas SPA;
+  Cognition row notes decisions are place-grounded (flavor + co-present + weather); World row documents
+  the deterministic weather engine.
+
+**Verified:** 100/100 (docs.test.ts 4/4 — headings, balanced mermaid, ablation numbers still hold) ·
+pushed to the public repo (docs aren't server-served, so no ECS deploy needed).
+
+**Still open (future pass):** DEPLOY.md systemd path/PORT reproducibility (issue #16 tail).
+
+---
+
 ## Iteration 28 — 2026-07-14 · broadcast lower-third: name the drama (watchability loop, 5/n) ✅
 
 **Done** — things always happen now, but a casual/all-day viewer couldn't tell a big moment from
