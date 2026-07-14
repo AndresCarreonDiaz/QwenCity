@@ -6,6 +6,26 @@ run before moving on.
 
 ---
 
+## Iteration 30 — 2026-07-14 · the town meeting: appointment viewing (watchability loop, 6/n) ✅
+
+**Done** — reality TV is built around the big group scene everyone tunes in for; the sim only ever had
+1:1 conversations. Now, **once per sim day (noon) the whole cast converges on the plaza** for a town
+meeting about the rent — a predictable "appointment-viewing" beat and the first full-cast scene.
+- **Engine** (`src/world/world.ts`): opt-in `dailyGathering:{hour,durationMin}` (off by default →
+  sims/ablation untouched). At the window it seeds a shared high-salience memory into everyone and
+  anchors each agent to the plaza (`gatheredUntil`) so they hold the meeting instead of drifting off on
+  their plans; pairwise conversations still fire within it (the rent debate). `World.activeEvent(now)`
+  exposes the live event.
+- **Contract + view**: new `snapshot.event`; a pulsing top-center **📣 TOWN MEETING · everyone's at
+  the plaza** banner while it's on. `places.ts` maps "meeting/gather/the plaza" → plaza.
+- Verified the whole cast's action becomes "at the town meeting in the Town Plaza" and they cluster at
+  the fountain; +2 tests (fires once, converges all; off by default).
+
+**Verified:** typecheck · 102/102 · syntax gate · CDP drove the mock world to noon (`event=gathering`
+probe + screenshot: banner up, roster all at the meeting, cast converged) · deployed, live OK.
+
+---
+
 ## Iteration 29 — 2026-07-14 · docs truth pass (keep the submission honest) ✅
 
 **Done** — five watchability iterations had grown the snapshot contract + feature set well past what
