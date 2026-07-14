@@ -6,6 +6,27 @@ run before moving on.
 
 ---
 
+## Iteration 27 — 2026-07-14 · emotional read: watch how they feel (watchability loop, 4/n) ✅
+
+**Done** — the reality-TV hook is seeing genuine emotional life; each character's feelings were
+invisible. Now derived and shown so you can scan the town and read the room.
+- **`src/view/mood.ts`** (pure, +6 tests → 100): `moodFor(recentMemoryTexts)` → one of happy / warm /
+  excited / worried / tense / sad / neutral via a recency-weighted sentiment lexicon (explicit emotion
+  words outweigh topical ones). Deterministic — replays agree, no model call.
+- **`snapshot.mood`** per agent (from the last ~14 memories). Surfaced four ways: a **mood emoji above
+  each sprite's nameplate**, a **soft mood-colored foot aura**, a **roster chip** next to the name, and
+  a **"Mood right now: 😟 worried" line** in the follow panel.
+- Emergent payoff: because the rent secret diffuses into everyone's memory stream, you literally watch
+  the town's mood turn worried as the news spreads (verified: a warm cast one tick, all-worried the
+  next) — information diffusion made emotionally legible.
+- Also fixed this session (separate commit): two decorative downtown cross-streets ran through the
+  DINER and the clock tower — removed so buildings sit on the sidewalk, not in the road.
+
+**Verified:** typecheck · 100/100 · syntax gate · CDP screenshots (mood emojis on the map, roster
+chips, follow-panel mood + relationships) · live snapshot returns varied per-character moods.
+
+---
+
 ## Iteration 26 — 2026-07-14 · cast & story: get attached to the characters (watchability loop, 3/n) ✅
 
 **Done** — the biggest all-day-watchability gap was that viewers couldn't tell WHO the cast were or
