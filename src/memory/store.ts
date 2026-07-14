@@ -26,11 +26,27 @@ export interface AddMemoryInput {
  * The interface (add / retrieve) is deliberately what a pgvector-backed
  * implementation will expose, so swapping persistence in later is mechanical.
  */
+export interface MemoryStoreOptions {
+  /**
+   * Cap on retained memories. When the stream exceeds it, the least valuable
+   * nodes are forgotten (lowest importance first, oldest broken ties) so a 24/7
+   * run stays bounded in heap AND keeps per-tick retrieval/snapshot scans cheap.
+   * Undefined = unbounded (the default — sims and the ablation stay deterministic).
+   */
+  maxNodes?: number;
+}
+
 export class MemoryStore {
   private nodes: MemoryNode[] = [];
   private seq = 0;
+  private readonly maxNodes: number | undefined;
 
-  constructor(private readonly model: ModelAdapter) {}
+  constructor(
+    private readonly model: ModelAdapter,
+    opts: MemoryStoreOptions = {},
+  ) {
+    this.maxNodes = opts.maxNodes && opts.maxNodes > 0 ? opts.maxNodes : undefined;
+  }
 
   get size(): number {
     return this.nodes.length;
@@ -61,7 +77,27 @@ export class MemoryStore {
       depth: input.depth ?? 0,
     };
     this.nodes.push(node);
+    this.prune();
     return node;
+  }
+
+  /**
+   * Forget down to `maxNodes` when over cap. Keep-priority = importance first
+   * (reflections, audience injections, and dramatic beats survive), most-recent
+   * breaking ties (so an agent keeps its short-term context). Preserves insertion
+   * order among survivors, so retrieval/replay semantics are unchanged otherwise.
+   */
+  private prune(): void {
+    if (this.maxNodes === undefined || this.nodes.length <= this.maxNodes) return;
+    const order = this.nodes.map((_, i) => i);
+    order.sort((a, b) => {
+      const na = this.nodes[a]!;
+      const nb = this.nodes[b]!;
+      if (nb.importance !== na.importance) return nb.importance - na.importance;
+      return b - a; // higher index = more recent = kept first
+    });
+    const keep = new Set(order.slice(0, this.maxNodes));
+    this.nodes = this.nodes.filter((_, i) => keep.has(i));
   }
 
   /**

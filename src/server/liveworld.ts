@@ -53,7 +53,9 @@ export class LiveWorld {
   constructor(opts: LiveWorldOptions = {}) {
     const model = opts.model ?? getModel();
     const start = opts.start ?? Date.UTC(2026, 6, 10, 8, 0, 0);
-    this.store = new MemoryStore(model);
+    // Bound the stream so a multi-week 24/7 run stays within the ECS box's heap
+    // and per-tick snapshot/retrieval scans stay fast (importance-based forgetting).
+    this.store = new MemoryStore(model, { maxNodes: Number(process.env.MAX_MEMORIES ?? 6000) });
     this.tickIntervalMs = opts.tickIntervalMs ?? 4000;
     this.maxReplies = opts.maxReplies ?? 200;
     this.logPath = opts.logPath;
