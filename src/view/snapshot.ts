@@ -26,6 +26,8 @@ export interface TickerEntry {
 export interface AgentView {
   id: string;
   name: string;
+  /** one-line identity/bio (who this character is) — surfaced so viewers attach */
+  bio: string;
   action: string;
   planActivity: string | null;
   /** id of the place the character is currently at (for the map) */
@@ -82,8 +84,17 @@ export interface WorldSnapshot {
   highlights: HighlightBeat[];
   /** the town map places (static, but included so the frontend is self-describing) */
   places: Place[];
+  /** the season framing — what's at stake — shown so drop-in viewers get the story */
+  premise: string;
   stats: { agents: number; memories: number; posts: number; edges: number };
 }
+
+/** The season's central conflict, framed for the audience. Tied to the seed
+ *  event (`liveworld.init` plants the rent rumor) so it stays honest. */
+export const PREMISE =
+  "Season 1 — Rent Day. A rumor is spreading that the landlord will raise everyone's rent. " +
+  "In a small town where Maya's café and Ana's bakery are already rivals, one secret could change everything. " +
+  "Watch it unfold live — and talk to the cast to change what happens next.";
 
 export interface SnapshotInput {
   now: number;
@@ -125,6 +136,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     return {
       id: a.profile.id,
       name: a.profile.name,
+      bio: a.profile.bio,
       action,
       planActivity: a.currentPlanStep(now)?.activity ?? null,
       location: locationForAction(a.profile.id, action),
@@ -220,6 +232,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     audience: recentAudience,
     highlights,
     places: PLACES,
+    premise: PREMISE,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },
   };
 }

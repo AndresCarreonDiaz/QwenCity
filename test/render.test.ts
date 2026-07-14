@@ -9,8 +9,8 @@ const SNAP: WorldSnapshot = {
   weather: "clear",
   audience: [],
   agents: [
-    { id: "a", name: "Ana", action: "opening the shop", planActivity: "work", location: "cafe", top: [] },
-    { id: "b", name: "Bo", action: "reading", planActivity: null, location: "plaza", top: [] },
+    { id: "a", name: "Ana", bio: "Ana runs the bakery.", action: "opening the shop", planActivity: "work", location: "cafe", top: [] },
+    { id: "b", name: "Bo", bio: "Bo reads a lot.", action: "reading", planActivity: null, location: "plaza", top: [] },
   ],
   ticker: [
     { t: 2, agentId: "a", agentName: "Ana", kind: "reflection", importance: 8, text: "I value my friends" },
@@ -23,6 +23,7 @@ const SNAP: WorldSnapshot = {
   ],
   highlights: [{ t: 2, kind: "reflection", importance: 8, text: "I value my friends" }],
   places: [],
+  premise: "A quiet town with a secret.",
   stats: { agents: 2, memories: 2, posts: 1, edges: 1 },
 };
 

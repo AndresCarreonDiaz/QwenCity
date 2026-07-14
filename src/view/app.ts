@@ -56,6 +56,13 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
   .ptitle{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:2px 0 10px}
   .scene{background:linear-gradient(90deg,#2b1e2e,#1e2431);border:1px solid #4a3550;border-radius:10px;padding:9px 11px;font-size:12.5px;margin-bottom:12px;color:#f0c9d4}
+  .story{background:linear-gradient(120deg,#241a12,#1a1e28);border:1px solid #4a3a24;border-radius:10px;padding:10px 12px;margin-bottom:12px}
+  .story .st{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:800;margin-bottom:5px}
+  .story .sp{font-size:12px;line-height:1.5;color:#d9cbb2}
+  .ra2{font-size:11px;color:#7f8ba0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+  .bio{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12.5px;line-height:1.5}
+  .bio .role{color:var(--ink);font-weight:600}
+  .bio .traits{color:var(--dim);margin-top:3px}
   .who{display:flex;align-items:center;gap:10px;margin-bottom:8px}
   .avatar{width:34px;height:34px;border-radius:50%;flex:0 0 auto;border:2px solid #0007}
   .wn{font-weight:800;font-size:18px}
@@ -1242,7 +1249,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         var hearts="";for(var i2=0;i2<Math.min(5,e.weight);i2++)hearts+="♥";
         return '<div class="bond"><span>'+esc(nameOf[e.a]||e.a)+' ↔ '+esc(nameOf[e.b]||e.b)+'</span><span class="hearts">'+hearts+'</span></div>';
       }).join("");
-      el.innerHTML='<div class="ptitle">The Town · Today</div>'+sceneHtml+'<div class="roster">'+roster+'</div>'+
+      var storyHtml=snap.premise?'<div class="story"><div class="st">📺 The Story</div><div class="sp">'+esc(snap.premise)+'</div></div>':"";
+      el.innerHTML='<div class="ptitle">The Town · Today</div>'+sceneHtml+storyHtml+'<div class="roster">'+roster+'</div>'+
         '<div class="sec"><div class="h">Today\\'s drama</div>'+hls+'</div>'+
         (bonds?'<div class="sec"><div class="h">Bonds</div>'+bonds+'</div>':"");
       Array.prototype.forEach.call(el.querySelectorAll(".rrow"),function(row){row.onclick=function(){selected=row.getAttribute("data-id");document.getElementById("hint").style.display="none";renderPanel();};});
@@ -1255,11 +1263,22 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var posts=(snap.feed||[]).filter(function(p){return p.agentId===selected;});
     var memHtml=mems.map(function(m){return '<div class="mem"><span class="kd" style="color:'+(KIND_COLOR[m.kind]||"#888")+'">'+esc(m.kind)+'</span>'+esc(m.text)+'</div>';}).join("")||'<div class="mem" style="color:var(--dim)">quiet mind so far…</div>';
     var postHtml=posts.map(function(p){return '<div class="post">'+esc(p.text)+' <span style="color:var(--dim);font-size:11px">· '+p.replies+' repl'+(p.replies===1?"y":"ies")+'</span></div>';}).join("")||'<div style="color:var(--dim);font-size:12px">no posts yet</div>';
+    // who is this: split the bio into a role clause + personality traits
+    var bio=a.bio||"", si=bio.indexOf(";"), role=si<0?bio:bio.slice(0,si), traits=si<0?"":bio.slice(si+1).trim();
+    var bioHtml=bio?'<div class="bio"><div class="role">'+esc(role.replace(/\\.$/,""))+'</div>'+(traits?'<div class="traits">'+esc(traits.replace(/\\.$/,""))+'</div>':"")+'</div>':"";
+    // their relationships, from their point of view (who they've bonded with)
+    var rels=(snap.relationships||[]).filter(function(e){return e.a===selected||e.b===selected;})
+      .sort(function(x,y){return y.weight-x.weight;}).map(function(e){
+        var other=e.a===selected?e.b:e.a, hearts="";for(var i3=0;i3<Math.min(5,e.weight);i3++)hearts+="♥";
+        return '<div class="bond"><span>'+esc(nameOf[other]||other)+'</span><span class="hearts">'+hearts+'</span></div>';
+      }).join("");
     el.innerHTML=
       '<div class="back" id="back">← back to town</div>'+
       '<div class="who" style="margin-top:10px"><span class="avatar" style="background:'+color(a.id)+'"></span><div><div class="wn">'+esc(a.name)+'</div><div class="wl">'+emojiFor(a.action)+" at "+esc(place?place.label:a.location)+'</div></div></div>'+
+      bioHtml+
       '<div class="doing"><div class="k">Right now</div>'+esc(a.action)+(a.planActivity?'<div style="color:var(--dim);margin-top:5px;font-size:12px">📋 plan: '+esc(a.planActivity)+'</div>':"")+'</div>'+
       '<div class="sec"><div class="h">💬 Say something to '+esc(a.name)+'</div><div class="replybox"><input id="rin" maxlength="240" placeholder="a message they\\'ll remember…"/><button id="rbtn">Send</button></div><div class="replymsg" id="rmsg">Your reply becomes a memory that can change what they do next.</div></div>'+
+      (rels?'<div class="sec"><div class="h">Who '+esc(a.name)+' knows</div>'+rels+'</div>':"")+
       '<div class="sec"><div class="h">Their thoughts</div>'+memHtml+'</div>'+
       '<div class="sec"><div class="h">Their posts</div>'+postHtml+'</div>';
     document.getElementById("back").onclick=function(){selected=null;document.getElementById("hint").style.display="block";renderPanel();};
