@@ -6,6 +6,23 @@ run before moving on.
 
 ---
 
+## Iteration 24 — 2026-07-13 · the broadcast package (all-day watchability loop, 1/n) ✅
+
+**Done** (`/loop` iteration — Truman-Show-style continuous-broadcast touches)
+- **"Previously on The Feed…" cold open**: first page load fades the city down and plays the top
+  highlights as a TV recap (skips gracefully on a fresh world with a "THE STORY BEGINS" card;
+  `?nocold=1` opt-out for screenshots) — drop-in viewers get the story so far in 8 seconds.
+- **Day-change title cards**: "DAY N — A NEW EPISODE BEGINS" band when the sim rolls a day (a full
+  sim day ≈ 4 real hours at prod cadence), giving the stream episodic structure.
+- **Roaming camera coverage**: when no scene is playing and nobody is followed, the control room
+  drifts to a random resident at 1.18× for ~12s every 30–50s — idle time now looks like a broadcast
+  switching cameras, not a static map.
+
+**Verified:** typecheck · 91/91 · syntax gate · CDP: cold open renders (t=3s), roam engages after
+recap (title probe `roam=tom cam=1.20`), deployed + live health OK.
+
+---
+
 ## Iteration 23 — 2026-07-13 · the Truman Show cut: follow-cam, Kokoro voices, a populated city ✅
 
 **Done**
