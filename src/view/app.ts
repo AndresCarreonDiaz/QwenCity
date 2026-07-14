@@ -276,7 +276,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   function viewBounds(){var hw=W/(2*cam.z),hh=H/(2*cam.z);return {x1:cam.cx-hw,y1:cam.cy-hh,x2:cam.cx+hw,y2:cam.cy+hh};}
   function stepCam(dt,now){
     if(!cam.cx){cam.cx=W/2;cam.cy=H/2;}
-    if(!selected&&!cur&&snap&&(!coldOpen||coldOpen.done)){
+    var meeting=snap&&snap.event&&snap.event.kind==="gathering";
+    if(!selected&&!cur&&!meeting&&snap&&(!coldOpen||coldOpen.done)){
       if(roam&&now>roam.until)roam=null;
       if(!roam&&now>roamAt){
         var ids=Object.keys(sprites);
@@ -291,6 +292,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       tz=1.22;tcx=s2?(s1.x+s2.x)/2:s1.x;tcy=(s2?(s1.y+s2.y)/2:s1.y)-30;
     }
     else if(roam&&sprites[roam.sid]){var rs=sprites[roam.sid];tz=1.18;tcx=rs.x;tcy=rs.y-32;}
+    else if(meeting){var mc=px({x:50,y:58});tz=isMobile()?1.04:1.12;tcx=mc.x;tcy=mc.y;} // establishing shot of the gathering
     var hw=W/(2*tz),hh=H/(2*tz);
     tcx=clamp(tcx,hw,W-hw);tcy=clamp(tcy,hh,H-hh);
     var kz=Math.min(1,dt*0.0016),kp=Math.min(1,dt*0.0024);
