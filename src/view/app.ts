@@ -8,8 +8,10 @@
  * Click a character to follow their thoughts, plan, posts, and reply to them
  * (the audience-coupling, made visible).
  *
- * Served at GET / by the spectator server. No external assets (CSP-safe). When
- * opened as a local file it falls back to the deployed origin (CORS-enabled).
+ * Served at GET / by the spectator server. No external assets load by default
+ * (CSP-safe); the opt-in voices toggle dynamically imports Kokoro TTS from the
+ * jsdelivr CDN and runs it in the viewer's browser (WebGPU, WASM fallback).
+ * When opened as a local file it falls back to the deployed origin (CORS-enabled).
  * Debug: append ?hh=22 to force the ambience hour (screenshot verification).
  */
 export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: unknown = null): string {
@@ -32,7 +34,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   h1{font-size:17px;font-weight:800;letter-spacing:.02em}
   h1 b{color:var(--amber)}
   .sub{font-size:11px;color:var(--dim)}
-  .clock{margin-left:auto;font-family:ui-monospace,Menlo,monospace;color:var(--dim);font-size:13px;white-space:nowrap}
+  #vbtn{margin-left:auto;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--dim);padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap}
+  #vbtn.on{color:#8fd49a;border-color:#3a5c42}
+  #vbtn.busy{color:var(--amber)}
+  .clock{font-family:ui-monospace,Menlo,monospace;color:var(--dim);font-size:13px;white-space:nowrap}
   .stat{font-family:ui-monospace,Menlo,monospace;color:var(--dim);font-size:12px}
   main{flex:1;display:flex;min-height:0}
   #stage{position:relative;flex:1;min-width:0;background:var(--grass)}
@@ -83,6 +88,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     <span class="live"><span class="dot"></span>LIVE</span>
     <h1>The <b>Feed</b></h1>
     <span class="sub">a soap opera played by AI minds — talk to the cast, change the story</span>
+    <button id="vbtn" title="Kokoro TTS runs in your browser — one-time ~110MB download">🔇 voices</button>
     <span class="clock" id="clock">--:--</span>
     <span class="stat" id="stat"></span>
   </header>
@@ -123,14 +129,15 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   ["table_umbrella","stall"].forEach(function(n){props[n]=loadImg(base()+"/assets/buildings/"+n+".png");});
   Object.keys(BLDG).forEach(function(k){buildings[k]=loadImg(base()+"/assets/buildings/"+BLDG[k]+".png");});
   // NEW: the staged LimeZu city set — served from /assets/city/<slot>.png
-  var CITY_PROP=["car_a","car_b","traffic_light","hydrant","bus_stop","mailbox","trash_bin","planter","city_bench","street_sign","phone_booth","streetlamp_modern","tree_city"];
+  var CITY_PROP=["car_a","car_b","car_c","car_d","traffic_light","hydrant","bus_stop","mailbox","trash_bin","planter","city_bench","bench_b","street_sign","phone_booth","streetlamp_modern","tree_city","vending","park_statue","pigeons"];
   var CITY_BLD=["shop_a","shop_b","shop_c","office","civic","hotel","house_a","house_b"];
   CITY_PROP.forEach(function(n){props[n]=loadImg(base()+"/assets/city/"+n+".png");});
   CITY_BLD.forEach(function(n){citybld[n]=loadImg(base()+"/assets/city/"+n+".png");});
   // manifest draw-heights (px at the reference unit 176) for every new city slot
   var DRAWH={shop_a:120,shop_b:120,shop_c:120,office:175,civic:165,hotel:190,house_a:140,house_b:130,
-    car_a:40,car_b:40,traffic_light:72,hydrant:44,bus_stop:60,mailbox:44,trash_bin:44,planter:26,
-    city_bench:40,street_sign:48,phone_booth:84,streetlamp_modern:92,tree_city:84};
+    car_a:40,car_b:40,car_c:40,car_d:40,traffic_light:72,hydrant:44,bus_stop:60,mailbox:44,trash_bin:44,planter:26,
+    city_bench:40,bench_b:40,street_sign:48,phone_booth:84,streetlamp_modern:92,tree_city:84,
+    vending:54,park_statue:110,pigeons:16};
   function ok(im){return im&&im.complete&&im.naturalWidth>0;}
 
   // ======================= the CITY layout plan (percent coords) =======================
@@ -179,6 +186,11 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var PROPS=[
     {slot:"car_a",x:23,y:46},{slot:"car_b",x:77,y:46},
     {slot:"car_b",x:35,y:51,flip:true,mobile:false},{slot:"car_a",x:66,y:51,flip:true,mobile:false},
+    {slot:"car_c",x:59,y:46,mobile:false},{slot:"car_d",x:21,y:69,mobile:false},
+    {slot:"vending",x:81,y:51,mobile:false},
+    {slot:"park_statue",x:43,y:87,mobile:false},
+    {slot:"bench_b",x:36,y:69,mobile:false},{slot:"bench_b",x:64,y:69,flip:true,mobile:false},
+    {slot:"pigeons",x:50,y:67},{slot:"pigeons",x:26,y:47,mobile:false},
     {slot:"traffic_light",x:46,y:46},{slot:"traffic_light",x:30,y:45,mobile:false},{slot:"traffic_light",x:70,y:45,flip:true,mobile:false},
     {slot:"street_sign",x:13,y:44},{slot:"street_sign",x:87,y:44,flip:true},
     {slot:"bus_stop",x:16,y:50},
@@ -227,6 +239,28 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var rszT=null;window.addEventListener("resize",function(){clearTimeout(rszT);rszT=setTimeout(resize,120);});
 
   var snap=null, sprites={}, selected=null, lastErr="", pairs={};
+  // --- the broadcast camera: wide shot by default, auto-director nudges in on
+  // live scenes, click-to-follow goes close (the Truman feel) ---
+  var cam={cx:0,cy:0,z:1};
+  function viewBounds(){var hw=W/(2*cam.z),hh=H/(2*cam.z);return {x1:cam.cx-hw,y1:cam.cy-hh,x2:cam.cx+hw,y2:cam.cy+hh};}
+  function stepCam(dt){
+    if(!cam.cx){cam.cx=W/2;cam.cy=H/2;}
+    var tz=1,tcx=W/2,tcy=H/2;
+    var fsp=selected?sprites[selected]:null;
+    if(fsp){tz=isMobile()?1.45:1.6;tcx=fsp.x;tcy=fsp.y-34;}
+    else if(cur&&sprites[cur.sid]){
+      var s1=sprites[cur.sid],s2=(cur.lid&&sprites[cur.lid])?sprites[cur.lid]:null;
+      tz=1.22;tcx=s2?(s1.x+s2.x)/2:s1.x;tcy=(s2?(s1.y+s2.y)/2:s1.y)-30;
+    }
+    var hw=W/(2*tz),hh=H/(2*tz);
+    tcx=clamp(tcx,hw,W-hw);tcy=clamp(tcy,hh,H-hh);
+    var kz=Math.min(1,dt*0.0016),kp=Math.min(1,dt*0.0024);
+    cam.z+=(tz-cam.z)*kz;cam.cx+=(tcx-cam.cx)*kp;cam.cy+=(tcy-cam.cy)*kp;
+    var hw2=W/(2*cam.z),hh2=H/(2*cam.z);
+    cam.cx=clamp(cam.cx,hw2,W-hw2);cam.cy=clamp(cam.cy,hh2,H-hh2);
+  }
+  function camApply(){ctx.setTransform(DPR*cam.z,0,0,DPR*cam.z,DPR*(W/2-cam.z*cam.cx),DPR*(H/2-cam.z*cam.cy));}
+  function camReset(){ctx.setTransform(DPR,0,0,DPR,0,0);}
   function px(p){return {x:p.x/100*W, y:p.y/100*H};}
   function plazaR(){return Math.max(56, W*0.04);}
   // responsive building base height: scale with the smaller of H and W so the
@@ -455,7 +489,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       // self-heal a runaway schedule (fast tick bursts): never sit silent for
       // more than a beat-gap while lines are waiting
       if(beats.length&&beats[0].at-now>tickGapMs*0.9)beats[0].at=now+3000;
-      if(beats.length&&now>=beats[0].at){cur=beats.shift();curUntil=now+cur.dur;}
+      if(beats.length&&now>=beats[0].at){cur=beats.shift();curUntil=now+cur.dur;if(voicesOn&&cur.kind==="say")playVoice(cur);}
       else if(!beats.length&&replayPool.length&&now>replayAt){
         // re-run the last scene, slowly, while the pair is still mid-conversation
         var l=replayPool[0];
@@ -468,6 +502,73 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       }
     }
   }
+
+  // ===================== Kokoro voices (opt-in, in-browser TTS) ==============
+  // Nothing loads until the user clicks the voices toggle (a user gesture also
+  // unlocks audio). Kokoro-82M runs locally: WebGPU when a real adapter exists,
+  // else single-thread WASM q8. Lines are pre-generated in the background so
+  // audio is usually ready when a scheduled bubble appears.
+  var VOICE={maya:"af_heart",ana:"af_bella",tom:"am_michael",leo:"am_puck"};
+  var voicesOn=false, ttsP=null, tts=null, audioCtx=null, voiceCache={}, voiceOrder=[], genBusy=false, voiceState="off";
+  function vkey(b){return (VOICE[b.sid]||"af_sky")+"|"+b.text;}
+  function enableVoices(){
+    if(ttsP)return ttsP;
+    voiceState="loading";
+    ttsP=(async function(){
+      var mod=await import("https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm");
+      var device="wasm",dtype="q8";
+      if(navigator.gpu){try{if(await navigator.gpu.requestAdapter()){device="webgpu";dtype="fp32";}}catch(e){}}
+      tts=await mod.KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX",{dtype:dtype,device:device});
+      voiceState="ready";
+      return tts;
+    })();
+    ttsP.catch(function(){voiceState="error";});
+    return ttsP;
+  }
+  function pumpVoices(){
+    if(!voicesOn||!tts||genBusy)return;
+    var next=null;
+    if(cur&&cur.kind==="say"&&!voiceCache[vkey(cur)])next=cur;
+    else for(var i=0;i<beats.length;i++){if(beats[i].kind==="say"&&!voiceCache[vkey(beats[i])]){next=beats[i];break;}}
+    if(!next)return;
+    genBusy=true;
+    var k=vkey(next);
+    tts.generate(next.text,{voice:VOICE[next.sid]||"af_sky"}).then(function(a){
+      voiceCache[k]=a;voiceOrder.push(k);
+      if(voiceOrder.length>30)delete voiceCache[voiceOrder.shift()];
+      if(cur&&vkey(cur)===k&&!cur.spoken)playVoice(cur);
+      genBusy=false;
+    }).catch(function(){voiceCache[k]=null;genBusy=false;});
+  }
+  function playVoice(beat){
+    var a=voiceCache[vkey(beat)];
+    if(!a||!audioCtx||beat.spoken)return;
+    beat.spoken=true;
+    try{
+      var buf=audioCtx.createBuffer(1,a.audio.length,a.sampling_rate);
+      buf.getChannelData(0).set(a.audio);
+      var src=audioCtx.createBufferSource();
+      src.buffer=buf;src.connect(audioCtx.destination);src.start();
+      var ms=a.audio.length/a.sampling_rate*1000;
+      curUntil=Math.max(curUntil,performance.now()+ms+300);
+    }catch(e){}
+  }
+  (function(){
+    var b=document.getElementById("vbtn");
+    if(!b)return;
+    b.onclick=function(){
+      if(!voicesOn){
+        voicesOn=true;
+        if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume();}catch(e){}}
+        enableVoices();
+        b.className="busy";b.textContent="⏳ voices";
+        var iv=setInterval(function(){
+          if(voiceState==="ready"){b.className="on";b.textContent="🔊 voices";clearInterval(iv);}
+          if(voiceState==="error"){b.className="";b.textContent="🔇 voices n/a";voicesOn=false;clearInterval(iv);}
+        },500);
+      } else {voicesOn=false;b.className="";b.textContent="🔇 voices";}
+    };
+  })();
 
   // --- stage directions: an idle character narrates what they're doing, in place ---
   var emote=null, emoteUntil=0, nextEmoteAt=0, emoteIdx=0;
@@ -511,7 +612,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var mw=stage?Math.min(180,W*0.4):Math.min(210,W*0.45);
     if(!beat.w||beat.mw!==mw){beat.mw=mw;var wr=wrap(beat.text,mw);beat.lines=wr.lines;beat.w=wr.bw;}
     var lh=stage?14:16, bw=beat.w+(stage?16:20), bh=beat.lines.length*lh+(stage?10:12);
-    var bx=clamp(sp.x-bw/2,6,W-bw-6), by=sp.y-CH-(stage?14:22)-bh; if(by<6)by=6;
+    var vb=viewBounds();
+    var bx=clamp(sp.x-bw/2,vb.x1+6,vb.x2-bw-6), by=sp.y-CH-(stage?14:22)-bh; if(by<vb.y1+6)by=vb.y1+6;
     ctx.fillStyle=stage?"rgba(16,22,32,.78)":think?"rgba(224,229,238,.94)":"rgba(255,255,255,.96)";
     rr(bx,by,bw,bh,stage?7:9);ctx.fill();
     if(think){
@@ -778,7 +880,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
 
   // --- vignettes: idle characters use the environment around them ---
-  var VIG={city_bench:"taking a seat for a moment",bench:"resting on the bench",stall:"browsing the flower cart",table_umbrella:"settling in at a table",phone_booth:"making a quick call",mailbox:"checking the mail",planter:"admiring the flowers",flowers:"admiring the flowers",bus_stop:"waiting at the bus stop",tree_city:"enjoying the shade"};
+  var VIG={city_bench:"taking a seat for a moment",bench_b:"resting on the bench",bench:"resting on the bench",stall:"browsing the flower cart",table_umbrella:"settling in at a table",phone_booth:"making a quick call",mailbox:"checking the mail",planter:"admiring the flowers",flowers:"admiring the flowers",bus_stop:"waiting at the bus stop",tree_city:"enjoying the shade",vending:"grabbing a drink from the machine",park_statue:"admiring the old statue",pigeons:"feeding the pigeons"};
   function insideBuilding(x,y){
     var hit=false;
     (snap.places||[]).forEach(function(p){
@@ -809,6 +911,59 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       bd=d;best={spot:spot,txt:txt};
     });
     return best;
+  }
+
+  // --- background extras: the town's other residents (pure set dressing, the
+  // Truman Show crowd) — they stroll the streets on loops, no minds, no names ---
+  var extras=null;
+  function extraTarget(){
+    var r=Math.random();
+    if(r<0.55)return {x:(10+Math.random()*80)/100*W, y:0.48*H};
+    if(r<0.8&&!isMobile())return {x:(10+Math.random()*80)/100*W, y:0.70*H};
+    var rails=[13,50,87], rx=rails[Math.floor(Math.random()*3)];
+    return {x:rx/100*W, y:(28+Math.random()*50)/100*H};
+  }
+  function extraRoute(from,to){
+    var hs=hCorrs(), hy=hs[0], best=Math.abs(from.y-hs[0])+Math.abs(to.y-hs[0]);
+    for(var i=1;i<hs.length;i++){var c=Math.abs(from.y-hs[i])+Math.abs(to.y-hs[i]);if(c<best){best=c;hy=hs[i];}}
+    var pts=[];
+    if(Math.abs(from.y-hy)>6)pts.push({x:from.x,y:hy});
+    if(Math.abs(to.x-from.x)>6)pts.push({x:to.x,y:hy});
+    if(Math.abs(to.y-hy)>6)pts.push(to);
+    return pts.length?pts:[to];
+  }
+  function stepExtras(dt,now,nn){
+    if(!snap)return;
+    if(!extras){
+      extras=[];
+      var n=isMobile()?3:6;
+      for(var i=0;i<n;i++){
+        var t0=extraTarget();
+        extras.push({img:loadImg(base()+"/assets/characters/x"+(i+1)+".png"),x:t0.x,y:t0.y,path:null,dir:"D",waitUntil:now+i*2500,speed:(26+Math.random()*14)/1000,night:i<2});
+      }
+    }
+    extras.forEach(function(ex){
+      // after dark most extras head home (the set empties out)
+      ex.hidden=nn>0.75&&!ex.night;
+      if(ex.hidden)return;
+      if(ex.path&&ex.path.length){
+        var t=ex.path[0],dx=t.x-ex.x,dy=t.y-ex.y,d=Math.hypot(dx,dy),step=ex.speed*dt;
+        if(d<=step||d<1.5){ex.x=t.x;ex.y=t.y;ex.path.shift();if(!ex.path.length){ex.path=null;ex.waitUntil=now+2000+Math.random()*9000;ex.dir="D";}}
+        else {ex.x+=dx/d*step;ex.y+=dy/d*step;ex.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?"L":"R"):(dy<0?"U":"D");}
+        ex.moving=true;
+      } else {
+        ex.moving=false;
+        if(now>ex.waitUntil)ex.path=extraRoute({x:ex.x,y:ex.y},extraTarget());
+      }
+    });
+  }
+  function drawExtra(ex){
+    if(ex.hidden||!ok(ex.img))return;
+    var footY=ex.y+2, topY=footY-CH;
+    ctx.fillStyle="rgba(0,0,0,.2)";ctx.beginPath();ctx.ellipse(ex.x,footY-3,12,4.5,0,0,7);ctx.fill();
+    var band=ex.moving?WALK_Y:IDLE_Y;
+    var fcol=ex.moving?Math.floor(T/6)%6:Math.floor(T/18)%6;
+    ctx.drawImage(ex.img,(DIRCOL[ex.dir||"D"]+fcol)*32,band,32,64,Math.round(ex.x-CW/2),Math.round(topY),CW,CH);
   }
 
   // --- sprite movement: unhurried walking, staggered departures, vignettes ---
@@ -858,6 +1013,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     // don't animate everything at double speed
     T=Math.floor(ts*0.06);var now=ts;
     ctx.imageSmoothingEnabled=false;
+    stepCam(dt);camApply();
     // grass
     for(var gy=0;gy<H;gy+=44)for(var gx=0;gx<W;gx+=44){ctx.fillStyle=((gx+gy)/44)%2?"#7bbf6a":"#74b863";ctx.fillRect(gx,gy,44,44);}
     plates=[];namePlates=[];
@@ -866,12 +1022,15 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       drawGround(nn);
       stepBeats(now);
       stepEmotes(now);
-      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length;
+      pumpVoices();
+      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2);
       // painter list: props + decorative + functional buildings + characters, by baseline
       var items=[], placeGeom={}, decGeom={};
       PROPS.forEach(function(p){if(!shown(p))return;var c=px(p);items.push({y:c.y,f:function(){drawProp(props[p.slot],c.x,c.y,pHeight(p.slot),p.flip);}});});
       DECOR.forEach(function(l){if(!shown(l))return;var g=decorGeom(l);decGeom[l.id]=g;items.push({y:g.base,f:function(){drawDecor(l,g);}});});
       (snap.places||[]).forEach(function(p){var g=geomOf(p);placeGeom[p.id]=g;items.push({y:g.base,f:function(){drawBuilding(p,g);}});});
+      stepExtras(dt,now,nn);
+      (extras||[]).forEach(function(ex){items.push({y:ex.y,f:function(){drawExtra(ex);}});});
       Object.keys(sprites).forEach(function(id){
         var sp=sprites[id];stepSprite(sp,dt,now);
         if(sp.a)items.push({y:sp.y,f:function(){drawChar(sp.a,sp);}});
@@ -929,6 +1088,18 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         var lsp=(cur.kind==="say"&&cur.lid&&pairs[cur.sid]===cur.lid)?sprites[cur.lid]:null;
         if(lsp&&ssp&&Math.hypot(lsp.x-ssp.x,lsp.y-ssp.y)>140)drawDots(lsp);
       }
+      camReset();
+      // broadcast framing while following a life (screen-space, on top)
+      if(selected&&sprites[selected]&&sprites[selected].a){
+        var vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.42,W/2,H/2,Math.max(W,H)*0.72);
+        vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(4,6,12,.42)");
+        ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+        ctx.fillStyle="rgba(8,10,16,.72)";rr(10,10,168,26,8);ctx.fill();
+        ctx.fillStyle="#f0575f";ctx.globalAlpha=.55+.45*Math.sin(T*0.1);ctx.beginPath();ctx.arc(24,23,4,0,7);ctx.fill();ctx.globalAlpha=1;
+        ctx.font="700 10px ui-monospace,Menlo,monospace";ctx.textAlign="left";ctx.fillStyle="#ffdfe2";
+        ctx.fillText("CAM 02 · FOLLOWING "+sprites[selected].a.name.toUpperCase(),36,26);
+        ctx.textAlign="center";
+      }
       drawChyron(dt);
     } else {
       ctx.fillStyle="rgba(0,0,0,.5)";ctx.font="14px ui-sans-serif";ctx.textAlign="center";
@@ -938,7 +1109,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
 
   canvas.addEventListener("click",function(e){
-    var r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,best=null,bd=1e9;
+    var r=canvas.getBoundingClientRect(),sx=e.clientX-r.left,sy=e.clientY-r.top,best=null,bd=1e9;
+    // screen → world (the camera may be zoomed in)
+    var mx=(sx-(W/2-cam.z*cam.cx))/cam.z, my=(sy-(H/2-cam.z*cam.cy))/cam.z;
     Object.keys(sprites).forEach(function(id){var sp=sprites[id];var d=Math.hypot(sp.x-mx,(sp.y-26)-my);if(d<38&&d<bd){bd=d;best=id;}});
     selected=best; document.getElementById("hint").style.display=best?"none":"block"; renderPanel();
   });

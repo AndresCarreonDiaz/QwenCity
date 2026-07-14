@@ -12,6 +12,9 @@ export interface Place {
   x: number;
   y: number;
   type: PlaceType;
+  /** what's physically around a character standing here — fed into decision
+   * prompts so actions reference real surroundings (and into nothing else) */
+  flavor: string;
 }
 
 // Laid out as a small city: Main Street (y=48) carries the downtown strip with
@@ -22,14 +25,14 @@ export interface Place {
 // and routes characters along them, so coordinates here are load-bearing for
 // the walkability of the city.
 export const PLACES: Place[] = [
-  { id: "cafe", label: "Maya's Café", x: 40, y: 34, type: "cafe" },
-  { id: "bakery", label: "Ana's Bakery", x: 60, y: 34, type: "bakery" },
-  { id: "maya_home", label: "Maya's Place", x: 13, y: 17, type: "home" },
-  { id: "tom_home", label: "Tom's Place", x: 87, y: 17, type: "home" },
-  { id: "ana_home", label: "Ana's Place", x: 87, y: 82, type: "home" },
-  { id: "leo_home", label: "Leo's Place", x: 13, y: 82, type: "home" },
-  { id: "park", label: "The Park", x: 50, y: 85, type: "park" },
-  { id: "plaza", label: "Town Plaza", x: 50, y: 60, type: "plaza" },
+  { id: "cafe", label: "Maya's Café", x: 40, y: 34, type: "cafe", flavor: "the espresso machine, the pastry case, corner tables with regulars, outdoor tables under an umbrella, big windows onto Main Street, the rival bakery across the boulevard" },
+  { id: "bakery", label: "Ana's Bakery", x: 60, y: 34, type: "bakery", flavor: "the bread oven, the display case, sacks of flour, the flower cart out front, the shop counter, the rival café across the boulevard" },
+  { id: "maya_home", label: "Maya's Place", x: 13, y: 17, type: "home", flavor: "her kitchen, a worn couch, a small desk by the window overlooking the residential avenue" },
+  { id: "tom_home", label: "Tom's Place", x: 87, y: 17, type: "home", flavor: "his kitchen counter, an old armchair, a journal on the desk, a window facing the street" },
+  { id: "ana_home", label: "Ana's Place", x: 87, y: 82, type: "home", flavor: "her tidy kitchen, a ledger on the table, a balcony over the promenade" },
+  { id: "leo_home", label: "Leo's Place", x: 13, y: 82, type: "home", flavor: "his delivery bike by the porch, a cluttered workbench, a radio in the kitchen" },
+  { id: "park", label: "The Park", x: 50, y: 85, type: "park", flavor: "benches under the trees, the lawn, a quiet path, birdsong" },
+  { id: "plaza", label: "Town Plaza", x: 50, y: 60, type: "plaza", flavor: "the stone fountain, benches, flower planters, street lamps, the clock tower, the diner on the corner" },
 ];
 
 const PLACE_BY_ID = new Map(PLACES.map((p) => [p.id, p]));

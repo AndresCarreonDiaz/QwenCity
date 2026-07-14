@@ -153,13 +153,21 @@ export class World {
       if (conversed.has(id)) {
         decided = true; // the conversation was this agent's action this tick
       } else if (due || reacting) {
-        // Ground the decision in place: the model writes actions that use the
-        // surroundings ("rearranges the window display") instead of floating in
-        // a void — and the map renders exactly where it says they are.
-        const here = placeById(locationForAction(id, r.action));
+        // Ground the decision in place: the model knows WHERE the agent is,
+        // WHAT is physically around them, and WHO else is here — so actions
+        // use the set ("rearranges the window display", "waves Tom over to a
+        // corner table") and the map renders exactly where it says they are.
+        const hereId = locationForAction(id, r.action);
+        const here = placeById(hereId);
+        const copresent = this.runtimes
+          .filter((o) => o !== r && locationForAction(o.agent.profile.id, o.action) === hereId)
+          .map((o) => `${o.agent.profile.name} (${o.action})`)
+          .join(", ");
         const situation =
-          `It is ${new Date(this.clock).toISOString()}. ${r.agent.profile.name} is at ${here?.label ?? "the Town Plaza"}, currently ${r.action}. ` +
-          `What does ${r.agent.profile.name} do next, here or nearby? Prefer concrete actions that use the surroundings.`;
+          `It is ${new Date(this.clock).toISOString()}. ${r.agent.profile.name} is at ${here?.label ?? "the Town Plaza"} — around them: ${here?.flavor ?? "the fountain and benches"}. ` +
+          (copresent ? `Also here: ${copresent}. ` : "") +
+          `${r.agent.profile.name} is currently ${r.action}. ` +
+          `What does ${r.agent.profile.name} do next, here or nearby? Prefer concrete actions that use the surroundings or the people present.`;
         const act = await r.agent.decideAction(situation, this.clock);
         r.action = act.label;
         r.nextDecisionAt = this.clock + this.actionMs;
