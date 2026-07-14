@@ -63,7 +63,7 @@ deployment detail: [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
 | Criterion | Weight | What serves it |
 |---|---|---|
 | **Innovation & AI Creativity** | 30% | Audience-Coupled Salience Memory — one `I(m)` driving retrieval, highlight editing, and render gating; real human replies rewire agents (`Agent.ingestAudienceReply` + `surfacePendingInjection`). A nameable algorithm, not a prompt wrapper. |
-| **Technical Depth & Engineering** | 30% | Faithful memory stream / `I(m)` retrieval / reflection tree / recursive planning; event-driven multi-agent tick loop; fast-forward buffer + NDJSON persistence; a deterministic offline harness with **91 tests + 11 runnable sims**, all green. |
+| **Technical Depth & Engineering** | 30% | Faithful memory stream / `I(m)` retrieval / reflection tree / recursive planning; event-driven multi-agent tick loop; fast-forward buffer + NDJSON persistence; a deterministic offline harness with **100 tests + 11 runnable sims**, all green. |
 | **Problem Value & Impact** | 25% | A *perturbable* social-simulation testbed — information diffusion, social contagion, and how human feedback steers an agent society — with zero human-subjects risk. Entertainment / game NPCs / synthetic user research as reach. |
 | **Presentation & Documentation** | 15% | The spectator viewer + thought-ticker, this README + architecture diagram + reproducible ablation numbers, and the 3-minute demo script in [`strategy/truman-show/`](./strategy/truman-show/). |
 
@@ -96,7 +96,7 @@ npm run sim:viewer      # render the spectator UI       (→ web/viewer.html, op
 npm run sim:highlights  # importance-driven daily recap
 npm run sim:life        # the integrated living town: plans + conversations in one World tick
 
-npm test                # 91 unit + integration tests
+npm test                # 100 unit + integration tests
 ```
 
 ## See it running
@@ -104,6 +104,19 @@ npm test                # 91 unit + integration tests
 **Watch the live town: <http://47.237.78.57>** — real Qwen agents on Alibaba Cloud ECS, 24/7. Click a
 character to follow their thoughts and reply to them; your message becomes a memory that can change
 what they do next.
+
+**What you'll see** — a walkable pixel city that plays like a live soap opera:
+
+- **Follow any character** — click a resident and the camera glides in and follows their life ("CAM 02");
+  read their bio, mood, relationships, thoughts, and posts, and send them a message.
+- **They speak** — an opt-in 🔊 toggle runs [Kokoro](https://github.com/hexgrad/kokoro) TTS *in your
+  browser* (zero server cost, per-character voices); dialogue also plays as speech bubbles.
+- **Read the room** — each character shows a mood (derived from their recent memories); watch anxiety
+  spread through the town as the rent rumor diffuses.
+- **Broadcast package** — a "Previously on…" cold-open recap for drop-in viewers, day-change title cards,
+  a scrolling news chyron, and scene lower-thirds that name the drama ("💥 THE RIVALRY", "🔥 TENSIONS
+  RISING"). Deterministic day/night cycle and weather (rain / overcast / clear) that the cast reacts to.
+- **You're on the show** — your replies surface on the broadcast over the character who received them.
 
 Live on Qwen locally: `npm run smoke:live` (needs a key in `.env`). Capture a small real-Qwen world with
 `npm run capture` → open `web/viewer.html`. A committed sample of authentic Qwen output is at
@@ -143,7 +156,7 @@ src/
              speech-bubble dialogue, news chyron, day/night cycle), HTML renderer, highlight editor
   eval/      ablation scenario + metrics
   sim/       11 runnable, self-asserting scenarios
-test/        91 node:test cases
+test/        100 node:test cases
 docs/        architecture + deployment
 strategy/    design brief, paper spec, cost model, deployment research (truman-show/)
 ```

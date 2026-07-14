@@ -10,10 +10,10 @@ research behind each choice, see [`../strategy/truman-show/`](../strategy/truman
 |---|---|---|
 | Model seam | `src/model/` | `ModelAdapter` interface; deterministic `MockAdapter` (offline) and the real DashScope adapter (`dashscope.ts` — task→model routing across qwen-flash/plus/max + embeddings, wire-verified in tests), chosen by `MODEL_BACKEND`. Nothing else knows which backend is live. |
 | Memory | `src/memory/` | `MemoryNode` (ConceptNode-faithful), the `I(m)` retrieval math, and the store (in-memory now; pgvector-shaped API for later). |
-| Cognition | `src/agent/` | perceive → store → retrieve → act; reflection tree (poignancy-threshold trigger, evidence-cited insights); recursive daily planning; dialogue; audience-reply ingestion. |
+| Cognition | `src/agent/` | perceive → store → retrieve → act; reflection tree (poignancy-threshold trigger, evidence-cited insights); recursive daily planning; dialogue; audience-reply ingestion. Decisions are **place-grounded** — the prompt includes where the agent is, what's physically around them (`place.flavor`), who else is present, and the current weather. |
 | Social | `src/social/` | moderation gate, the social feed, first-person post composition. |
-| World | `src/world/` | event-driven tick loop; conversation orchestrator (stores each utterance in both streams → diffusion); fast-forward buffer + NDJSON persistence. |
-| View | `src/view/` | world snapshot (frontend contract, incl. recent dialogue lines), the self-contained canvas town SPA (walkable street-grid town, speech-bubble dialogue playback, news chyron, sim-clock day/night cycle), a no-JS HTML renderer, the importance-driven highlight editor. |
+| World | `src/world/` | event-driven tick loop; conversation orchestrator (stores each utterance in both streams → diffusion); deterministic town weather (`weather.ts`, a pure function of sim time, shared by prompts + view); fast-forward buffer + NDJSON persistence. |
+| View | `src/view/` | the **world snapshot** (frontend contract — agents with `bio`/`mood`/`location`, recent `dialogue` + `audience` lines, `relationships`, `highlights`, `weather`, `premise`; derived from `mood.ts`/`weather.ts`); the self-contained **canvas town SPA** (walkable pixel city; speech-bubble dialogue + voices; click-to-follow broadcast camera; day/night + weather; mood reads; "Previously on" cold open + scene lower-thirds); a no-JS HTML renderer; the importance-driven highlight editor. |
 | Eval | `src/eval/` | the controlled ablation scenario + metrics (diffusion, density, divergence). |
 
 ## The Salience Engine — one score, three uses
