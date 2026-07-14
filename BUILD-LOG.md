@@ -6,6 +6,20 @@ run before moving on.
 
 ---
 
+## Iteration 33 — 2026-07-14 · full map audit (methodical, region by region) ✅
+
+**Done** — after repeatedly missing map overlaps by eyeballing whole-map screenshots, did a proper
+audit: cropped and inspected EACH road segment (main street, promenade, boulevard) + building bases,
+on desktop AND mobile. Findings: main road now clean (props moved off in iter 32), promenade clean,
+boulevard clean, homes on grass, buildings on their lots — no remaining overlaps. Two consistency
+nudges: the promenade van now sits on the asphalt (y=69→70), and the promenade lamps sit off the road
+edge (y=69→67). **Process fix:** crop-and-inspect per region, never trust a whole-map glance.
+
+**Verified:** typecheck · 103/103 · syntax gate · region crops (main/promenade/boulevard + mobile) all
+clean · deployed, live OK.
+
+---
+
 ## Iteration 32 — 2026-07-14 · breaking news + the real map fix ✅
 
 **Map fix (the one the user actually meant):** iteration 29's fix handled two downtown buildings, but
