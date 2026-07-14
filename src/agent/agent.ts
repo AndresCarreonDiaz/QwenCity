@@ -62,6 +62,9 @@ export class Agent {
   private accumulatedImportance = 0;
   /** audience-injection memory ids already surfaced to a decision (so each lands once) */
   private readonly responded = new Set<string>();
+  /** if the current action was shaped by an audience reply, who/what shaped it
+   *  (the causal loop, made observable). Cleared on any decision that isn't. */
+  private lastInfluence: { handle: string; text: string; at: number } | null = null;
   /** today's schedule (empty until planDay is called) */
   plan: Plan = [];
 
@@ -144,7 +147,13 @@ export class Agent {
    * relevant memories, conditions the model on them, and returns an action that
    * explicitly cites the memories it used.
    */
+  /** the audience reply shaping this agent's current action, if any (for the view) */
+  get influence(): { handle: string; text: string; at: number } | null {
+    return this.lastInfluence;
+  }
+
   async decideAction(situation: string, now: number, k = 8): Promise<AgentAction> {
+    this.lastInfluence = null; // a fresh decision is uninfluenced unless an injection surfaces below
     let retrieved = await this.memory.retrieve(this.profile.id, situation, now, k);
     retrieved = this.surfacePendingInjection(retrieved, k);
     const prompt = this.buildActionPrompt(situation, now, retrieved);
@@ -170,6 +179,9 @@ export class Agent {
     const latest = pending[pending.length - 1];
     if (!latest) return retrieved;
     this.responded.add(latest.id);
+    // record the causal link so the view can show "acting on your message"
+    const m = latest.description.match(/@([\w.-]+) replied to my post: "([\s\S]*)"$/);
+    if (m) this.lastInfluence = { handle: m[1]!, text: m[2]!, at: latest.created };
     const promoted: ScoredMemory = {
       node: latest,
       score: Number.POSITIVE_INFINITY,

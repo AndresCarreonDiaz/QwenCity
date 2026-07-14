@@ -32,6 +32,8 @@ export interface AgentView {
   bio: string;
   /** current emotional read, derived from recent memories (for the map + panel) */
   mood: MoodKey;
+  /** if this agent's current action was shaped by an audience reply (the causal loop, visible) */
+  influencedBy: { handle: string; text: string } | null;
   action: string;
   planActivity: string | null;
   /** id of the place the character is currently at (for the map) */
@@ -156,11 +158,13 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     const action = currentActions[a.profile.id] ?? "…";
     const recent = store.forAgent(a.profile.id);
     const mood = moodFor(recent.slice(-14).map((n) => n.description));
+    const inf = a.influence;
     return {
       id: a.profile.id,
       name: a.profile.name,
       bio: a.profile.bio,
       mood,
+      influencedBy: inf ? { handle: inf.handle, text: inf.text } : null,
       action,
       planActivity: a.currentPlanStep(now)?.activity ?? null,
       location: locationForAction(a.profile.id, action),

@@ -56,3 +56,18 @@ test("ingested audience reply gets the +2 salience boost and surfaces in retriev
   const action = await maya.decideAction("What should Maya do about Tom?", T0 + 2e6, 8);
   assert.ok(action.retrieved.some((s) => s.node.id === node.id), "audience reply should surface");
 });
+
+test("an audience reply shapes the next decision and surfaces as visible influence", async () => {
+  const store = new MemoryStore(new MockAdapter());
+  const agent = new Agent({ id: "maya", name: "Maya", bio: "Maya runs the café." }, store, new MockAdapter());
+  assert.equal(agent.influence === null, true);
+  await agent.ingestAudienceReply("superfan", "Don't let the landlord win!", T0);
+  await agent.decideAction("It is morning. What does Maya do next?", T0 + 1000);
+  const inf = agent.influence;
+  assert.ok(inf, "influence is set after a reply shapes the decision");
+  assert.equal(inf.handle, "superfan");
+  assert.equal(inf.text, "Don't let the landlord win!");
+  // a later decision with no new reply clears the influence
+  await agent.decideAction("It is later. What does Maya do next?", T0 + 2000);
+  assert.equal(agent.influence === null, true, "influence clears on an uninfluenced decision");
+});

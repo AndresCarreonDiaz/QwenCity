@@ -69,6 +69,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   .bio{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12.5px;line-height:1.5}
   .bio .role{color:var(--ink);font-weight:600}
   .bio .traits{color:var(--dim);margin-top:3px}
+  .inf{background:linear-gradient(90deg,#3a2c10,#241a12);border:1px solid var(--amber);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12.5px;line-height:1.5}
+  .inf .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);font-weight:800;margin-bottom:3px}
+  .inf .q{color:#ffe6b0}
   .who{display:flex;align-items:center;gap:10px;margin-bottom:8px}
   .avatar{width:34px;height:34px;border-radius:50%;flex:0 0 auto;border:2px solid #0007}
   .wn{font-weight:800;font-size:18px}
@@ -1076,6 +1079,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     // a soft mood-colored aura at the feet — subliminal emotional read
     if(md.c){ctx.save();ctx.globalAlpha=0.5;ctx.fillStyle=md.c;ctx.beginPath();ctx.ellipse(sp.x,footY-3,17,7,0,0,7);ctx.fill();ctx.restore();}
     ctx.fillStyle="rgba(0,0,0,.25)";ctx.beginPath();ctx.ellipse(sp.x,footY-3,13,5,0,0,7);ctx.fill();
+    // the audience is steering this one: a pulsing amber ring (the causal loop, visible)
+    if(a.influencedBy){var pu=0.5+0.5*Math.sin(T*0.14);ctx.save();ctx.globalAlpha=pu;ctx.strokeStyle="#ecb44a";ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(sp.x,footY-3,20,8,0,0,7);ctx.stroke();ctx.restore();}
     if(sel){ctx.strokeStyle="#ecb44a";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sp.x,footY-3,17,7,0,0,7);ctx.stroke();}
     if(ok(img)){
       var band=sp.moving?WALK_Y:IDLE_Y;
@@ -1085,7 +1090,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     } else {
       ctx.fillStyle=color(a.id);ctx.beginPath();ctx.arc(sp.x,footY-22,13,0,7);ctx.fill();
     }
-    namePlates.push({x:sp.x,y:topY-4,name:a.name,sel:sel,em:emojiFor(a.action),emX:sp.x+CW/2+6,emY:topY+16,mood:md.e});
+    namePlates.push({x:sp.x,y:topY-4,name:a.name,sel:sel,em:a.influencedBy?"🎙️":emojiFor(a.action),emX:sp.x+CW/2+6,emY:topY+16,mood:md.e});
   }
 
   // --- vignettes: idle characters use the environment around them ---
@@ -1367,7 +1372,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         var pa=(snap.agents||[]).filter(function(x){return x.id===pk;})[0];
         sceneHtml='<div class="scene">🎬 LIVE SCENE · '+esc(nameOf[pk])+' &amp; '+esc(nameOf[pairs[pk]])+(pa?' at '+esc(placeOf[pa.location]||pa.location):"")+'</div>';
       }
-      var roster=(snap.agents||[]).map(function(a){var md=moodOf(a);return '<div class="rrow" data-id="'+a.id+'"><span class="rdot" style="background:'+color(a.id)+'"></span><div style="min-width:0"><div class="rn">'+esc(a.name)+(md.e?' <span title="'+md.l+'">'+md.e+'</span>':"")+'</div><div class="ra">'+emojiFor(a.action)+" "+esc(a.action)+'</div></div></div>';}).join("");
+      var roster=(snap.agents||[]).map(function(a){var md=moodOf(a);return '<div class="rrow" data-id="'+a.id+'"><span class="rdot" style="background:'+color(a.id)+'"></span><div style="min-width:0"><div class="rn">'+esc(a.name)+(md.e?' <span title="'+md.l+'">'+md.e+'</span>':"")+(a.influencedBy?' <span title="acting on @'+esc(a.influencedBy.handle)+'">🎙️</span>':"")+'</div><div class="ra">'+emojiFor(a.action)+" "+esc(a.action)+'</div></div></div>';}).join("");
+      var steer=(snap.agents||[]).filter(function(a){return a.influencedBy;})[0];
+      var steerHtml=steer?'<div class="inf"><div class="k">🎙️ You\\'re steering the story</div><b>'+esc(steer.name)+'</b> is acting on <b>@'+esc(steer.influencedBy.handle)+'</b>\\'s message right now — <span class="q">“'+esc(steer.influencedBy.text)+'”</span></div>':"";
       var hls=(snap.highlights||[]).slice(0,5).map(function(b){return '<div class="hl">'+esc(b.text)+'</div>';}).join("")||'<div class="hl">the day is just beginning…</div>';
       var bonds=(snap.relationships||[]).slice().sort(function(a,b){return b.weight-a.weight;}).slice(0,6).map(function(e){
         var hearts="";for(var i2=0;i2<Math.min(5,e.weight);i2++)hearts+="♥";var tn=toneOf(e);
@@ -1378,7 +1385,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         '<p>You\\'re <b>in the loop</b>, not just watching. Click anyone and reply — your message enters the <b>same memory</b> these AI minds reason from (with a salience boost) and steers what they do next.</p>'+
         '<p>In a controlled test, one audience reply changed <span class="stat">25% of the town\\'s next actions</span> — vs <span class="stat">0%</span> with no audience. That open, perturbable society is the leap past a closed sim.</p>'+
         '<p style="margin-bottom:0"><a href="https://github.com/AndresCarreonDiaz/QwenCity" target="_blank" rel="noopener">Audience-Coupled Salience Memory ↗</a></p></div>';
-      el.innerHTML='<div class="ptitle">The Town · Today</div>'+sceneHtml+storyHtml+'<div class="roster">'+roster+'</div>'+
+      el.innerHTML='<div class="ptitle">The Town · Today</div>'+steerHtml+sceneHtml+storyHtml+'<div class="roster">'+roster+'</div>'+
         '<div class="sec"><div class="h">Today\\'s drama</div>'+hls+'</div>'+
         (bonds?'<div class="sec"><div class="h">Bonds</div>'+bonds+'</div>':"")+sciHtml;
       Array.prototype.forEach.call(el.querySelectorAll(".rrow"),function(row){row.onclick=function(){selected=row.getAttribute("data-id");document.getElementById("hint").style.display="none";renderPanel();};});
@@ -1405,6 +1412,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       '<div class="back" id="back">← back to town</div>'+
       '<div class="who" style="margin-top:10px"><span class="avatar" style="background:'+color(a.id)+'"></span><div><div class="wn">'+esc(a.name)+'</div><div class="wl">'+emojiFor(a.action)+" at "+esc(place?place.label:a.location)+'</div></div></div>'+
       bioHtml+
+      (a.influencedBy?'<div class="inf"><div class="k">🎙️ Acting on your message</div>'+esc(a.name)+'\\'s next move was shaped by <b>@'+esc(a.influencedBy.handle)+'</b>: <span class="q">“'+esc(a.influencedBy.text)+'”</span></div>':"")+
       '<div class="doing"><div class="k">Right now</div>'+esc(a.action)+(a.planActivity?'<div style="color:var(--dim);margin-top:5px;font-size:12px">📋 plan: '+esc(a.planActivity)+'</div>':"")+'</div>'+
       '<div class="sec"><div class="h">💬 Say something to '+esc(a.name)+'</div><div class="replybox"><input id="rin" maxlength="240" placeholder="a message they\\'ll remember…"/><button id="rbtn">Send</button></div><div class="replymsg" id="rmsg">Your reply becomes a memory that can change what they do next.</div></div>'+
       (rels?'<div class="sec"><div class="h">Who '+esc(a.name)+' knows</div>'+rels+'</div>':"")+
