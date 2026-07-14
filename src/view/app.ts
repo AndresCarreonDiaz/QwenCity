@@ -116,26 +116,103 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var CW=34, CH=68; // on-screen character size
   var HHOVR=null; try{var q=new URLSearchParams(location.search).get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);}catch(e){}
 
-  // --- image assets: character sheets, props, real LimeZu buildings ---
-  var props={}, buildings={};
+  // --- image assets: character sheets, legacy props, LimeZu buildings + CITY set ---
+  var props={}, buildings={}, citybld={};
   var BLDG={cafe:"cafe",bakery:"bakery",maya_home:"home1",tom_home:"home2",ana_home:"home3",leo_home:"home4"};
   ["tree_green","tree_autumn","bush_pink","bush_white","bench","flowers","fountain","lamp"].forEach(function(n){props[n]=loadImg(base()+"/assets/props/"+n+".png");});
   ["table_umbrella","stall"].forEach(function(n){props[n]=loadImg(base()+"/assets/buildings/"+n+".png");});
   Object.keys(BLDG).forEach(function(k){buildings[k]=loadImg(base()+"/assets/buildings/"+BLDG[k]+".png");});
+  // NEW: the staged LimeZu city set — served from /assets/city/<slot>.png
+  var CITY_PROP=["car_a","car_b","traffic_light","hydrant","bus_stop","mailbox","trash_bin","planter","city_bench","street_sign","phone_booth","streetlamp_modern","tree_city"];
+  var CITY_BLD=["shop_a","shop_b","shop_c","office","civic","hotel","house_a","house_b"];
+  CITY_PROP.forEach(function(n){props[n]=loadImg(base()+"/assets/city/"+n+".png");});
+  CITY_BLD.forEach(function(n){citybld[n]=loadImg(base()+"/assets/city/"+n+".png");});
+  // manifest draw-heights (px at the reference unit 176) for every new city slot
+  var DRAWH={shop_a:120,shop_b:120,shop_c:120,office:175,civic:165,hotel:190,house_a:140,house_b:130,
+    car_a:40,car_b:40,traffic_light:72,hydrant:44,bus_stop:60,mailbox:44,trash_bin:44,planter:26,
+    city_bench:40,street_sign:48,phone_booth:84,streetlamp_modern:92,tree_city:84};
   function ok(im){return im&&im.complete&&im.naturalWidth>0;}
 
-  // --- decoration layer: props scattered off the streets (percent coords) ---
-  var SCATTER=[
-    {k:"tree_green",x:7,y:11},{k:"tree_autumn",x:25,y:8},{k:"tree_green",x:42,y:9},{k:"tree_autumn",x:58,y:8},{k:"tree_green",x:75,y:9},{k:"tree_autumn",x:93,y:11},
-    {k:"tree_green",x:5,y:32},{k:"tree_autumn",x:95,y:32},{k:"tree_autumn",x:5,y:64},{k:"tree_green",x:95,y:66},
-    {k:"tree_green",x:26,y:95},{k:"tree_autumn",x:41,y:96},{k:"tree_green",x:59,y:96},{k:"tree_autumn",x:74,y:95},
-    {k:"lamp",x:38,y:55},{k:"lamp",x:62,y:55},{k:"lamp",x:16,y:44},{k:"lamp",x:84,y:44},
-    {k:"bush_pink",x:30,y:60},{k:"bush_white",x:70,y:60},{k:"bush_pink",x:57,y:33},
-    {k:"flowers",x:24,y:28},{k:"flowers",x:76,y:28},{k:"flowers",x:43,y:33},{k:"flowers",x:27,y:63},{k:"flowers",x:73,y:63},{k:"flowers",x:36,y:89},{k:"flowers",x:64,y:89},
-    {k:"table_umbrella",x:24.5,y:47},{k:"stall",x:75.5,y:47}
+  // ======================= the CITY layout plan (percent coords) =======================
+  var MOBILE_W=560;
+  function isMobile(){return W<MOBILE_W;}
+  function shown(o){return o.mobile!==false||!isMobile();}
+  // street graph (Manhattan): two horizontal corridors + vertical rails
+  var HSTREETS=[
+    {y:48,x1:6,x2:94,kind:"main"},
+    {y:70,x1:8,x2:92,kind:"side",mobile:false}   // the promenade (plaza-south)
   ];
-  function propH(k){var m=clamp(H/760,0.9,1.3);return (k.slice(0,4)==="tree"?62:k==="lamp"?56:k==="fountain"?66:k==="table_umbrella"?50:k==="stall"?46:(k==="bush_pink"||k==="bush_white")?16:k==="bench"?26:17)*m;}
-  function drawProp(im,cx,cy,h){if(!ok(im))return;var s=h/im.naturalHeight,w=im.naturalWidth*s;ctx.drawImage(im,Math.round(cx-w/2),Math.round(cy-h),Math.round(w),Math.round(h));}
+  var VSTREETS=[
+    {x:13,y1:19,y2:85,kind:"side"},               // west residential ave
+    {x:87,y1:19,y2:85,kind:"side"},               // east residential ave
+    {x:50,y1:48,y2:88,kind:"main"},               // center boulevard
+    {x:30,y1:40,y2:71,kind:"side",mobile:false},  // downtown W cross (decorative)
+    {x:70,y1:40,y2:71,kind:"side",mobile:false}   // downtown E cross (decorative)
+  ];
+  var CROSSWALKS=[
+    {x:50,y:48,dir:"v"},                          // the rivalry crossing @ MAIN
+    {x:30,y:48,dir:"v",mobile:false},
+    {x:70,y:48,dir:"v",mobile:false},
+    {x:13,y:48,dir:"h"},
+    {x:87,y:48,dir:"h"},
+    {x:50,y:70,dir:"v",mobile:false},
+    {x:30,y:70,dir:"h",mobile:false},
+    {x:70,y:70,dir:"h",mobile:false}
+  ];
+  var DISTRICT={x1:8,y1:42,x2:92,y2:73};          // paved downtown rectangle
+  // decorative buildings (desktop only). x/hScale nudged from the raw plan so that
+  // NOTHING overlaps at real canvas heights (H~=755, not the plan's 1500 — towers
+  // are ~2x taller in %H there). Verified collision-free across W 560..1280.
+  var DECOR=[
+    {id:"office",  slot:"office", x:22, y:34, hScale:1.15, mobile:false},
+    {id:"hotel",   slot:"hotel",  x:78, y:34, hScale:0.95, mobile:false},
+    {id:"shop_a",  slot:"shop_a", x:31, y:35, hScale:1.00, sign:"FLOWERS", mobile:false},
+    {id:"shop_b",  slot:"shop_b", x:68, y:35, hScale:1.00, sign:"BOOKS", mobile:false},
+    {id:"shop_c",  slot:"shop_c", x:30, y:58, hScale:1.00, sign:"DINER", mobile:false},
+    {id:"civic",   slot:"civic",  x:68, y:58, hScale:0.95, mobile:false},
+    {id:"house_bl",slot:"house_b",x:28, y:82, hScale:0.85, mobile:false},
+    {id:"house_br",slot:"house_a",x:74, y:82, hScale:0.85, mobile:false}
+  ];
+  // props: cars, signage, sidewalk furniture, terraces, benches, lamps, greenery.
+  // legacy slots keep propH heights; new city slots use manifest DRAWH*m; flip
+  // mirrors the sprite around its own x.
+  var PROPS=[
+    {slot:"car_a",x:23,y:46},{slot:"car_b",x:77,y:46},
+    {slot:"car_b",x:35,y:51,flip:true,mobile:false},{slot:"car_a",x:66,y:51,flip:true,mobile:false},
+    {slot:"traffic_light",x:46,y:46},{slot:"traffic_light",x:30,y:45,mobile:false},{slot:"traffic_light",x:70,y:45,flip:true,mobile:false},
+    {slot:"street_sign",x:13,y:44},{slot:"street_sign",x:87,y:44,flip:true},
+    {slot:"bus_stop",x:16,y:50},
+    {slot:"phone_booth",x:20,y:50,mobile:false},
+    {slot:"hydrant",x:44,y:51},{slot:"mailbox",x:56,y:51},
+    {slot:"trash_bin",x:34,y:45,mobile:false},{slot:"trash_bin",x:66,y:45,mobile:false},
+    {slot:"tree_city",x:24,y:45,mobile:false},{slot:"tree_city",x:76,y:45,mobile:false},
+    {slot:"table_umbrella",x:45,y:42},{slot:"stall",x:55,y:42},
+    {slot:"city_bench",x:43,y:66},{slot:"city_bench",x:57,y:66,flip:true},
+    {slot:"planter",x:44,y:55},{slot:"planter",x:56,y:55},
+    {slot:"planter",x:24,y:51,mobile:false},{slot:"planter",x:76,y:51,mobile:false},
+    {slot:"city_bench",x:24,y:69,mobile:false},{slot:"city_bench",x:76,y:69,flip:true,mobile:false},
+    {slot:"lamp",x:17,y:45},{slot:"lamp",x:33,y:45},{slot:"lamp",x:67,y:45},{slot:"lamp",x:83,y:45},
+    {slot:"lamp",x:42,y:56},{slot:"lamp",x:58,y:56},
+    {slot:"streetlamp_modern",x:44,y:69,mobile:false},{slot:"streetlamp_modern",x:56,y:69,mobile:false},
+    {slot:"lamp",x:17,y:68,mobile:false},{slot:"lamp",x:83,y:68,mobile:false},
+    {slot:"tree_green",x:6,y:10},{slot:"tree_autumn",x:46,y:9,mobile:false},{slot:"tree_green",x:94,y:10},
+    {slot:"tree_autumn",x:6,y:40,mobile:false},{slot:"tree_green",x:94,y:40,mobile:false},
+    {slot:"tree_green",x:6,y:90},{slot:"tree_autumn",x:94,y:90},
+    {slot:"tree_green",x:40,y:90},{slot:"tree_autumn",x:60,y:90},
+    {slot:"bush_pink",x:20,y:74,mobile:false},{slot:"bush_white",x:80,y:74,mobile:false},
+    {slot:"flowers",x:46,y:63},{slot:"flowers",x:54,y:63},
+    {slot:"flowers",x:33,y:90,mobile:false},{slot:"flowers",x:67,y:90,mobile:false}
+  ];
+  function mFac(){return clamp(H/760,0.9,1.3);}
+  function propH(k){var m=mFac();return (k.slice(0,4)==="tree"?62:k==="lamp"?56:k==="fountain"?66:k==="table_umbrella"?50:k==="stall"?46:(k==="bush_pink"||k==="bush_white")?16:k==="bench"?26:17)*m;}
+  // unified prop height: new city slots use manifest DRAWH*m, legacy slots use propH
+  function pHeight(slot){return DRAWH[slot]?DRAWH[slot]*mFac():propH(slot);}
+  function drawProp(im,cx,cy,h,flip){
+    if(!ok(im))return;var s=h/im.naturalHeight,w=im.naturalWidth*s;
+    var y=Math.round(cy-h),wr=Math.round(w),hr=Math.round(h);
+    if(flip){ctx.save();ctx.translate(Math.round(cx),0);ctx.scale(-1,1);ctx.drawImage(im,Math.round(-w/2),y,wr,hr);ctx.restore();}
+    else ctx.drawImage(im,Math.round(cx-w/2),y,wr,hr);
+  }
 
   var canvas=document.getElementById("c"), ctx=canvas.getContext("2d");
   var stage=document.getElementById("stage");
@@ -151,17 +228,34 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
 
   var snap=null, sprites={}, selected=null, lastErr="", pairs={};
   function px(p){return {x:p.x/100*W, y:p.y/100*H};}
-  function streetY(){return 0.52*H;}
   function plazaR(){return Math.max(56, W*0.04);}
+  // responsive building base height: scale with the smaller of H and W so the
+  // dense downtown row fits horizontally at narrow desktop widths without ever
+  // overlapping (and never gets tiny on a phone).
+  function unitB(){return isMobile()?clamp(Math.min(H*0.21,W*0.235),100,150):clamp(Math.min(H*0.21,W*0.122),78,150);}
+  // horizontal corridors (MAIN always; PROMENADE desktop-only) and through-rails.
+  // x30/x70 are drawn as downtown cross-streets but NOT used for routing (shop_c /
+  // civic sit on them); characters traverse only x13/x50/x87.
+  function hCorrs(){return isMobile()?[0.48*H]:[0.48*H,0.70*H];}
+  function nearestH(y){var c=hCorrs(),b=c[0],i;for(i=1;i<c.length;i++)if(Math.abs(y-c[i])<Math.abs(y-b))b=c[i];return b;}
+  function nearestRailPx(xp){var r=[13,87],b=px({x:r[0],y:0}).x,i,xx;for(i=1;i<r.length;i++){xx=px({x:r[i],y:0}).x;if(Math.abs(xx-xp)<Math.abs(b-xp))b=xx;}return b;}
 
   // --- geometry of a place: where its building sits, its door, its baseline ---
   function geomOf(p){
     var c=px(p);
     if(p.type==="plaza"){var rx=Math.max(56,W*0.078);return {c:c,rx:rx,ry:rx*0.6,bottom:c.y+rx*0.6,base:c.y+16};}
     if(p.type==="park"){return {c:c,rx:Math.max(50,W*0.062),bottom:c.y+34,base:c.y+8};}
-    var bh=clamp(H*0.21,104,176)*(p.type==="home"?0.94:1);
+    var bh=unitB()*(p.type==="home"?0.94:1);
     var im=buildings[p.id]||buildings[p.type];
     var bw=ok(im)?im.naturalWidth*(bh/im.naturalHeight):bh*0.8;
+    var bottom=c.y+bh*0.45;
+    return {c:c,bh:bh,bw:bw,top:bottom-bh,bottom:bottom,base:bottom};
+  }
+  // decorative building geometry (drawH-based, bottom-anchored like functional)
+  function decorGeom(l){
+    var c=px(l), bh=(DRAWH[l.slot]||120)*l.hScale*(unitB()/176);
+    var im=citybld[l.slot];
+    var bw=ok(im)?im.naturalWidth*(bh/im.naturalHeight):bh*0.7;
     var bottom=c.y+bh*0.45;
     return {c:c,bh:bh,bw:bw,top:bottom-bh,bottom:bottom,base:bottom};
   }
@@ -187,21 +281,60 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     return out;
   }
 
-  // --- walking: route along the street grid (dips around the plaza fountain) ---
+  // --- walking: route along the ladder street grid (dips around the fountain) ---
+  // Rungs = MAIN (y48) + PROMENADE (y70, desktop). Rails = x13/x50/x87. Each place
+  // exits onto its own corridor; the plaza & park (behind the fountain on the
+  // boulevard) are reached via the southern dip, skirting the water — never a
+  // head-on walk through the fountain, on desktop OR phone.
   function route(from,place,slot){
-    var d=doorOf(place), sy=streetY(), cx=0.5*W;
-    var dip=px({x:50,y:52}).y+plazaR()*0.62+12;
-    var pts=[];
-    if(Math.abs(from.y-sy)>4)pts.push({x:from.x,y:sy});
-    var x1=from.x,x2=d.x;
-    if(Math.min(x1,x2)-6<cx&&cx<Math.max(x1,x2)+6){
-      if(Math.abs(x2-cx)<6){pts.push({x:cx,y:dip});}
-      else {pts.push({x:cx,y:dip});pts.push({x:x2,y:sy});}
-    } else if(Math.abs(x2-x1)>4)pts.push({x:x2,y:sy});
-    // the plaza's "door" is the fountain itself — never walk into it; ring
-    // slots are reached straight from the southern dip point
-    if(place.type!=="plaza"&&Math.abs(d.y-sy)>6)pts.push({x:d.x,y:d.y});
-    pts.push(slot);
+    var main=0.48*H;
+    var pc=px({x:50,y:60}), cx50=pc.x, pr=plazaR(), rxp=Math.max(56,W*0.078);
+    var dipY=pc.y+pr*0.62+12;
+    var d=doorOf(place);
+    var isPlaza=place.type==="plaza", isPark=place.type==="park";
+    var pts=[], f={x:from.x,y:from.y};
+
+    if(isPlaza||isPark){
+      if(f.y>pc.y+6){
+        // coming from the south (the park): rise straight up the clear blvd to the dip
+        if(Math.abs(f.x-cx50)>6)pts.push({x:cx50,y:f.y});
+        pts.push({x:cx50,y:dipY});
+      } else {
+        // coming from the north: slide MAIN to just outside the pad, drop beside it,
+        // then step in from the side so the fountain is never crossed
+        var s0=f.x<=cx50?-1:1, sk0=clamp(cx50+s0*(rxp+14),8,W-8);
+        if(Math.abs(f.y-main)>6)pts.push({x:f.x,y:main});
+        pts.push({x:sk0,y:main});
+        pts.push({x:sk0,y:dipY});
+        pts.push({x:cx50,y:dipY});
+      }
+      if(isPark)pts.push({x:cx50,y:d.y});   // continue down the clear blvd to the park
+      pts.push(slot);
+    } else {
+      // leaving the boulevard south of MAIN (a plaza/park slot)? skirt the fountain
+      // before climbing north (needed on phone where there is no promenade)
+      var band=f.y>main+8 && Math.abs(f.x-cx50)<rxp+8 && (f.y<dipY+40 || isMobile());
+      if(band){
+        if(f.y>dipY){pts.push({x:cx50,y:dipY});f={x:cx50,y:dipY};}
+        var s1=f.x<=cx50?-1:1, sk1=clamp(cx50+s1*(rxp+14),8,W-8);
+        pts.push({x:sk1,y:dipY});f={x:sk1,y:dipY};
+      }
+      var hy=nearestH(f.y);
+      if(Math.abs(f.y-hy)>6)pts.push({x:f.x,y:hy});
+      if(place.type==="cafe"||place.type==="bakery"){
+        // exits onto MAIN; switch rungs (if needed) via the nearest through-rail
+        if(hy!==main){var vx=nearestRailPx(d.x);pts.push({x:vx,y:hy});pts.push({x:vx,y:main});}
+        pts.push({x:d.x,y:main});
+        pts.push(d);
+      } else {
+        // home: ride its nearest vertical rail (x13/x87) to the door row
+        var vx2=nearestRailPx(d.x);
+        pts.push({x:vx2,y:hy});
+        pts.push({x:vx2,y:d.y});
+        if(Math.abs(d.x-vx2)>4)pts.push(d);
+      }
+      pts.push(slot);
+    }
     var out=[],last=from;
     for(var i=0;i<pts.length;i++){if(Math.hypot(pts[i].x-last.x,pts[i].y-last.y)>3){out.push(pts[i]);last=pts[i];}}
     return out;
@@ -229,7 +362,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var atPlace={}; (s.agents||[]).forEach(function(a){atPlace[a.location]=(atPlace[a.location]||[]).concat(a.id);});
     var slotBy={};
     Object.keys(atPlace).forEach(function(loc){
-      var p=places[loc]||places.plaza||{x:50,y:52,type:"plaza",id:"plaza"};
+      var p=places[loc]||places.plaza||{x:50,y:60,type:"plaza",id:"plaza"};
       var group=atPlace[loc], slots=slotsFor(p,group.length);
       group.forEach(function(id,i){slotBy[id]=slots[i];});
     });
@@ -421,7 +554,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
   function drawButterflies(nn){
     if(nn>0.15)return;
-    var anchors=[{x:24,y:28},{x:73,y:63},{x:43,y:33}];
+    var anchors=[{x:46,y:62},{x:54,y:62},{x:40,y:90}];
     for(var i=0;i<anchors.length;i++){
       var c=px(anchors[i]),t=T*0.03+i*2.1;
       var bx=c.x+Math.sin(t*1.3)*16,by=c.y-10+Math.sin(t*2.1)*8;
@@ -444,22 +577,43 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
 
   // ===================== drawing the town =====================
   function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
-  function roadSegs(){
-    var sy=streetY();
-    return [
-      [{x:0.12*W,y:sy},{x:0.88*W,y:sy}],
-      [{x:0.16*W,y:0.22*H},{x:0.16*W,y:0.84*H}],
-      [{x:0.84*W,y:0.22*H},{x:0.84*W,y:0.84*H}],
-      [{x:0.50*W,y:sy},{x:0.50*W,y:0.78*H}]
-    ];
-  }
-  function drawRoads(){
-    var rw=clamp(W*0.017,14,26),segs=roadSegs(),i;
-    ctx.lineCap="round";
-    for(var pass=0;pass<2;pass++){
-      ctx.strokeStyle=pass?"#d9c496":"#b7996b";ctx.lineWidth=pass?rw:rw+6;
-      for(i=0;i<segs.length;i++){ctx.beginPath();ctx.moveTo(segs[i][0].x,segs[i][0].y);ctx.lineTo(segs[i][1].x,segs[i][1].y);ctx.stroke();}
-    }
+  // --- procedural city ground: paved district, asphalt streets, crosswalks ---
+  function drawGround(nn){
+    var mob=isMobile();
+    // 1. the paved downtown district — sidewalk concrete laid over the grass
+    var d1=px({x:DISTRICT.x1,y:DISTRICT.y1}), d2=px({x:DISTRICT.x2,y:DISTRICT.y2});
+    ctx.fillStyle="#c3c7cf";ctx.fillRect(d1.x,d1.y,d2.x-d1.x,d2.y-d1.y);
+    ctx.strokeStyle="#aab0ba";ctx.lineWidth=1;
+    var sx,sy;
+    for(sx=d1.x+64;sx<d2.x;sx+=64){ctx.beginPath();ctx.moveTo(Math.round(sx)+0.5,d1.y);ctx.lineTo(Math.round(sx)+0.5,d2.y);ctx.stroke();}
+    for(sy=d1.y+64;sy<d2.y;sy+=64){ctx.beginPath();ctx.moveTo(d1.x,Math.round(sy)+0.5);ctx.lineTo(d2.x,Math.round(sy)+0.5);ctx.stroke();}
+    ctx.fillStyle="rgba(120,126,138,.16)";ctx.fillRect(d1.x,d2.y-6,d2.x-d1.x,6);
+    // 2. streets: sidewalk band, asphalt, curb lines, dashed centerline (main)
+    var aHalf=clamp(W*0.014,9,17)*(mob?0.72:1);
+    var swW=clamp(W*0.006,4,8)*(mob?0.72:1);
+    var asph=nn>0.5?"#3f444e":"#4b515c";
+    var segs=[];
+    HSTREETS.forEach(function(s){if(!shown(s))return;var a=px({x:s.x1,y:s.y}),b=px({x:s.x2,y:s.y});segs.push({o:"h",a:a,b:b,kind:s.kind});});
+    VSTREETS.forEach(function(s){if(!shown(s))return;var a=px({x:s.x,y:s.y1}),b=px({x:s.x,y:s.y2});segs.push({o:"v",a:a,b:b,kind:s.kind});});
+    ctx.fillStyle="#c3c7cf";
+    segs.forEach(function(g){if(g.o==="h")ctx.fillRect(g.a.x,g.a.y-aHalf-swW,g.b.x-g.a.x,(aHalf+swW)*2);else ctx.fillRect(g.a.x-aHalf-swW,g.a.y,(aHalf+swW)*2,g.b.y-g.a.y);});
+    ctx.fillStyle=asph;
+    segs.forEach(function(g){if(g.o==="h")ctx.fillRect(g.a.x,g.a.y-aHalf,g.b.x-g.a.x,aHalf*2);else ctx.fillRect(g.a.x-aHalf,g.a.y,aHalf*2,g.b.y-g.a.y);});
+    ctx.strokeStyle="#8b909b";ctx.lineWidth=1.4;
+    segs.forEach(function(g){ctx.beginPath();
+      if(g.o==="h"){ctx.moveTo(g.a.x,Math.round(g.a.y-aHalf)+0.5);ctx.lineTo(g.b.x,Math.round(g.a.y-aHalf)+0.5);ctx.moveTo(g.a.x,Math.round(g.a.y+aHalf)-0.5);ctx.lineTo(g.b.x,Math.round(g.a.y+aHalf)-0.5);}
+      else{ctx.moveTo(Math.round(g.a.x-aHalf)+0.5,g.a.y);ctx.lineTo(Math.round(g.a.x-aHalf)+0.5,g.b.y);ctx.moveTo(Math.round(g.a.x+aHalf)-0.5,g.a.y);ctx.lineTo(Math.round(g.a.x+aHalf)-0.5,g.b.y);}
+      ctx.stroke();});
+    ctx.strokeStyle="#c9a24b";ctx.lineWidth=2;ctx.setLineDash([14,12]);
+    segs.forEach(function(g){if(g.kind!=="main")return;ctx.beginPath();ctx.moveTo(g.a.x,g.a.y);ctx.lineTo(g.b.x,g.b.y);ctx.stroke();});
+    ctx.setLineDash([]);
+    // 3. zebra crosswalks across each flagged road
+    var n=mob?4:6, stw=4, gap=3, tot=n*stw+(n-1)*gap, i;
+    ctx.fillStyle="rgba(233,236,241,.9)";
+    CROSSWALKS.forEach(function(cw){if(!shown(cw))return;var c=px(cw);
+      if(cw.dir==="v"){for(i=0;i<n;i++){var yy=c.y-tot/2+i*(stw+gap);ctx.fillRect(c.x-aHalf,yy,aHalf*2,stw);}}
+      else{for(i=0;i<n;i++){var xx=c.x-tot/2+i*(stw+gap);ctx.fillRect(xx,c.y-aHalf,stw,aHalf*2);}}
+    });
   }
   var plates=[], namePlates=[];
   function drawNamePlates(){
@@ -472,17 +626,19 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     namePlates.forEach(function(p){
       ctx.textAlign="center";ctx.font="700 13px ui-sans-serif";
       var nw=ctx.measureText(p.name).width+12;
-      ctx.fillStyle="rgba(10,14,20,.72)";rr(p.x-nw/2,p.y-13,nw,17,8);ctx.fill();
-      ctx.fillStyle=p.sel?"#ecb44a":"#fff";ctx.fillText(p.name,p.x,p.y);
-      ctx.font="13px serif";ctx.fillText(p.em,p.emX,p.emY);
+      // clamp x so corner-home labels (x13/x87) stay fully on-canvas
+      var nx=clamp(p.x,nw/2+4,W-nw/2-4), dx=nx-p.x;
+      ctx.fillStyle="rgba(10,14,20,.72)";rr(nx-nw/2,p.y-13,nw,17,8);ctx.fill();
+      ctx.fillStyle=p.sel?"#ecb44a":"#fff";ctx.fillText(p.name,nx,p.y);
+      ctx.font="13px serif";ctx.fillText(p.em,clamp(p.emX+dx,10,W-10),p.emY);
     });
   }
   function plateLabel(text,x,y,dark){
     plates.push(function(){
       ctx.font="600 11px ui-sans-serif";ctx.textAlign="center";
-      var w=ctx.measureText(text).width+12;
-      ctx.fillStyle=dark||"rgba(10,14,20,.58)";rr(x-w/2,y-11,w,15,7);ctx.fill();
-      ctx.fillStyle="rgba(255,255,255,.93)";ctx.fillText(text,x,y+1);
+      var w=ctx.measureText(text).width+12, cx=clamp(x,w/2+3,W-w/2-3);
+      ctx.fillStyle=dark||"rgba(10,14,20,.58)";rr(cx-w/2,y-11,w,15,7);ctx.fill();
+      ctx.fillStyle="rgba(255,255,255,.93)";ctx.fillText(text,cx,y+1);
     });
   }
   function drawBuilding(p,g){
@@ -522,6 +678,20 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       ctx.fillStyle="#7a5a3a";var dw=bw2*0.24;rr(g.c.x-dw/2,y+bh2-bh2*0.42,dw,bh2*0.42,3);ctx.fill();
     }
     plateLabel(p.label,g.c.x,g.bottom-g.bh-8);
+  }
+
+  // decorative city building: soft shadow, bottom-anchored sprite, optional
+  // shop name painted onto its blank upper billboard (like the bakery sign)
+  function drawDecor(l,g){
+    var im=citybld[l.slot];
+    ctx.fillStyle="rgba(0,0,0,.18)";ctx.beginPath();ctx.ellipse(g.c.x,g.bottom+3,Math.max(10,g.bw*0.46),7,0,0,7);ctx.fill();
+    if(ok(im))ctx.drawImage(im,Math.round(g.c.x-g.bw/2),Math.round(g.bottom-g.bh),Math.round(g.bw),Math.round(g.bh));
+    if(l.sign){
+      var sx=g.c.x, sy=g.bottom-g.bh*0.70, fs=Math.max(8,Math.round(g.bh*0.085));
+      plates.push(function(){ctx.font="800 "+fs+"px ui-monospace,Menlo,monospace";ctx.textAlign="center";
+        ctx.fillStyle="rgba(20,22,28,.30)";ctx.fillText(l.sign,sx+1,sy+1);
+        ctx.fillStyle="#f4efe2";ctx.fillText(l.sign,sx,sy);});
+    }
   }
 
   function drawChar(a,sp){
@@ -573,12 +743,12 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     plates=[];namePlates=[];
     if(snap){
       var h=HHOVR!==null?HHOVR:hourNow(), tint=ambTint(h), nn=nightness(h);
-      drawRoads();
+      drawGround(nn);
       stepBeats(now);
-      // painter list: props + buildings + characters, sorted by baseline
-      var items=[];
-      SCATTER.forEach(function(d){var c=px(d);items.push({y:c.y,f:function(){drawProp(props[d.k],c.x,c.y,propH(d.k));}});});
-      var placeGeom={};
+      // painter list: props + decorative + functional buildings + characters, by baseline
+      var items=[], placeGeom={}, decGeom={};
+      PROPS.forEach(function(p){if(!shown(p))return;var c=px(p);items.push({y:c.y,f:function(){drawProp(props[p.slot],c.x,c.y,pHeight(p.slot),p.flip);}});});
+      DECOR.forEach(function(l){if(!shown(l))return;var g=decorGeom(l);decGeom[l.id]=g;items.push({y:g.base,f:function(){drawDecor(l,g);}});});
       (snap.places||[]).forEach(function(p){var g=geomOf(p);placeGeom[p.id]=g;items.push({y:g.base,f:function(){drawBuilding(p,g);}});});
       Object.keys(sprites).forEach(function(id){
         var sp=sprites[id];stepSprite(sp,dt,now);
@@ -594,19 +764,23 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       if(tint[3]>0.004){ctx.fillStyle="rgba("+Math.round(tint[0])+","+Math.round(tint[1])+","+Math.round(tint[2])+","+tint[3].toFixed(3)+")";ctx.fillRect(0,0,W,H);}
       if(nn>0.02){
         ctx.save();ctx.globalCompositeOperation="lighter";
-        SCATTER.forEach(function(d){
-          if(d.k!=="lamp")return;var c=px(d),ly=c.y-propH("lamp")*0.74;
-          var g2=ctx.createRadialGradient(c.x,ly,2,c.x,ly,46);
-          g2.addColorStop(0,"rgba(255,196,110,"+(0.5*nn).toFixed(2)+")");g2.addColorStop(1,"rgba(255,196,110,0)");
-          ctx.fillStyle=g2;ctx.beginPath();ctx.arc(c.x,ly,46,0,7);ctx.fill();
+        // street lamps, modern lamps + traffic signals all glow after dark
+        PROPS.forEach(function(p){if(!shown(p))return;
+          var isL=p.slot==="lamp"||p.slot==="streetlamp_modern", isT=p.slot==="traffic_light";
+          if(!isL&&!isT)return;
+          var c=px(p),hh=pHeight(p.slot),ly=c.y-hh*(isT?0.62:0.8),rad=isT?24:46;
+          var col=isT?"255,150,90":"255,196,110",al=(isT?0.26:0.5)*nn;
+          var g2=ctx.createRadialGradient(c.x,ly,2,c.x,ly,rad);
+          g2.addColorStop(0,"rgba("+col+","+al.toFixed(2)+")");g2.addColorStop(1,"rgba("+col+",0)");
+          ctx.fillStyle=g2;ctx.beginPath();ctx.arc(c.x,ly,rad,0,7);ctx.fill();
         });
-        (snap.places||[]).forEach(function(p){
-          if(p.type==="park"||p.type==="plaza")return;var g=placeGeom[p.id];if(!g)return;
-          var wy=g.bottom-g.bh*0.30;
-          var g3=ctx.createRadialGradient(g.c.x,wy,3,g.c.x,wy,g.bh*0.42);
+        // warm window glow — functional homes/shops AND the decorative skyline
+        function winGlow(g){var wy=g.bottom-g.bh*0.30,r=g.bh*0.42;
+          var g3=ctx.createRadialGradient(g.c.x,wy,3,g.c.x,wy,r);
           g3.addColorStop(0,"rgba(255,190,96,"+(0.24*nn).toFixed(2)+")");g3.addColorStop(1,"rgba(255,190,96,0)");
-          ctx.fillStyle=g3;ctx.beginPath();ctx.arc(g.c.x,wy,g.bh*0.42,0,7);ctx.fill();
-        });
+          ctx.fillStyle=g3;ctx.beginPath();ctx.arc(g.c.x,wy,r,0,7);ctx.fill();}
+        (snap.places||[]).forEach(function(p){if(p.type==="park"||p.type==="plaza")return;var g=placeGeom[p.id];if(g)winGlow(g);});
+        DECOR.forEach(function(l){if(!shown(l))return;var g=decGeom[l.id];if(g)winGlow(g);});
         ctx.restore();
         for(var si=0;si<stars.length;si++){
           var st=stars[si];

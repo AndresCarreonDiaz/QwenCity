@@ -14,20 +14,22 @@ export interface Place {
   type: PlaceType;
 }
 
-// Laid out on a street grid: a horizontal main street at y=52 with the plaza at
-// its center, vertical side streets at x=16 and x=84 serving the four homes, and
-// a short avenue from the plaza down to the park. The frontend draws these roads
-// and routes characters along them, so coordinates here are load-bearing for the
-// walkability of the town.
+// Laid out as a small city: Main Street (y=48) carries the downtown strip with
+// the café and bakery facing off across the central boulevard (x=50), the plaza
+// sits dead-center at the boulevard's heart (y=60) with a promenade (y=70)
+// south of it, homes anchor the corners on residential avenues (x=13/x=87), and
+// the park closes the boulevard at the bottom. The frontend draws the streets
+// and routes characters along them, so coordinates here are load-bearing for
+// the walkability of the city.
 export const PLACES: Place[] = [
-  { id: "cafe", label: "Maya's Café", x: 31, y: 40, type: "cafe" },
-  { id: "bakery", label: "Ana's Bakery", x: 69, y: 40, type: "bakery" },
-  { id: "maya_home", label: "Maya's Place", x: 16, y: 18, type: "home" },
-  { id: "tom_home", label: "Tom's Place", x: 84, y: 18, type: "home" },
-  { id: "ana_home", label: "Ana's Place", x: 84, y: 80, type: "home" },
-  { id: "leo_home", label: "Leo's Place", x: 16, y: 80, type: "home" },
-  { id: "park", label: "The Park", x: 50, y: 82, type: "park" },
-  { id: "plaza", label: "Town Plaza", x: 50, y: 52, type: "plaza" },
+  { id: "cafe", label: "Maya's Café", x: 40, y: 34, type: "cafe" },
+  { id: "bakery", label: "Ana's Bakery", x: 60, y: 34, type: "bakery" },
+  { id: "maya_home", label: "Maya's Place", x: 13, y: 17, type: "home" },
+  { id: "tom_home", label: "Tom's Place", x: 87, y: 17, type: "home" },
+  { id: "ana_home", label: "Ana's Place", x: 87, y: 82, type: "home" },
+  { id: "leo_home", label: "Leo's Place", x: 13, y: 82, type: "home" },
+  { id: "park", label: "The Park", x: 50, y: 85, type: "park" },
+  { id: "plaza", label: "Town Plaza", x: 50, y: 60, type: "plaza" },
 ];
 
 const PLACE_BY_ID = new Map(PLACES.map((p) => [p.id, p]));
