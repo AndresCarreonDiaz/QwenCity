@@ -6,6 +6,24 @@ run before moving on.
 
 ---
 
+## Iteration 35 — 2026-07-14 · the causal loop, made visible (watchability + Innovation) ✅
+
+**Done** — the whole thesis is "your reply causally rewires the society," and the engine already
+force-surfaces an audience reply into the character's very *next* decision (`surfacePendingInjection`)
+— but that moment was invisible. Now it's shown, live and in the moment.
+- **Engine** (`src/agent/agent.ts`): when a decision surfaces an audience injection, record the causal
+  link (`get influence()` → {handle, text}); cleared on any decision that isn't influenced. +1 test.
+- **Contract**: `AgentView.influencedBy` on the snapshot.
+- **View**: a pulsing **amber ring + 🎙️ marker** on the steered character; a **"🎙️ YOU'RE STEERING
+  THE STORY"** callout atop the town sidebar ("Maya is acting on @superfan's message right now — …");
+  a follow-panel **"Acting on your message"** card; a roster mic tag. The differentiator, provable in
+  the live product — and the demo video's money shot.
+
+**Verified:** typecheck · 107/107 · syntax gate · end-to-end (POST /reply → snapshot `influencedBy`
+set → the callout + ring render) via CDP screenshots · deployed, live OK.
+
+---
+
 ## Iteration 34 — 2026-07-14 · the improvements pass (win-the-hackathon priorities) ✅
 
 Prompted by "what would you improve?" → made the high-leverage improvements (past the watchability
