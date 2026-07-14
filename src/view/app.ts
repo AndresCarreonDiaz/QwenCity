@@ -779,6 +779,24 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     }
     lower.a+=((apk?1:0)-lower.a)*Math.min(1,dt*0.006);
   }
+  // top-center banner while a town-wide event (the daily meeting) is on — the
+  // appointment-viewing beat: everyone's at the plaza right now
+  function drawEventBanner(now){
+    if(!snap||!snap.event)return;
+    var label=snap.event.label||"Town Event";
+    ctx.font="800 13px ui-sans-serif";var tw=ctx.measureText(label).width;
+    var sub="everyone's at the plaza",sf="600 11px ui-sans-serif";
+    ctx.font=sf;var sw=ctx.measureText(sub).width;
+    var pad=14,ic=20,gap=10, w=ic+Math.max(tw,sw)+pad*2, h=40, x=(W-w)/2, y=12;
+    var pulse=0.6+0.4*Math.sin(T*0.12);
+    ctx.fillStyle="rgba(20,12,26,.9)";rr(x,y,w,h,10);ctx.fill();
+    ctx.strokeStyle="rgba(236,180,74,"+pulse.toFixed(2)+")";ctx.lineWidth=1.5;rr(x,y,w,h,10);ctx.stroke();
+    ctx.textAlign="left";
+    ctx.font="17px serif";ctx.fillText("📣",x+pad,y+25);
+    ctx.font="800 13px ui-sans-serif";ctx.fillStyle="#ecb44a";ctx.fillText(label.toUpperCase(),x+pad+ic+gap-4,y+18);
+    ctx.font=sf;ctx.fillStyle="#d9c8b0";ctx.fillText(sub,x+pad+ic+gap-4,y+32);
+    ctx.textAlign="center";
+  }
   function drawLowerThird(){
     if(lower.a<0.03||!lower.label)return;
     ctx.globalAlpha=Math.min(1,lower.a);
@@ -1169,7 +1187,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       stepBeats(now);
       stepEmotes(now);
       pumpVoices();
-      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2)+" roam="+(roam?roam.sid:"-")+" cold="+(coldOpen&&!coldOpen.done?"on":"off");
+      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2)+" roam="+(roam?roam.sid:"-")+" cold="+(coldOpen&&!coldOpen.done?"on":"off")+" event="+((snap&&snap.event)?snap.event.kind:"-");
       // painter list: props + decorative + functional buildings + characters, by baseline
       var items=[], placeGeom={}, decGeom={};
       PROPS.forEach(function(p){if(!shown(p))return;var c=px(p);items.push({y:c.y,f:function(){drawProp(props[p.slot],c.x,c.y,pHeight(p.slot),p.flip);}});});
@@ -1259,6 +1277,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         ctx.textAlign="center";
       }
       stepLower(dt);drawLowerThird();
+      drawEventBanner(now);
       drawChyron(dt);
       drawDayCard(now);
       drawColdOpen(now);

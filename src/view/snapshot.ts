@@ -3,6 +3,7 @@ import type { MemoryKind } from "../memory/types.ts";
 import type { MemoryStore } from "../memory/store.ts";
 import type { Feed } from "../social/feed.ts";
 import { weatherFor, type Weather } from "../world/weather.ts";
+import type { WorldEvent } from "../world/world.ts";
 import { selectHighlights, type HighlightBeat } from "./highlights.ts";
 import { moodFor, type MoodKey } from "./mood.ts";
 import { locationForAction, PLACES, type Place } from "./places.ts";
@@ -89,6 +90,8 @@ export interface WorldSnapshot {
   places: Place[];
   /** the season framing — what's at stake — shown so drop-in viewers get the story */
   premise: string;
+  /** a town-wide happening in progress (e.g. the daily town meeting), or null */
+  event: WorldEvent | null;
   stats: { agents: number; memories: number; posts: number; edges: number };
 }
 
@@ -107,6 +110,8 @@ export interface SnapshotInput {
   feed?: Feed;
   tickerLimit?: number;
   highlightLimit?: number;
+  /** the town-wide event in progress, from `World.activeEvent(now)` */
+  event?: WorldEvent | null;
 }
 
 /** how many of the most recent dialogue lines a snapshot carries */
@@ -239,6 +244,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     highlights,
     places: PLACES,
     premise: PREMISE,
+    event: input.event ?? null,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },
   };
 }

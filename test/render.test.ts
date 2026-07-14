@@ -24,6 +24,7 @@ const SNAP: WorldSnapshot = {
   highlights: [{ t: 2, kind: "reflection", importance: 8, text: "I value my friends" }],
   places: [],
   premise: "A quiet town with a secret.",
+  event: null,
   stats: { agents: 2, memories: 2, posts: 1, edges: 1 },
 };
 

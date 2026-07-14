@@ -21,6 +21,15 @@ export interface WorldOptions {
   conversationEveryTicks?: number;
   /** alternating turns per scheduled conversation (default 2; the live show uses 4 for richer scenes) */
   conversationTurns?: number;
+  /** opt-in: once per sim day the whole cast gathers at the plaza (appointment viewing) */
+  dailyGathering?: { hour: number; durationMin: number; topic?: string };
+}
+
+/** a scheduled town-wide happening surfaced to the spectator view */
+export interface WorldEvent {
+  kind: "gathering";
+  label: string;
+  until: number;
 }
 
 interface Runtime {
@@ -31,7 +40,11 @@ interface Runtime {
   nextDecisionAt: number;
   /** last-seen action of every other agent, so co-presence perception is event-driven */
   lastSeen: Map<string, string>;
+  /** while set and in the future, the agent stays at the town-meeting gathering */
+  gatheredUntil?: number;
 }
+
+const GATHER_ACTION = "at the town meeting in the Town Plaza";
 
 export interface TickEntry {
   t: number;
@@ -66,6 +79,9 @@ export class World {
   private readonly enableConversations: boolean;
   private readonly convEvery: number;
   private readonly convTurns: number;
+  private readonly gather: { hour: number; durationMin: number; topic?: string } | undefined;
+  private lastGatherDay = -1;
+  private gatheringUntil = 0;
   private readonly runtimes: Runtime[] = [];
   private tickCount = 0;
   /** realized conversational edges, keyed "idA|idB" (sorted) → exchange count */
@@ -84,6 +100,15 @@ export class World {
     this.enableConversations = opts.enableConversations ?? false;
     this.convEvery = Math.max(1, opts.conversationEveryTicks ?? 3);
     this.convTurns = Math.max(1, opts.conversationTurns ?? 2);
+    this.gather = opts.dailyGathering;
+  }
+
+  /** the town-wide event in progress at `now`, if any (for the spectator view) */
+  activeEvent(now: number): WorldEvent | null {
+    if (this.gatheringUntil && now < this.gatheringUntil) {
+      return { kind: "gathering", label: "Town Meeting", until: this.gatheringUntil };
+    }
+    return null;
   }
 
   /** plan each agent's day (call before run when usePlans is on) */
@@ -109,6 +134,25 @@ export class World {
   async tick(): Promise<void> {
     this.clock += this.stepMs;
     this.tickCount++;
+
+    // 0. TOWN MEETING (opt-in) — once per sim day the whole cast converges on
+    // the plaza to talk through the day's big worry (the rent). This gives the
+    // stream a predictable "appointment viewing" beat and a full-cast scene.
+    if (this.gather && this.runtimes.length) {
+      const d = new Date(this.clock);
+      const hour = d.getUTCHours() + d.getUTCMinutes() / 60;
+      const day = Math.floor(this.clock / 86_400_000);
+      if (day !== this.lastGatherDay && hour >= this.gather.hour && hour < this.gather.hour + this.gather.durationMin / 60) {
+        this.lastGatherDay = day;
+        this.gatheringUntil = this.clock + this.gather.durationMin * MS_PER_MIN;
+        const topic = this.gather.topic ?? "the news that the landlord may raise everyone's rent";
+        for (const r of this.runtimes) {
+          r.gatheredUntil = this.gatheringUntil;
+          r.action = GATHER_ACTION;
+          await r.agent.perceive(`The whole town is gathering at the Town Plaza for a meeting about ${topic}.`, this.clock);
+        }
+      }
+    }
 
     // 1. PERCEPTION — event-driven: only when another agent's action changed.
     const salient = new Map<string, boolean>();
@@ -153,6 +197,11 @@ export class World {
       let decided = false;
       if (conversed.has(id)) {
         decided = true; // the conversation was this agent's action this tick
+      } else if (r.gatheredUntil && this.clock < r.gatheredUntil) {
+        // anchored at the town meeting: stay put (no model call, no plan drift)
+        r.action = GATHER_ACTION;
+        r.nextDecisionAt = r.gatheredUntil;
+        decided = true;
       } else if (due || reacting) {
         // Ground the decision in place: the model knows WHERE the agent is,
         // WHAT is physically around them, and WHO else is here — so actions

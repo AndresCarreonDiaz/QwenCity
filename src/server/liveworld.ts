@@ -63,6 +63,7 @@ export class LiveWorld {
       enableConversations: true,
       conversationEveryTicks: 2,
       conversationTurns: 4,
+      dailyGathering: { hour: 12, durationMin: 90 },
     });
     for (const [id, name, bio] of DEFAULT_CAST) {
       const a = new Agent({ id, name, bio }, this.store, model, { reflectionThreshold: 200 });
@@ -83,7 +84,7 @@ export class LiveWorld {
     await this.world.tick();
     this.ticks++;
     if (this.logPath) for (const e of this.world.tickLog.slice(-this.agents.length)) appendTick(this.logPath, e);
-    this.snap = buildSnapshot({ now: this.world.clock, agents: this.agents, store: this.store, currentActions: this.world.currentActions(), feed: this.feed });
+    this.snap = buildSnapshot({ now: this.world.clock, agents: this.agents, store: this.store, currentActions: this.world.currentActions(), feed: this.feed, event: this.world.activeEvent(this.world.clock) });
     this.cachedHtml = renderSnapshotHtml(this.snap);
   }
 

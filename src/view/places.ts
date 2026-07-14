@@ -62,6 +62,6 @@ export function locationForAction(agentId: string, action: string): string {
   if (/\bhome|shower|dress|sleep|bed|waking|nap|rest|breakfast|winding down|\bread|journal|window\b/.test(a)) {
     return HOME_BY_AGENT[agentId] ?? "plaza";
   }
-  if (/\btalking with|chat|conversation|catch up|clear the air|apolog\b/.test(a)) return "plaza";
+  if (/\btalking with|chat|conversation|catch up|clear the air|apolog|meeting|gather|town square|the plaza\b/.test(a)) return "plaza";
   return "plaza";
 }
