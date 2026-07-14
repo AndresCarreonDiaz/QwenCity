@@ -6,6 +6,38 @@ run before moving on.
 
 ---
 
+## Iteration 39 — 2026-07-14 · calm the view: one channel per job, detail on demand ✅
+
+- **Why:** user felt *overwhelmed* by the screen. Diagnosis: the info wasn't too much, it was told
+  too many times at once — the same beat narrated through **six** simultaneous channels (speech
+  bubbles + the cold-open overlapping them + a caption + the news chyron + the sidebar "LIVE SCENE"
+  card + "Today's drama"), a 7-item header, and 8 flat sidebar sections with no hierarchy.
+- **Process:** ran a **design panel Workflow** — 4 independent senior-designer proposals (cinematic /
+  progressive-disclosure / strict-hierarchy / mobile-first-tabs), each adversarially critiqued and
+  scored, then synthesized into one implementable spec grounded in the real code element names (9
+  agents, 0 errors). Implemented + screenshot-verified the synthesis inline.
+- **Header:** dropped the "N souls · N memories · N bonds" engine strip (meaningless to a casual
+  viewer, wrapped to a 2nd row on phones). Numbers relocated into the "Why this is different" drawer.
+- **Canvas — the reported cold-open-overlap bug:** a single takeover gate (`COLD`/`TK`) now holds the
+  beat/emote/voice engine and DEFERS queued beats (never drops them) during the recap/day-card, and
+  hides the edge chrome under the full-screen scrim. Recap plays clean, hands off to the first live
+  bubble one frame later. Verified via `?dbg=1` (`cold=on cur=- emote=- beats=5` — five beats queued,
+  none drawn). The duplicate sidebar "LIVE SCENE" card is gone; scene identity lives only on the
+  canvas lower-third + roster action line.
+- **Sidebar — 8 flat sections → 3 tiers:** quiet title · always-visible green "⚡ You're in the loop ·
+  25% vs 0%" hook (the differentiator, split out of the wall of text so it's above the fold) · roster ·
+  two collapsed-by-default drawers ("The story so far" = premise + today's drama + bonds; "Why this
+  is different" = explainer + engine stats + link). Drawer state in closure vars (survives the 4s
+  poll re-render) + localStorage (survives reloads); reply-in-progress guard untouched.
+- **Info preservation:** every original item mapped to a new home (infoMap) — nothing deleted, only
+  relocated/deferred.
+
+**Verified:** client JS compiles (extract + `new Function`) · typecheck clean · 110/110 · CDP
+screenshots (desktop + mobile calm; drawers expand with all info; cold-open no longer bleeds) ·
+pushed, deployed to ECS, live screenshot confirms the calm layout under real Qwen.
+
+---
+
 ## Iteration 38 — 2026-07-14 · standing desires: give the audience an arc to root for ✅
 
 - **Why:** the cast was reactive turn-to-turn — nobody *wanted* anything across days, so there was no
