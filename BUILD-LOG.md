@@ -6,6 +6,30 @@ run before moving on.
 
 ---
 
+## Iteration 41 — 2026-07-14 · a rotating season: fresh drama past the rent ✅
+
+- **Why:** the only storyline was the rent, whose escalating meeting topics ran out after ~5 sim-days
+  and then looped — the deepest all-day/all-week watchability risk (repetition kills 24/7).
+- **Engine:** `World` gains optional `arcSeeds` — story hooks planted **once**, the first tick on/after
+  their sim-day, as a perception for one agent. Pure day-scheduled firing, self-deduping, off by
+  default; pairs with the existing day-indexed meeting topics so the framing walks the whole season.
+- **Content (3-writer panel → critique → synthesis Workflow):** four arcs after the rent, register
+  deliberately cycling so nothing repeats — **The Newcomer** (Leo spots a stranger photographing
+  storefronts → pushes Leo's need to matter; a mystery, deliberately not another buyout), **The Spring
+  Fair** (Maya finds an old fair ribbon + photo of two laughing teenagers → warm Maya/Tom arc toward a
+  last dance), **The Critic** (a food magazine will feature one plaza shop → detonates the Ana/Maya
+  rivalry), **The Leaving** (Maya overhears Tom may move away → the intimate Maya/Tom finale). Every
+  seed is a neutral fact/rumor; every outcome is left to the agents.
+- **Wiring:** a testable pure `seasonSchedule()` in liveworld flattens the `SEASON` into the World's
+  `topics` + `arcSeeds`, aligning each arc's seed to its start sim-day. Arc 0 (rent) still seeded in
+  `init()` before planning so day-0 plans know it.
+
+**Verified:** typecheck clean · 114/114 (seed fires once / on its day / for the right agent · off by
+default · schedule alignment) · a 7-sim-day fast-forward shows the meeting framing walk rent → Newcomer
+and the day-5 seed fire exactly once · deployed to ECS, live healthy.
+
+---
+
 ## Iteration 40 — 2026-07-14 · arc payoff: relationship milestones as broadcast "moments" ✅
 
 - **Why:** the desire arcs (iter 38) build tension, but a casual all-day viewer never got a clear
