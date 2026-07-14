@@ -160,19 +160,16 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var VSTREETS=[
     {x:13,y1:19,y2:85,kind:"side"},               // west residential ave
     {x:87,y1:19,y2:85,kind:"side"},               // east residential ave
-    {x:50,y1:48,y2:88,kind:"main"},               // center boulevard
-    {x:30,y1:40,y2:71,kind:"side",mobile:false},  // downtown W cross (decorative)
-    {x:70,y1:40,y2:71,kind:"side",mobile:false}   // downtown E cross (decorative)
+    {x:50,y1:48,y2:88,kind:"main"}                // center boulevard
+    // NB: no cross-streets at x=30/x=70 — the DINER (shop_c) and clock tower
+    // (civic) sit there on the downtown sidewalk; a road under them read as a
+    // building standing in the middle of the street.
   ];
   var CROSSWALKS=[
     {x:50,y:48,dir:"v"},                          // the rivalry crossing @ MAIN
-    {x:30,y:48,dir:"v",mobile:false},
-    {x:70,y:48,dir:"v",mobile:false},
     {x:13,y:48,dir:"h"},
     {x:87,y:48,dir:"h"},
-    {x:50,y:70,dir:"v",mobile:false},
-    {x:30,y:70,dir:"h",mobile:false},
-    {x:70,y:70,dir:"h",mobile:false}
+    {x:50,y:70,dir:"v",mobile:false}
   ];
   var DISTRICT={x1:8,y1:42,x2:92,y2:73};          // paved downtown rectangle
   // decorative buildings (desktop only). x/hScale nudged from the raw plan so that
