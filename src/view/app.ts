@@ -57,7 +57,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     #stage{flex:0 0 54dvh;min-height:240px}
     aside{flex:1 1 auto;flex-basis:auto;border-left:none;border-top:1px solid var(--line)}
     header{flex-wrap:wrap;gap:6px 12px;padding:8px 12px}
-    h1{font-size:16px}.stat{flex-basis:100%;order:9}.sub{display:none}
+    h1{font-size:16px}.sub{display:none}
     #hint{font-size:11px;left:8px;bottom:38px}
   }
   .ptitle{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:2px 0 10px}
@@ -71,6 +71,15 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   .sci b{color:var(--ink)}
   .sci .stat{color:#8fd49a;font-weight:700}
   .sci a{color:var(--amber);text-decoration:none}
+  .hook{margin:2px 0 4px;border:1px solid #2c4436;border-radius:10px;padding:9px 11px;background:linear-gradient(90deg,#15251b,#171f28)}
+  .hook .sh{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8fd49a;font-weight:800;margin-bottom:4px}
+  .hook p{font-size:12px;line-height:1.5;color:var(--dim);margin:0}
+  .hook .stat{color:#8fd49a;font-weight:700}
+  .drw{border-top:1px solid var(--line);margin-top:14px;padding-top:11px}
+  .dh{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:700;cursor:pointer;user-select:none}
+  .dh:hover{color:var(--ink)}
+  .dh .chv{color:var(--amber);font-size:11px}
+  .db{margin-top:11px}
   .ra2{font-size:11px;color:#7f8ba0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
   .bio{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12.5px;line-height:1.5}
   .bio .role{color:var(--ink);font-weight:600}
@@ -115,7 +124,6 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     <span class="sub">a soap opera played by AI minds — talk to the cast, change the story</span>
     <button id="vbtn" title="Kokoro TTS runs in your browser — one-time ~110MB download">🔇 voices</button>
     <span class="clock" id="clock">--:--</span>
-    <span class="stat" id="stat"></span>
   </header>
   <main>
     <div id="stage"><canvas id="c"></canvas><div id="hint">Click anyone to follow — and reply to change their story →</div><div id="coach"><div>👋 <b>You're not just watching.</b> Click any character and send them a message — it becomes a memory they act on, and <b>you change what happens next</b>.</div><div class="cx"><button id="coachok">Got it — let me try</button></div></div></div>
@@ -270,6 +278,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var rszT=null;window.addEventListener("resize",function(){clearTimeout(rszT);rszT=setTimeout(resize,120);});
 
   var snap=null, sprites={}, selected=null, lastErr="", pairs={};
+  // sidebar drawers: closed by default (calm), but persist a viewer's choice across
+  // the 4s poll re-render (closure scope) and across reloads (localStorage).
+  var showStory=false, showWhy=false;
+  try{showStory=localStorage.getItem("feed_story")==="1";showWhy=localStorage.getItem("feed_why")==="1";}catch(e){}
   // --- the broadcast camera: wide shot by default, auto-director nudges in on
   // live scenes, click-to-follow goes close (the Truman feel) ---
   var cam={cx:0,cy:0,z:1};
@@ -439,7 +451,6 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var wx=wxNow();
     var ph=wx==="rain"?"🌧":wx==="overcast"?"☁️":nn>0.6?"🌙":h<8?"🌅":h<17?"☀️":"🌇";
     document.getElementById("clock").textContent=(day>=1&&day<1000?"S1 · Day "+day+" · ":"")+ph+" "+(s.clock||"--:--");
-    document.getElementById("stat").textContent=(s.stats?(s.stats.agents+" souls · "+s.stats.memories+" memories · "+s.stats.edges+" bonds"):"");
     var places={}; (s.places||[]).forEach(function(p){places[p.id]=p;});
     var idByName={}; (s.agents||[]).forEach(function(a){idByName[a.name.toLowerCase()]=a.id;});
     // mutual "talking with X" pairs at the same location
@@ -552,6 +563,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     }
   }
   function stepBeats(now){
+    // During a full-screen takeover (cold-open recap or day card) hold the live
+    // dialogue: clear the current bubble and DEFER queued beats (they stay in
+    // beats[], nothing is evicted) so nothing bleeds through the recap scrim.
+    if((coldOpen&&!coldOpen.done)||dayCard){cur=null;gapUntil=now+400;return;}
     if(cur&&now>curUntil){cur=null;gapUntil=now+800;}
     if(!cur&&now>gapUntil){
       // self-heal a runaway schedule (fast tick bursts): never sit silent for
@@ -641,6 +656,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // --- stage directions: an idle character narrates what they're doing, in place ---
   var emote=null, emoteUntil=0, nextEmoteAt=0, emoteIdx=0;
   function stepEmotes(now){
+    if((coldOpen&&!coldOpen.done)||dayCard){emote=null;return;}
     if(emote&&now>emoteUntil)emote=null;
     if(emote||!snap)return;
     if(!nextEmoteAt){nextEmoteAt=now+6000;return;}
@@ -1237,6 +1253,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     // time-based phase counter (~one unit per 60Hz frame) so 120Hz displays
     // don't animate everything at double speed
     T=Math.floor(ts*0.06);var now=ts;
+    // takeover gates: COLD = full-screen cold-open recap; TK = any takeover (recap
+    // or day card). While TK, hold the live layer; while COLD, also hide edge chrome.
+    var COLD=coldOpen&&!coldOpen.done, TK=COLD||dayCard;
     ctx.imageSmoothingEnabled=false;
     stepCam(dt,now);camApply();
     // grass
@@ -1255,7 +1274,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       }
       stepBeats(now);
       stepEmotes(now);
-      pumpVoices();
+      if(!TK)pumpVoices();
       if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2)+" roam="+(roam?roam.sid:"-")+" cold="+(coldOpen&&!coldOpen.done?"on":"off")+" event="+((snap&&snap.event)?snap.event.kind:"-")+" brk="+(breaking?"ON":"-")+"/"+breakingQ.length;
       // painter list: props + decorative + functional buildings + characters, by baseline
       var items=[], placeGeom={}, decGeom={};
@@ -1324,8 +1343,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       // nameplates, labels, bubbles, chyron — always readable, above the grade
       plates.forEach(function(f){f();});
       drawNamePlates();
-      if(emote&&sprites[emote.sid])drawBubble(sprites[emote.sid],emote);
-      if(cur){
+      if(!TK&&emote&&sprites[emote.sid])drawBubble(sprites[emote.sid],emote);
+      if(!TK&&cur){
         var ssp=sprites[cur.sid];
         if(ssp)drawBubble(ssp,cur);
         // listener "…" only when the pair is really mid-conversation and far
@@ -1345,10 +1364,13 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         ctx.fillText("CAM 02 · FOLLOWING "+sprites[selected].a.name.toUpperCase(),36,26);
         ctx.textAlign="center";
       }
-      stepLower(dt);drawLowerThird();
-      drawEventBanner(now);
-      stepBreaking(now);drawBreaking(now);
-      drawChyron(dt);
+      // edge broadcast chrome — hidden only under the full-screen cold-open scrim
+      if(!COLD){
+        stepLower(dt);drawLowerThird();
+        drawEventBanner(now);
+        stepBreaking(now);drawBreaking(now);
+        drawChyron(dt);
+      }
       drawDayCard(now);
       drawColdOpen(now);
     } else {
@@ -1377,29 +1399,28 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var nameOf={}; (snap.agents||[]).forEach(function(a){nameOf[a.id]=a.name;});
     var placeOf={}; (snap.places||[]).forEach(function(p){placeOf[p.id]=p.label;});
     if(!selected){
-      var sceneHtml="";
-      var pk=Object.keys(pairs).filter(function(id){return id<pairs[id];})[0];
-      if(pk){
-        var pa=(snap.agents||[]).filter(function(x){return x.id===pk;})[0];
-        sceneHtml='<div class="scene">🎬 LIVE SCENE · '+esc(nameOf[pk])+' &amp; '+esc(nameOf[pairs[pk]])+(pa?' at '+esc(placeOf[pa.location]||pa.location):"")+'</div>';
-      }
       var roster=(snap.agents||[]).map(function(a){var md=moodOf(a);return '<div class="rrow" data-id="'+a.id+'"><span class="rdot" style="background:'+color(a.id)+'"></span><div style="min-width:0"><div class="rn">'+esc(a.name)+(md.e?' <span title="'+md.l+'">'+md.e+'</span>':"")+(a.influencedBy?' <span title="acting on @'+esc(a.influencedBy.handle)+'">🎙️</span>':"")+'</div><div class="ra">'+emojiFor(a.action)+" "+esc(a.action)+'</div></div></div>';}).join("");
       var steer=(snap.agents||[]).filter(function(a){return a.influencedBy;})[0];
       var steerHtml=steer?'<div class="inf"><div class="k">🎙️ You\\'re steering the story</div><b>'+esc(steer.name)+'</b> is acting on <b>@'+esc(steer.influencedBy.handle)+'</b>\\'s message right now — <span class="q">“'+esc(steer.influencedBy.text)+'”</span></div>':"";
+      // Tier-1 causal proof, always visible (the ablation headline split out of the explainer)
+      var hookHtml='<div class="hook"><div class="sh">⚡ You\\'re in the loop</div><p>Your replies change the story — <span class="stat">25% acted-on</span> vs <span class="stat">0%</span> with no audience.</p></div>';
       var hls=(snap.highlights||[]).slice(0,5).map(function(b){return '<div class="hl">'+esc(b.text)+'</div>';}).join("")||'<div class="hl">the day is just beginning…</div>';
       var bonds=(snap.relationships||[]).slice().sort(function(a,b){return b.weight-a.weight;}).slice(0,6).map(function(e){
         var hearts="";for(var i2=0;i2<Math.min(5,e.weight);i2++)hearts+="♥";var tn=toneOf(e);
         return '<div class="bond"><span>'+esc(nameOf[e.a]||e.a)+' ↔ '+esc(nameOf[e.b]||e.b)+(tn.e?' <span title="'+tn.l+'">'+tn.e+'</span>':"")+'</span><span class="hearts">'+hearts+'</span></div>';
       }).join("");
       var storyHtml=snap.premise?'<div class="story"><div class="st">📺 The Story</div><div class="sp">'+esc(snap.premise)+'</div></div>':"";
-      var sciHtml='<div class="sci"><div class="sh">⚡ Why this is different</div>'+
-        '<p>You\\'re <b>in the loop</b>, not just watching. Click anyone and reply — your message enters the <b>same memory</b> these AI minds reason from (with a salience boost) and steers what they do next.</p>'+
-        '<p>In a controlled test, one audience reply changed <span class="stat">25% of the town\\'s next actions</span> — vs <span class="stat">0%</span> with no audience. That open, perturbable society is the leap past a closed sim.</p>'+
-        '<p style="margin-bottom:0"><a href="https://github.com/AndresCarreonDiaz/QwenCity" target="_blank" rel="noopener">Audience-Coupled Salience Memory ↗</a></p></div>';
-      el.innerHTML='<div class="ptitle">The Town · Today</div>'+steerHtml+sceneHtml+storyHtml+'<div class="roster">'+roster+'</div>'+
-        '<div class="sec"><div class="h">Today\\'s drama</div>'+hls+'</div>'+
-        (bonds?'<div class="sec"><div class="h">Bonds</div>'+bonds+'</div>':"")+sciHtml;
+      // "The story so far" drawer — narrative thread, collapsed by default (calm)
+      var storyBody=showStory?('<div class="db">'+storyHtml+'<div class="h" style="margin-top:6px">Today\\'s drama</div>'+hls+(bonds?'<div class="h" style="margin-top:12px">Bonds</div>'+bonds:"")+'</div>'):"";
+      var storyDrawer='<div class="drw"><div class="dh" id="tglStory">The story so far <span class="chv">'+(showStory?'▾':'▸')+'</span></div>'+storyBody+'</div>';
+      // "Why this is different" drawer — judges' explainer + engine substrate, collapsed by default
+      var statLine=snap.stats?'<p>Under the hood right now: <b>'+snap.stats.memories+'</b> memories across <b>'+snap.stats.edges+'</b> bonds among <b>'+snap.stats.agents+'</b> souls.</p>':"";
+      var whyBody=showWhy?('<div class="sci" style="margin-top:11px"><p>You\\'re <b>in the loop</b>, not just watching. Click anyone and reply — your message enters the <b>same memory</b> these AI minds reason from (with a salience boost) and steers what they do next.</p>'+'<p>In a controlled test, one audience reply changed <span class="stat">25% of the town\\'s next actions</span> — vs <span class="stat">0%</span> with no audience. That open, perturbable society is the leap past a closed sim.</p>'+statLine+'<p style="margin-bottom:0"><a href="https://github.com/AndresCarreonDiaz/QwenCity" target="_blank" rel="noopener">Audience-Coupled Salience Memory ↗</a></p></div>'):"";
+      var whyDrawer='<div class="drw"><div class="dh" id="tglWhy">Why this is different <span class="chv">'+(showWhy?'▾':'▸')+'</span></div>'+whyBody+'</div>';
+      el.innerHTML='<div class="ptitle">The Town · Today</div>'+steerHtml+hookHtml+'<div class="roster">'+roster+'</div>'+storyDrawer+whyDrawer;
       Array.prototype.forEach.call(el.querySelectorAll(".rrow"),function(row){row.onclick=function(){selected=row.getAttribute("data-id");document.getElementById("hint").style.display="none";renderPanel();};});
+      var tS=document.getElementById("tglStory");if(tS)tS.onclick=function(){showStory=!showStory;try{localStorage.setItem("feed_story",showStory?"1":"0");}catch(e){}renderPanel();};
+      var tW=document.getElementById("tglWhy");if(tW)tW.onclick=function(){showWhy=!showWhy;try{localStorage.setItem("feed_why",showWhy?"1":"0");}catch(e){}renderPanel();};
       return;
     }
     var a=(snap.agents||[]).filter(function(x){return x.id===selected;})[0];
