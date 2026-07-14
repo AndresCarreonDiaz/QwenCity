@@ -6,6 +6,28 @@ run before moving on.
 
 ---
 
+## Iteration 42 — 2026-07-14 · make the season visible: chapters ✅
+
+- **Why:** the rotating season (iter 41) was only *felt* through dialogue — a watcher couldn't see
+  which chapter the town was in. Naming the story's position makes the multi-arc structure legible
+  (and sells the generative-story depth to judges).
+- **Engine:** `World.simDay()` exposes the season/chapter clock; a pure `chapterAt(SEASON, day)` names
+  the current arc (1-based + title + hook), clamping at both ends. Carried on the snapshot as an
+  optional `chapter` (so no test/contract churn).
+- **Surfaced three ways, all calm:** an always-visible purple `📖 Chapter N · Title` chip under the
+  panel title; the "story so far" drawer now leads with **"This chapter"** = the arc's hook (the fact
+  that kicked it off), above the evergreen show premise; and when the chapter turns, a broadcast
+  **title card** (`CHAPTER N / <Title> / A NEW CHAPTER`) supersedes the plain day card — a real "new
+  episode" beat. Title cards now own the screen: the breaking/moment flash is held (queued, not lost)
+  under any day/chapter card.
+
+**Verified:** client JS compiles · typecheck clean · 115/115 (`chapterAt` clamps both ends) · a
+fast-forward CDP run caught the live turn — chip Chapter 1 → Chapter 2, the "CHAPTER 2 / The Newcomer"
+card, and the drawer's "This chapter" showing the Newcomer hook verbatim · deployed, live serves
+`chapter:{n:1,title:"The Rent"}`.
+
+---
+
 ## Iteration 41 — 2026-07-14 · a rotating season: fresh drama past the rent ✅
 
 - **Why:** the only storyline was the rent, whose escalating meeting topics ran out after ~5 sim-days
