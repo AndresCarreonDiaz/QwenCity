@@ -6,6 +6,23 @@ run before moving on.
 
 ---
 
+## Iteration 37 — 2026-07-14 · live QA + camera cuts to the town meeting ✅
+
+- **Live E2E QA pass** (no code change): verified the deployed product across desktop + mobile — no
+  regressions, clean map, all broadcast cards cohesive, real-Qwen dialogue sharp. A suspected mobile
+  text-clipping bug was a **screenshot artifact** (headless `--force-device-scale-factor` without
+  device emulation); proper CDP `Emulation.setDeviceMetricsOverride{mobile:true}` + a `scrollWidth`
+  overflow probe confirmed no overflow. Recorded the mobile-verification lesson in memory + tooling
+  (`cdp-mobshot.mjs`, `cdp-overflow.mjs`).
+- **Camera cuts to the meeting**: during the daily town gathering the broadcast camera now holds a
+  wide establishing shot of the plaza (and suppresses the idle roam), so the appointment-viewing beat
+  is framed like a real broadcast cutting to the big event.
+
+**Verified:** typecheck · 107/107 · syntax gate · CDP screenshot of the meeting establishing shot ·
+deployed, live OK.
+
+---
+
 ## Iteration 36 — 2026-07-14 · onboarding: make the interaction discoverable ✅
 
 **Done** — the differentiator (talk to the cast → change the story) is now visible *once you use it*,
