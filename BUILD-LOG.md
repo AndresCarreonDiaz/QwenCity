@@ -6,6 +6,19 @@ run before moving on.
 
 ---
 
+## Iteration 36 — 2026-07-14 · onboarding: make the interaction discoverable ✅
+
+**Done** — the differentiator (talk to the cast → change the story) is now visible *once you use it*,
+but a new viewer had to stumble onto it. Added a tasteful **one-time coachmark** ("👋 You're not just
+watching. Click any character and send them a message — it becomes a memory they act on, and you
+change what happens next"), shown ~4.4s after load, dismissed on click / "Got it" / 22s, remembered
+per browser (localStorage). Persistent hint copy now reads "Click anyone to follow — and reply to
+change their story." Agency drives all-day retention + makes the core loop demo-obvious.
+
+**Verified:** typecheck · 107/107 · syntax gate · CDP screenshot of the coachmark · deployed, live OK.
+
+---
+
 ## Iteration 35 — 2026-07-14 · the causal loop, made visible (watchability + Innovation) ✅
 
 **Done** — the whole thesis is "your reply causally rewires the society," and the engine already
