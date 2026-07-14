@@ -127,6 +127,23 @@ export function seasonSchedule(season: SeasonArc[]): {
   return { topics, arcSeeds };
 }
 
+/** which chapter (1-based) the town is in at a given sim-day, with its title +
+ *  hook — so the spectator view can name where the season is right now. Clamps
+ *  to the last arc once the season's topics are exhausted. */
+export function chapterAt(
+  season: SeasonArc[],
+  dayOffset: number,
+): { n: number; title: string; hook?: string } {
+  let day = 0;
+  for (let i = 0; i < season.length; i++) {
+    const arc = season[i]!;
+    if (dayOffset < day + arc.topics.length) return { n: i + 1, title: arc.title, hook: arc.seedText };
+    day += arc.topics.length;
+  }
+  const last = season[season.length - 1]!;
+  return { n: season.length, title: last.title, hook: last.seedText };
+}
+
 /**
  * The always-on world behind the server: fast-forwards the simulation on a
  * timer, keeps a rendered snapshot + HTML cached for cheap reads, appends the
@@ -191,7 +208,7 @@ export class LiveWorld {
     await this.world.tick();
     this.ticks++;
     if (this.logPath) for (const e of this.world.tickLog.slice(-this.agents.length)) appendTick(this.logPath, e);
-    this.snap = buildSnapshot({ now: this.world.clock, agents: this.agents, store: this.store, currentActions: this.world.currentActions(), feed: this.feed, event: this.world.activeEvent(this.world.clock) });
+    this.snap = buildSnapshot({ now: this.world.clock, agents: this.agents, store: this.store, currentActions: this.world.currentActions(), feed: this.feed, event: this.world.activeEvent(this.world.clock), chapter: chapterAt(SEASON, this.world.simDay()) });
     this.cachedHtml = renderSnapshotHtml(this.snap);
   }
 

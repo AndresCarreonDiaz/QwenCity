@@ -4,7 +4,7 @@ import { Agent } from "../src/agent/agent.ts";
 import { MemoryStore } from "../src/memory/store.ts";
 import { MockAdapter } from "../src/model/mock.ts";
 import { World } from "../src/world/world.ts";
-import { SEASON, seasonSchedule } from "../src/server/liveworld.ts";
+import { SEASON, seasonSchedule, chapterAt } from "../src/server/liveworld.ts";
 
 const START = Date.UTC(2026, 6, 10, 8, 0, 0); // day 10, 08:00 → dayOffset 0
 const SEED = "ARC2-SEED: a mysterious stranger arrived in town.";
@@ -63,6 +63,18 @@ test("season schedule flattens topics and aligns each arc's seed to its start da
   // every seed is a real hook, and the season actually rotates (more than one arc)
   assert.ok(arcSeeds.length >= 3, "the season adds several arcs after the rent");
   assert.ok(arcSeeds.every((s) => s.text.length > 20));
+});
+
+test("chapterAt names the arc for a given sim-day, clamping at both ends", () => {
+  const len0 = SEASON[0]!.topics.length;
+  assert.equal(chapterAt(SEASON, 0).n, 1);
+  assert.equal(chapterAt(SEASON, len0 - 1).n, 1, "last day of arc 0 is still chapter 1");
+  assert.equal(chapterAt(SEASON, len0).n, 2, "first day past arc 0 is chapter 2");
+  assert.equal(chapterAt(SEASON, len0).title, SEASON[1]!.title);
+  assert.equal(chapterAt(SEASON, len0).hook, SEASON[1]!.seedText);
+  assert.equal(chapterAt(SEASON, -3).n, 1, "underflow clamps to chapter 1");
+  assert.equal(chapterAt(SEASON, 9999).n, SEASON.length, "overflow clamps to the finale");
+  assert.equal(chapterAt(SEASON, 9999).title, SEASON[SEASON.length - 1]!.title);
 });
 
 test("arc seeds are off by default (opt-in only)", async () => {

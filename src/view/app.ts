@@ -60,7 +60,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     h1{font-size:16px}.sub{display:none}
     #hint{font-size:11px;left:8px;bottom:38px}
   }
-  .ptitle{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:2px 0 10px}
+  .ptitle{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:2px 0 8px}
+  .chap{display:inline-block;font-size:11px;color:#c9a6e6;background:#221a2e;border:1px solid #3a2f4a;border-radius:999px;padding:3px 11px;margin:0 0 12px;font-weight:700;letter-spacing:.02em}
   .scene{background:linear-gradient(90deg,#2b1e2e,#1e2431);border:1px solid #4a3550;border-radius:10px;padding:9px 11px;font-size:12.5px;margin-bottom:12px;color:#f0c9d4}
   .story{background:linear-gradient(120deg,#241a12,#1a1e28);border:1px solid #4a3a24;border-radius:10px;padding:10px 12px;margin-bottom:12px}
   .story .st{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:800;margin-bottom:5px}
@@ -446,7 +447,11 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       if(NOCOLD)coldOpen={done:true,lines:[]};
       else coldOpen={lines:(s.highlights||[]).slice(0,3).map(function(b){return b.text;}),start:performance.now(),day:day};
     }
-    if(lastDay&&day!==lastDay&&day>=1)dayCard={text:"DAY "+day,start:performance.now()};
+    // a chapter turn is momentous — its title card supersedes the plain day card
+    var sc=s.chapter;
+    if(sc&&prevChapterN!==null&&sc.n!==prevChapterN)dayCard={text:sc.title,sub:"CHAPTER "+sc.n,start:performance.now()};
+    else if(lastDay&&day!==lastDay&&day>=1)dayCard={text:"DAY "+day,start:performance.now()};
+    if(sc)prevChapterN=sc.n;
     if(day>=1)lastDay=day;
     var wx=wxNow();
     var ph=wx==="rain"?"🌧":wx==="overcast"?"☁️":nn>0.6?"🌙":h<8?"🌅":h<17?"☀️":"🌇";
@@ -720,7 +725,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
 
   // ============ broadcast package: cold open + day title cards ==============
-  var coldOpen=null, dayCard=null, lastDay=0;
+  var coldOpen=null, dayCard=null, lastDay=0, prevChapterN=null;
   function drawColdOpen(now){
     if(!coldOpen||coldOpen.done)return;
     var el=now-coldOpen.start, n=coldOpen.lines.length;
@@ -757,10 +762,13 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var a=el<300?el/300:el>total-500?(total-el)/500:1;
     ctx.fillStyle="rgba(6,8,14,"+(0.6*a).toFixed(3)+")";ctx.fillRect(0,H*0.4,W,H*0.2);
     ctx.globalAlpha=Math.max(0,a);ctx.textAlign="center";
-    ctx.font="800 34px ui-monospace,Menlo,monospace";ctx.fillStyle="#fff";
+    // a chapter card leads with its title (top label "CHAPTER N"); a day card
+    // leads with "DAY N" (label "A NEW EPISODE BEGINS").
+    if(dayCard.sub){ctx.font="700 11px ui-monospace,Menlo,monospace";ctx.fillStyle="#c9a6e6";ctx.fillText(dayCard.sub,W/2,H*0.5-16);}
+    ctx.font="800 32px ui-sans-serif";ctx.fillStyle="#fff";
     ctx.fillText(dayCard.text,W/2,H*0.5+6);
     ctx.font="700 11px ui-monospace,Menlo,monospace";ctx.fillStyle="#ecb44a";
-    ctx.fillText("A NEW EPISODE BEGINS",W/2,H*0.5+30);
+    ctx.fillText(dayCard.sub?"A NEW CHAPTER":"A NEW EPISODE BEGINS",W/2,H*0.5+30);
     ctx.globalAlpha=1;
   }
 
@@ -1400,7 +1408,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       if(!COLD){
         stepLower(dt);drawLowerThird();
         drawEventBanner(now);
-        stepBreaking(now);drawBreaking(now);
+        // hold the breaking/moment flash under ANY title card (day or chapter) so
+        // the card owns the screen; the flash is queued, not lost, and resumes after
+        if(!TK){stepBreaking(now);drawBreaking(now);}
         drawChyron(dt);
       }
       drawDayCard(now);
@@ -1444,13 +1454,17 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       var storyHtml=snap.premise?'<div class="story"><div class="st">📺 The Story</div><div class="sp">'+esc(snap.premise)+'</div></div>':"";
       // "The story so far" drawer — narrative thread, collapsed by default (calm)
       var turns=momentsLog.length?('<div class="h" style="margin-top:6px">Turning points</div>'+momentsLog.map(function(t){return '<div class="hl">'+esc(t)+'</div>';}).join("")):"";
-      var storyBody=showStory?('<div class="db">'+storyHtml+turns+'<div class="h" style="margin-top:12px">Today\\'s drama</div>'+hls+(bonds?'<div class="h" style="margin-top:12px">Bonds</div>'+bonds:"")+'</div>'):"";
+      // the current chapter's hook — the fact that kicked off where the season is now
+      var chp=snap.chapter;
+      var chapHook=(chp&&chp.hook)?('<div class="h" style="margin-top:6px">This chapter</div><div class="hl">'+esc(chp.hook)+'</div>'):"";
+      var storyBody=showStory?('<div class="db">'+storyHtml+chapHook+turns+'<div class="h" style="margin-top:12px">Today\\'s drama</div>'+hls+(bonds?'<div class="h" style="margin-top:12px">Bonds</div>'+bonds:"")+'</div>'):"";
       var storyDrawer='<div class="drw"><div class="dh" id="tglStory">The story so far <span class="chv">'+(showStory?'▾':'▸')+'</span></div>'+storyBody+'</div>';
       // "Why this is different" drawer — judges' explainer + engine substrate, collapsed by default
       var statLine=snap.stats?'<p>Under the hood right now: <b>'+snap.stats.memories+'</b> memories across <b>'+snap.stats.edges+'</b> bonds among <b>'+snap.stats.agents+'</b> souls.</p>':"";
       var whyBody=showWhy?('<div class="sci" style="margin-top:11px"><p>You\\'re <b>in the loop</b>, not just watching. Click anyone and reply — your message enters the <b>same memory</b> these AI minds reason from (with a salience boost) and steers what they do next.</p>'+'<p>In a controlled test, one audience reply changed <span class="stat">25% of the town\\'s next actions</span> — vs <span class="stat">0%</span> with no audience. That open, perturbable society is the leap past a closed sim.</p>'+statLine+'<p style="margin-bottom:0"><a href="https://github.com/AndresCarreonDiaz/QwenCity" target="_blank" rel="noopener">Audience-Coupled Salience Memory ↗</a></p></div>'):"";
       var whyDrawer='<div class="drw"><div class="dh" id="tglWhy">Why this is different <span class="chv">'+(showWhy?'▾':'▸')+'</span></div>'+whyBody+'</div>';
-      el.innerHTML='<div class="ptitle">The Town · Today</div>'+steerHtml+hookHtml+'<div class="roster">'+roster+'</div>'+storyDrawer+whyDrawer;
+      var chapChip=chp?('<div class="chap">📖 Chapter '+chp.n+' · '+esc(chp.title)+'</div>'):"";
+      el.innerHTML='<div class="ptitle">The Town · Today</div>'+chapChip+steerHtml+hookHtml+'<div class="roster">'+roster+'</div>'+storyDrawer+whyDrawer;
       Array.prototype.forEach.call(el.querySelectorAll(".rrow"),function(row){row.onclick=function(){selected=row.getAttribute("data-id");document.getElementById("hint").style.display="none";renderPanel();};});
       var tS=document.getElementById("tglStory");if(tS)tS.onclick=function(){showStory=!showStory;try{localStorage.setItem("feed_story",showStory?"1":"0");}catch(e){}renderPanel();};
       var tW=document.getElementById("tglWhy");if(tW)tW.onclick=function(){showWhy=!showWhy;try{localStorage.setItem("feed_why",showWhy?"1":"0");}catch(e){}renderPanel();};

@@ -107,6 +107,8 @@ export interface WorldSnapshot {
   places: Place[];
   /** the season framing — what's at stake — shown so drop-in viewers get the story */
   premise: string;
+  /** the current season chapter (1-based) + title/hook, so the view can name where the story is now */
+  chapter?: { n: number; title: string; hook?: string };
   /** a town-wide happening in progress (e.g. the daily town meeting), or null */
   event: WorldEvent | null;
   stats: { agents: number; memories: number; posts: number; edges: number };
@@ -129,6 +131,8 @@ export interface SnapshotInput {
   highlightLimit?: number;
   /** the town-wide event in progress, from `World.activeEvent(now)` */
   event?: WorldEvent | null;
+  /** the current season chapter, from `chapterAt(SEASON, world.simDay())` */
+  chapter?: { n: number; title: string; hook?: string };
 }
 
 /** how many of the most recent dialogue lines a snapshot carries */
@@ -271,6 +275,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     highlights,
     places: PLACES,
     premise: PREMISE,
+    chapter: input.chapter,
     event: input.event ?? null,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },
   };

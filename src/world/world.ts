@@ -118,6 +118,11 @@ export class World {
     this.startDay = Math.floor(startTime / 86_400_000);
   }
 
+  /** whole sim-days elapsed since the world started (0-based) — the season/chapter clock */
+  simDay(now: number = this.clock): number {
+    return Math.floor(now / 86_400_000) - this.startDay;
+  }
+
   /** the town-wide event in progress at `now`, if any (for the spectator view) */
   activeEvent(now: number): WorldEvent | null {
     if (this.gatheringUntil && now < this.gatheringUntil) {
