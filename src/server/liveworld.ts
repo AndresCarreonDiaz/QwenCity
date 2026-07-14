@@ -65,7 +65,19 @@ export class LiveWorld {
       enableConversations: true,
       conversationEveryTicks: 2,
       conversationTurns: 4,
-      dailyGathering: { hour: 12, durationMin: 90 },
+      // The town meeting's subject escalates day by day — an emergent story arc
+      // (the cast still reacts freely; only the day's framing advances).
+      dailyGathering: {
+        hour: 12,
+        durationMin: 90,
+        topics: [
+          "the rumor that the landlord may raise everyone's rent",
+          "the official notice — the landlord has confirmed the rent will go up",
+          "what the shop owners should do about the rent; some want to band together",
+          "how the town is coping now that the higher rent has taken effect",
+          "whether the café and bakery can survive the winter under the new rent",
+        ],
+      },
     });
     for (const [id, name, bio] of DEFAULT_CAST) {
       const a = new Agent({ id, name, bio }, this.store, model, { reflectionThreshold: 200 });

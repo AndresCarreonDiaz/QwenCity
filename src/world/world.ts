@@ -21,8 +21,11 @@ export interface WorldOptions {
   conversationEveryTicks?: number;
   /** alternating turns per scheduled conversation (default 2; the live show uses 4 for richer scenes) */
   conversationTurns?: number;
-  /** opt-in: once per sim day the whole cast gathers at the plaza (appointment viewing) */
-  dailyGathering?: { hour: number; durationMin: number; topic?: string };
+  /** opt-in: once per sim day the whole cast gathers at the plaza (appointment viewing).
+   *  `topics` (optional) escalate the meeting's subject by sim-day (index = days
+   *  since the world started, clamped) — a light, emergent story arc: agents still
+   *  react freely, only the day's framing advances. */
+  dailyGathering?: { hour: number; durationMin: number; topic?: string; topics?: string[] };
 }
 
 /** a scheduled town-wide happening surfaced to the spectator view */
@@ -79,7 +82,8 @@ export class World {
   private readonly enableConversations: boolean;
   private readonly convEvery: number;
   private readonly convTurns: number;
-  private readonly gather: { hour: number; durationMin: number; topic?: string } | undefined;
+  private readonly gather: { hour: number; durationMin: number; topic?: string; topics?: string[] } | undefined;
+  private readonly startDay: number;
   private lastGatherDay = -1;
   private gatheringUntil = 0;
   private readonly runtimes: Runtime[] = [];
@@ -101,6 +105,7 @@ export class World {
     this.convEvery = Math.max(1, opts.conversationEveryTicks ?? 3);
     this.convTurns = Math.max(1, opts.conversationTurns ?? 2);
     this.gather = opts.dailyGathering;
+    this.startDay = Math.floor(startTime / 86_400_000);
   }
 
   /** the town-wide event in progress at `now`, if any (for the spectator view) */
@@ -145,7 +150,10 @@ export class World {
       if (day !== this.lastGatherDay && hour >= this.gather.hour && hour < this.gather.hour + this.gather.durationMin / 60) {
         this.lastGatherDay = day;
         this.gatheringUntil = this.clock + this.gather.durationMin * MS_PER_MIN;
-        const topic = this.gather.topic ?? "the news that the landlord may raise everyone's rent";
+        const topics = this.gather.topics;
+        const topic = topics && topics.length
+          ? topics[Math.min(Math.max(0, day - this.startDay), topics.length - 1)]!
+          : (this.gather.topic ?? "the news that the landlord may raise everyone's rent");
         for (const r of this.runtimes) {
           r.gatheredUntil = this.gatheringUntil;
           r.action = GATHER_ACTION;

@@ -44,6 +44,25 @@ test("the daily town meeting gathers the whole cast at the plaza, once", async (
   assert.equal(world.activeEvent(world.clock), null, "meeting over after its window");
 });
 
+test("the town meeting's topic escalates by sim-day", async () => {
+  const model = new MockAdapter();
+  const store = new MemoryStore(model);
+  const world = new World(store, START, {
+    stepMinutes: 30,
+    dailyGathering: {
+      hour: 12,
+      durationMin: 90,
+      topics: ["the RUMOR-STAGE about rent", "the NOTICE-STAGE about rent"],
+    },
+  });
+  world.add(new Agent({ id: "maya", name: "Maya", bio: "Maya lives here." }, store, model));
+  // through noon of day 2 (08:00 start, 30-min steps → 24h ≈ 48 ticks + 8 to first noon)
+  for (let i = 0; i < 56; i++) await world.tick();
+  const seeded = store.all().map((n) => n.description);
+  assert.ok(seeded.some((d) => d.includes("RUMOR-STAGE")), "day 1 meeting used the first topic");
+  assert.ok(seeded.some((d) => d.includes("NOTICE-STAGE")), "day 2 meeting escalated to the second topic");
+});
+
 test("gathering is off by default (opt-in only)", async () => {
   const model = new MockAdapter();
   const store = new MemoryStore(model);
