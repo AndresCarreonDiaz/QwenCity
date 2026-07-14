@@ -62,6 +62,7 @@ export class LiveWorld {
       usePlans: true,
       enableConversations: true,
       conversationEveryTicks: 2,
+      conversationTurns: 4,
     });
     for (const [id, name, bio] of DEFAULT_CAST) {
       const a = new Agent({ id, name, bio }, this.store, model, { reflectionThreshold: 200 });

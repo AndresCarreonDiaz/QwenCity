@@ -114,7 +114,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // Band y=64 is idle, y=128 is walk. Direction column offsets within a band:
   var DIRCOL={R:0,U:6,L:12,D:18}, IDLE_Y=64, WALK_Y=128;
   var CW=34, CH=68; // on-screen character size
-  var HHOVR=null; try{var q=new URLSearchParams(location.search).get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);}catch(e){}
+  var HHOVR=null,DBG=false; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";}catch(e){}
 
   // --- image assets: character sheets, legacy props, LimeZu buildings + CITY set ---
   var props={}, buildings={}, citybld={};
@@ -343,6 +343,12 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // --- ingest a world snapshot: place everyone, queue new dialogue beats ---
   function ingest(s,reset){
     snap=s;
+    // measure the real cadence of sim ticks so the director can pace the show
+    if(s.t!==lastSimT){
+      var nwT=performance.now();
+      if(lastTickWall)tickGapMs=clamp(nwT-lastTickWall,8000,360000);
+      lastTickWall=nwT; lastSimT=s.t;
+    }
     var h=hourNow(), nn=nightness(h);
     var day=Math.floor((s.t-Date.UTC(2026,6,10))/86400000)+1;
     var ph=nn>0.6?"🌙":h<8?"🌅":h<17?"☀️":"🌇";
@@ -387,8 +393,15 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       var slot=slotBy[a.id]||{x:W/2,y:H/2};
       var sp=sprites[a.id];
       if(!sp||reset){sp=sprites[a.id]={x:slot.x,y:slot.y,place:a.location,path:null,dir:"D",idleAt:0};}
-      else if(sp.place!==a.location){sp.path=route({x:sp.x,y:sp.y},places[a.location]||places.plaza,slot);sp.place=a.location;}
-      else if(!sp.path&&Math.hypot((sp.slot?sp.slot.x:slot.x)-slot.x,(sp.slot?sp.slot.y:slot.y)-slot.y)>5){sp.path=[slot];}
+      else if(sp.place!==a.location){
+        // staggered departure: don't send everyone marching the instant the
+        // snapshot lands — people leave one by one over the next few seconds
+        var pl2=places[a.location]||places.plaza;
+        if(sp.pend)sp.pend={place:pl2,slot:slot};
+        else {sp.pend={place:pl2,slot:slot};sp.departAt=performance.now()+1200+Math.random()*12000;}
+        sp.place=a.location; sp.path=null; sp.vig=null; sp.vigText=null;
+      }
+      else if(!sp.path&&!sp.pend&&Math.hypot((sp.slot?sp.slot.x:slot.x)-slot.x,(sp.slot?sp.slot.y:slot.y)-slot.y)>5){sp.path=[slot];sp.vig=null;sp.vigText=null;}
       sp.slot=slot; sp.a=a;
     });
     Object.keys(sprites).forEach(function(id){ if(!(s.agents||[]).some(function(a){return a.id===id;})) delete sprites[id]; });
@@ -398,34 +411,87 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
 
   // ===================== the soap layer: dialogue beats =====================
+  // The show director: instead of dumping each tick's dialogue in one burst and
+  // going silent for minutes, beats are SCHEDULED across the measured gap
+  // between sim ticks, so something is always about to happen.
   var seen={}, beats=[], cur=null, curUntil=0, gapUntil=0, replayPool=[], replayAt=0;
+  var lastSimT=0, lastTickWall=0, tickGapMs=45000, lastSchedAt=0, everPushed=false;
   function beatKey(l){return l.t+"|"+l.speakerId+"|"+l.text;}
+  function sayDur(len){return clamp(2600+62*len,4200,9000);}
   function pushBeats(s){
-    var fresh=false;
-    ((s.dialogue)||[]).forEach(function(l){
-      var k=beatKey(l); if(seen[k])return; seen[k]=1; fresh=true;
-      beats.push({kind:"say",sid:l.speakerId,lid:l.listenerId,text:l.text,dur:clamp(1600+55*l.text.length,3200,7000)});
+    var freshBeats=[];
+    // on first load skip straight to the latest scene instead of replaying
+    // minutes of backlog line by line
+    var lines=((s.dialogue)||[]);
+    var startAt=everPushed?0:Math.max(0,lines.length-5);
+    lines.forEach(function(l,li){
+      var k=beatKey(l); if(seen[k])return; seen[k]=1;
+      if(li<startAt)return;
+      freshBeats.push({kind:"say",sid:l.speakerId,lid:l.listenerId,text:l.text,dur:sayDur(l.text.length)});
     });
-    if(fresh){replayPool=[];((s.dialogue)||[]).slice(-4).forEach(function(l){replayPool.push({kind:"say",sid:l.speakerId,lid:l.listenerId,text:l.text,dur:clamp(1600+55*l.text.length,3200,7000)});});}
+    everPushed=true;
+    if(freshBeats.length){replayPool=[];((s.dialogue)||[]).slice(-4).forEach(function(l){replayPool.push({kind:"say",sid:l.speakerId,lid:l.listenerId,text:l.text,dur:sayDur(l.text.length)});});}
     // a couple of fresh reflections become thought bubbles (watch the mind)
     var refl=(s.ticker||[]).filter(function(t){return t.kind==="reflection";}).slice(0,2);
     refl.forEach(function(r){
       var k=r.t+"|"+r.agentId+"|"+r.text; if(seen[k])return; seen[k]=1;
-      beats.push({kind:"think",sid:r.agentId,lid:null,text:r.text,dur:clamp(1500+45*r.text.length,2800,5200)});
+      freshBeats.push({kind:"think",sid:r.agentId,lid:null,text:r.text,dur:clamp(1500+45*r.text.length,2800,5200)});
     });
+    if(freshBeats.length){
+      var nw=performance.now();
+      var spacing=clamp(tickGapMs*0.6/freshBeats.length,9000,40000);
+      // never let the schedule run further ahead than one tick gap — if the
+      // sim ticks faster than lines can play, drop pace to "always something
+      // queued soon" instead of starving the screen
+      var t0=Math.max(nw+2500,Math.min(lastSchedAt+spacing*0.5,nw+tickGapMs*0.8));
+      freshBeats.forEach(function(b,i){b.at=t0+i*spacing+(i?(Math.random()*4000-2000):0);beats.push(b);});
+      lastSchedAt=Math.min(t0+(freshBeats.length-1)*spacing,nw+tickGapMs*1.2);
+    }
     if(beats.length>10)beats=beats.slice(-10);
   }
   function stepBeats(now){
-    if(cur&&now>curUntil){cur=null;gapUntil=now+420;}
+    if(cur&&now>curUntil){cur=null;gapUntil=now+800;}
     if(!cur&&now>gapUntil){
-      if(beats.length){cur=beats.shift();curUntil=now+cur.dur;}
-      else if(replayPool.length&&now>replayAt){
-        // loop the last scene while the pair is still mid-conversation
+      // self-heal a runaway schedule (fast tick bursts): never sit silent for
+      // more than a beat-gap while lines are waiting
+      if(beats.length&&beats[0].at-now>tickGapMs*0.9)beats[0].at=now+3000;
+      if(beats.length&&now>=beats[0].at){cur=beats.shift();curUntil=now+cur.dur;}
+      else if(!beats.length&&replayPool.length&&now>replayAt){
+        // re-run the last scene, slowly, while the pair is still mid-conversation
         var l=replayPool[0];
-        if(pairs[l.sid]===l.lid){replayPool.forEach(function(b){beats.push({kind:b.kind,sid:b.sid,lid:b.lid,text:b.text,dur:b.dur});});replayAt=now+replayPool.length*5000+6000;}
+        if(pairs[l.sid]===l.lid){
+          var t0=now+1500;
+          replayPool.forEach(function(b,i){beats.push({kind:b.kind,sid:b.sid,lid:b.lid,text:b.text,dur:b.dur,at:t0+i*16000});});
+          replayAt=now+replayPool.length*16000+30000;
+        }
         else replayPool=[];
       }
     }
+  }
+
+  // --- stage directions: an idle character narrates what they're doing, in place ---
+  var emote=null, emoteUntil=0, nextEmoteAt=0, emoteIdx=0;
+  function stepEmotes(now){
+    if(emote&&now>emoteUntil)emote=null;
+    if(emote||!snap)return;
+    if(!nextEmoteAt){nextEmoteAt=now+6000;return;}
+    if(now<nextEmoteAt)return;
+    var ags=(snap.agents||[]);
+    for(var k=0;k<ags.length;k++){
+      var a=ags[(emoteIdx+k)%ags.length], sp=sprites[a.id];
+      if(!sp||sp.moving)continue;
+      if(pairs[a.id])continue;                                   // their scene is the dialogue
+      if(cur&&(cur.sid===a.id||cur.lid===a.id))continue;
+      if(cur&&sprites[cur.sid]&&Math.hypot(sp.x-sprites[cur.sid].x,sp.y-sprites[cur.sid].y)<120)continue;
+      emoteIdx=(emoteIdx+k+1)%ags.length;
+      var txt=sp.vigText||a.action||"";
+      if(!txt)break;
+      emote={sid:a.id,kind:"stage",text:emojiFor(a.action)+" "+txt,dur:clamp(2200+45*txt.length,3200,5600)};
+      emoteUntil=now+emote.dur;
+      nextEmoteAt=now+9000+Math.random()*10000;
+      return;
+    }
+    nextEmoteAt=now+6000;
   }
   function wrap(text,maxw){
     var words=String(text).split(" "),lines=[],line="",bw=0;
@@ -440,21 +506,22 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     return {lines:lines,bw:bw};
   }
   function drawBubble(sp,beat){
-    var think=beat.kind==="think";
-    ctx.font=think?"italic 600 12px ui-sans-serif":"600 12.5px ui-sans-serif";
-    if(!beat.w||beat.mw!==Math.min(210,W*0.45)){beat.mw=Math.min(210,W*0.45);var wr=wrap(beat.text,beat.mw);beat.lines=wr.lines;beat.w=wr.bw;}
-    var lh=16, bw=beat.w+20, bh=beat.lines.length*lh+12;
-    var bx=clamp(sp.x-bw/2,6,W-bw-6), by=sp.y-CH-22-bh; if(by<6)by=6;
-    ctx.fillStyle=think?"rgba(224,229,238,.94)":"rgba(255,255,255,.96)";
-    rr(bx,by,bw,bh,9);ctx.fill();
+    var think=beat.kind==="think", stage=beat.kind==="stage";
+    ctx.font=stage?"italic 600 11px ui-sans-serif":think?"italic 600 12px ui-sans-serif":"600 12.5px ui-sans-serif";
+    var mw=stage?Math.min(180,W*0.4):Math.min(210,W*0.45);
+    if(!beat.w||beat.mw!==mw){beat.mw=mw;var wr=wrap(beat.text,mw);beat.lines=wr.lines;beat.w=wr.bw;}
+    var lh=stage?14:16, bw=beat.w+(stage?16:20), bh=beat.lines.length*lh+(stage?10:12);
+    var bx=clamp(sp.x-bw/2,6,W-bw-6), by=sp.y-CH-(stage?14:22)-bh; if(by<6)by=6;
+    ctx.fillStyle=stage?"rgba(16,22,32,.78)":think?"rgba(224,229,238,.94)":"rgba(255,255,255,.96)";
+    rr(bx,by,bw,bh,stage?7:9);ctx.fill();
     if(think){
       ctx.beginPath();ctx.arc(sp.x-4,by+bh+5,3.4,0,7);ctx.fill();
       ctx.beginPath();ctx.arc(sp.x+1,by+bh+11,2.1,0,7);ctx.fill();
-    } else {
+    } else if(!stage){
       ctx.beginPath();ctx.moveTo(clamp(sp.x-7,bx+8,bx+bw-22),by+bh-1);ctx.lineTo(clamp(sp.x+7,bx+22,bx+bw-8),by+bh-1);ctx.lineTo(sp.x,by+bh+9);ctx.closePath();ctx.fill();
     }
-    ctx.fillStyle=think?"#3c4759":"#182230";ctx.textAlign="left";
-    for(var i=0;i<beat.lines.length;i++)ctx.fillText(beat.lines[i],bx+10,by+16+i*lh);
+    ctx.fillStyle=stage?"#dfe7f4":think?"#3c4759":"#182230";ctx.textAlign="left";
+    for(var i=0;i<beat.lines.length;i++)ctx.fillText(beat.lines[i],bx+(stage?8:10),by+(stage?14:16)+i*lh);
     ctx.textAlign="center";
   }
   function drawDots(sp){
@@ -710,22 +777,75 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     namePlates.push({x:sp.x,y:topY-4,name:a.name,sel:sel,em:emojiFor(a.action),emX:sp.x+CW/2+6,emY:topY+16});
   }
 
-  // --- sprite movement: constant-speed walking + idle micro-wander ---
+  // --- vignettes: idle characters use the environment around them ---
+  var VIG={city_bench:"taking a seat for a moment",bench:"resting on the bench",stall:"browsing the flower cart",table_umbrella:"settling in at a table",phone_booth:"making a quick call",mailbox:"checking the mail",planter:"admiring the flowers",flowers:"admiring the flowers",bus_stop:"waiting at the bus stop",tree_city:"enjoying the shade"};
+  function insideBuilding(x,y){
+    var hit=false;
+    (snap.places||[]).forEach(function(p){
+      if(p.type==="park"||p.type==="plaza")return;
+      var g=geomOf(p);
+      if(x>g.c.x-g.bw/2&&x<g.c.x+g.bw/2&&y>g.top+g.bh*0.3&&y<g.bottom)hit=true;
+    });
+    DECOR.forEach(function(l){
+      if(!shown(l))return;var g=decorGeom(l);
+      if(x>g.c.x-g.bw/2&&x<g.c.x+g.bw/2&&y>g.top+g.bh*0.3&&y<g.bottom)hit=true;
+    });
+    return hit;
+  }
+  function blockedLine(a,b){
+    for(var i=1;i<=4;i++){
+      if(insideBuilding(a.x+(b.x-a.x)*i/4,a.y+(b.y-a.y)*i/4))return true;
+    }
+    return false;
+  }
+  function pickVignette(sp){
+    var best=null,bd=1e9;
+    PROPS.forEach(function(p){
+      var txt=VIG[p.slot]; if(!txt||!shown(p))return;
+      var c=px(p), spot={x:c.x,y:c.y+10};
+      var d=Math.hypot(spot.x-sp.x,spot.y-sp.y);
+      if(d<28||d>170||d>=bd)return;
+      if(blockedLine(sp,spot))return;
+      bd=d;best={spot:spot,txt:txt};
+    });
+    return best;
+  }
+
+  // --- sprite movement: unhurried walking, staggered departures, vignettes ---
   function stepSprite(sp,dt,now){
-    var speed=clamp(W*0.045,46,72)/1000;
+    var speed=clamp(W*0.03,30,46)/1000;
     sp.moving=false;
+    if(sp.pend&&now>=sp.departAt){
+      sp.path=route({x:sp.x,y:sp.y},sp.pend.place,sp.pend.slot);
+      sp.pend=null; sp.vig=null; sp.vigText=null;
+    }
     if(sp.path&&sp.path.length){
       var t=sp.path[0],dx=t.x-sp.x,dy=t.y-sp.y,d=Math.hypot(dx,dy),step=speed*dt;
-      if(d<=step||d<1.5){sp.x=t.x;sp.y=t.y;sp.path.shift();if(!sp.path.length){sp.path=null;sp.idleAt=now+5000+Math.random()*8000;sp.dir="D";}}
+      if(d<=step||d<1.5){
+        sp.x=t.x;sp.y=t.y;sp.path.shift();
+        if(!sp.path.length){
+          sp.path=null;
+          if(sp.vig&&sp.vigPhase==="go"){sp.vigPhase="linger";sp.vigUntil=now+5500+Math.random()*3500;sp.vigText=sp.vig.txt;sp.dir="U";}
+          else if(sp.vig&&sp.vigPhase==="back"){sp.vig=null;sp.vigText=null;sp.idleAt=now+6000+Math.random()*9000;sp.dir="D";}
+          else {sp.idleAt=now+5000+Math.random()*8000;sp.dir="D";}
+        }
+      }
       else {sp.x+=dx/d*step;sp.y+=dy/d*step;sp.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?"L":"R"):(dy<0?"U":"D");}
       sp.moving=true;
     } else {
       var partner=sp.a&&pairs[sp.a.id]?sprites[pairs[sp.a.id]]:null;
-      if(partner){sp.dir=partner.x<sp.x?"L":"R";}
-      else if(now>sp.idleAt&&sp.slot){
-        sp.idleAt=now+6000+Math.random()*9000;
-        var ox=(Math.random()*2-1)*20,oy=(Math.random()*2-1)*9;
-        sp.path=[{x:sp.slot.x+ox,y:sp.slot.y+oy}];
+      if(partner){sp.dir=partner.x<sp.x?"L":"R";sp.vig=null;sp.vigText=null;}
+      else if(sp.vig&&sp.vigPhase==="linger"){
+        if(now>sp.vigUntil&&sp.slot){sp.vigPhase="back";sp.path=[{x:sp.slot.x,y:sp.slot.y}];}
+      }
+      else if(!sp.pend&&now>sp.idleAt&&sp.slot){
+        sp.idleAt=now+9000+Math.random()*12000;
+        var v=Math.random()<0.55?pickVignette(sp):null;
+        if(v){sp.vig=v;sp.vigPhase="go";sp.path=[v.spot];}
+        else {
+          var ox=(Math.random()*2-1)*20,oy=(Math.random()*2-1)*9;
+          sp.path=[{x:sp.slot.x+ox,y:sp.slot.y+oy}];
+        }
       }
     }
   }
@@ -745,6 +865,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       var h=HHOVR!==null?HHOVR:hourNow(), tint=ambTint(h), nn=nightness(h);
       drawGround(nn);
       stepBeats(now);
+      stepEmotes(now);
+      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length;
       // painter list: props + decorative + functional buildings + characters, by baseline
       var items=[], placeGeom={}, decGeom={};
       PROPS.forEach(function(p){if(!shown(p))return;var c=px(p);items.push({y:c.y,f:function(){drawProp(props[p.slot],c.x,c.y,pHeight(p.slot),p.flip);}});});
@@ -798,6 +920,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       // nameplates, labels, bubbles, chyron — always readable, above the grade
       plates.forEach(function(f){f();});
       drawNamePlates();
+      if(emote&&sprites[emote.sid])drawBubble(sprites[emote.sid],emote);
       if(cur){
         var ssp=sprites[cur.sid];
         if(ssp)drawBubble(ssp,cur);

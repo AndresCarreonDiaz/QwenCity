@@ -1,5 +1,6 @@
 import { Agent } from "../agent/agent.ts";
 import type { MemoryStore } from "../memory/store.ts";
+import { locationForAction, placeById } from "../view/places.ts";
 import { converse } from "./conversation.ts";
 
 const MS_PER_MIN = 60_000;
@@ -17,6 +18,8 @@ export interface WorldOptions {
   enableConversations?: boolean;
   /** with enableConversations, run one conversation every N ticks (default 3) */
   conversationEveryTicks?: number;
+  /** alternating turns per scheduled conversation (default 2; the live show uses 4 for richer scenes) */
+  conversationTurns?: number;
 }
 
 interface Runtime {
@@ -61,6 +64,7 @@ export class World {
   private readonly usePlans: boolean;
   private readonly enableConversations: boolean;
   private readonly convEvery: number;
+  private readonly convTurns: number;
   private readonly runtimes: Runtime[] = [];
   private tickCount = 0;
   /** realized conversational edges, keyed "idA|idB" (sorted) → exchange count */
@@ -78,6 +82,7 @@ export class World {
     this.usePlans = opts.usePlans ?? false;
     this.enableConversations = opts.enableConversations ?? false;
     this.convEvery = Math.max(1, opts.conversationEveryTicks ?? 3);
+    this.convTurns = Math.max(1, opts.conversationTurns ?? 2);
   }
 
   /** plan each agent's day (call before run when usePlans is on) */
@@ -125,7 +130,12 @@ export class World {
       const i = Math.floor(this.tickCount / this.convEvery) % pairs;
       const a = this.runtimes[i]!;
       const b = this.runtimes[(i + 1) % pairs]!;
-      await converse(a.agent, b.agent, this.clock, this.store, { maxTurns: 2, topic: "the most important thing on my mind lately" });
+      // The view stages every conversation at the plaza fountain, so ground the
+      // scene there — the model writes lines aware of where they're standing.
+      await converse(a.agent, b.agent, this.clock, this.store, {
+        maxTurns: this.convTurns,
+        topic: "chatting by the fountain at Town Plaza about the most important thing on my mind lately",
+      });
       a.action = `talking with ${b.agent.profile.name}`;
       b.action = `talking with ${a.agent.profile.name}`;
       a.nextDecisionAt = b.nextDecisionAt = this.clock + this.actionMs;
@@ -143,9 +153,13 @@ export class World {
       if (conversed.has(id)) {
         decided = true; // the conversation was this agent's action this tick
       } else if (due || reacting) {
+        // Ground the decision in place: the model writes actions that use the
+        // surroundings ("rearranges the window display") instead of floating in
+        // a void — and the map renders exactly where it says they are.
+        const here = placeById(locationForAction(id, r.action));
         const situation =
-          `It is ${new Date(this.clock).toISOString()}. ${r.agent.profile.name} is currently ${r.action}. ` +
-          `What does ${r.agent.profile.name} do next?`;
+          `It is ${new Date(this.clock).toISOString()}. ${r.agent.profile.name} is at ${here?.label ?? "the Town Plaza"}, currently ${r.action}. ` +
+          `What does ${r.agent.profile.name} do next, here or nearby? Prefer concrete actions that use the surroundings.`;
         const act = await r.agent.decideAction(situation, this.clock);
         r.action = act.label;
         r.nextDecisionAt = this.clock + this.actionMs;
