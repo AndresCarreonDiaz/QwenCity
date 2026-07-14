@@ -6,6 +6,28 @@ run before moving on.
 
 ---
 
+## Iteration 32 — 2026-07-14 · breaking news + the real map fix ✅
+
+**Map fix (the one the user actually meant):** iteration 29's fix handled two downtown buildings, but
+the four **corner homes** (Maya's/Tom's/Leo's/Ana's Place) sat centered on the x=13/x=87 vertical
+"residential avenue" roads — a street with a centerline ran straight up out of each house. Removed
+those two avenues (+ their orphan crosswalks); homes now sit on their lawns. Routing is unchanged
+(route() computes x=13/x=87 rails independently of the drawn roads — walkers cross grass). Verified
+live: all four homes clear.
+
+**Breaking-news flash (watchability, 8/n):** when a **top-salience beat (importance ≥ 7** — the
+Salience Engine's ceiling; live Qwen tops out 7–9) newly appears, a prominent top-center **● BREAKING**
+banner surfaces it, so an all-day / just-tuned-in viewer never misses the moment that matters. Reuses
+the importance-ranked `highlights` (another visible use of the one salience score); backlog is marked
+seen on load so it never flashes stale beats; queue-capped, one at a time, fade in/out; sits below the
+town-meeting banner if both show. `?brk=1` forces a demo flash. Calibrated the threshold against the
+live importance distribution (mock compresses to 5/1; live is 6/7).
+
+**Verified:** typecheck · 103/103 · syntax gate · CDP screenshots of the banner on both local and the
+live deploy (real-Qwen beat) · homes-on-grass confirmed live.
+
+---
+
 ## Iteration 31 — 2026-07-14 · relationship trajectory: root for the bonds (watchability loop, 7/n) ✅
 
 **Done** — soap operas run on relationships you're invested in, but bonds here only ever grew (hearts =
