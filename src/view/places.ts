@@ -53,7 +53,7 @@ export function placeById(id: string): Place | undefined {
  */
 export function locationForAction(agentId: string, action: string): string {
   const a = action.toLowerCase();
-  if (/\bbakery|pastry|bread|flour|dough|inventory|restock|shelv\w*|oven\b/.test(a)) return "bakery";
+  if (/\bbakery|pastr\w*|bread|flour|dough|inventory|restock|shelv\w*|display case|oven\b/.test(a)) return "bakery";
   if (/\bcaf[eé]|coffee|barista|tables|counter|opening up|brew|espresso|shop\b/.test(a)) return "cafe";
   if (/\bpark|stroll|walk|outside|air|garden|bench|neighbou?r\b/.test(a)) return "park";
   if (/\bhome|shower|dress|sleep|bed|waking|nap|rest|breakfast|winding down|\bread|journal|window\b/.test(a)) {
