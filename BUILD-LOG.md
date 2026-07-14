@@ -6,6 +6,34 @@ run before moving on.
 
 ---
 
+## Iteration 34 — 2026-07-14 · the improvements pass (win-the-hackathon priorities) ✅
+
+Prompted by "what would you improve?" → made the high-leverage improvements (past the watchability
+polish) that actually move the rubric + protect the submission.
+- **#2 Memory longevity (the top engineering risk).** The `MemoryStore` had NO cap — 1024-dim
+  embeddings kept forever → unbounded heap + per-tick snapshot scans that slow to seconds over days,
+  risking an OOM-restart (wipes the story) or a sluggish demo *during* the Aug-11 judging window.
+  Added importance-based forgetting (`maxNodes`, default unbounded so sims/ablation stay
+  deterministic; live world = 6000 via `MAX_MEMORIES`). +2 tests.
+- **#3 Made the novel differentiator legible live.** The audience-causal claim (25% divergence vs 0%)
+  was buried in the README; a judge skimming the live site never saw it. Added a "⚡ Why this is
+  different" sidebar card stating the thesis + the measured ablation numbers + repo link, and a
+  stronger reply confirmation that names the salience-boosted memory loop.
+- **#5 Light emergent story arc.** The rent crisis was a static backdrop. The daily town meeting's
+  topic now escalates by sim-day (rumor → official notice → what to do → coping → survival) — real
+  "tune in tomorrow" stakes, while agents still react freely (only the framing advances). +1 test.
+- **#1 Submission pack** (`strategy/SUBMISSION.md`): pass/fail checklist, ready-to-paste Devpost
+  writeup, and a shot-by-shot 3-min video script — unblocks the gated items (video, Workbench
+  screenshot, repo-public check).
+- **#4 (more agents / bigger society): NOT done — user decision.** It raises live Qwen token cost
+  (budget-sensitive) and needs map/home work; flagged for the user to greenlight rather than
+  unilaterally spending budget.
+
+**Verified:** typecheck · 106/106 · syntax gate · CDP screenshot of the "why different" card ·
+memory-cap + escalating-topic tests · all deployed, live OK.
+
+---
+
 ## Iteration 33 — 2026-07-14 · full map audit (methodical, region by region) ✅
 
 **Done** — after repeatedly missing map overlaps by eyeballing whole-map screenshots, did a proper
