@@ -26,6 +26,13 @@ export interface WorldOptions {
    *  since the world started, clamped) — a light, emergent story arc: agents still
    *  react freely, only the day's framing advances. */
   dailyGathering?: { hour: number; durationMin: number; topic?: string; topics?: string[] };
+  /** opt-in: story-arc hooks planted on a sim-day offset (days since the world
+   *  started). Each fires exactly once — the first tick on/after its day — as a
+   *  perception for one agent, seeding a fresh emergent storyline without ever
+   *  scripting its outcome. Pairs with `dailyGathering.topics` (whose day-indexed
+   *  framing walks through the same arcs), so the town keeps generating new drama
+   *  across a long run instead of looping one storyline forever. */
+  arcSeeds?: Array<{ onDay: number; text: string; agentIndex?: number }>;
 }
 
 /** a scheduled town-wide happening surfaced to the spectator view */
@@ -83,6 +90,8 @@ export class World {
   private readonly convEvery: number;
   private readonly convTurns: number;
   private readonly gather: { hour: number; durationMin: number; topic?: string; topics?: string[] } | undefined;
+  private readonly arcSeeds: Array<{ onDay: number; text: string; agentIndex?: number }>;
+  private readonly firedSeeds = new Set<number>();
   private readonly startDay: number;
   private lastGatherDay = -1;
   private gatheringUntil = 0;
@@ -105,6 +114,7 @@ export class World {
     this.convEvery = Math.max(1, opts.conversationEveryTicks ?? 3);
     this.convTurns = Math.max(1, opts.conversationTurns ?? 2);
     this.gather = opts.dailyGathering;
+    this.arcSeeds = opts.arcSeeds ?? [];
     this.startDay = Math.floor(startTime / 86_400_000);
   }
 
@@ -139,6 +149,21 @@ export class World {
   async tick(): Promise<void> {
     this.clock += this.stepMs;
     this.tickCount++;
+
+    // 0a. STORY ARCS — plant each arc's seed hook once, the first tick on/after
+    // its sim-day, so a fresh emergent storyline kicks off. Only the seed is
+    // authored; the cast reacts freely, and the meeting framing (below) walks the
+    // same arc schedule. This is what keeps a 24/7 run from looping one story.
+    if (this.arcSeeds.length && this.runtimes.length) {
+      const dayOffset = Math.floor(this.clock / 86_400_000) - this.startDay;
+      for (let i = 0; i < this.arcSeeds.length; i++) {
+        const s = this.arcSeeds[i]!;
+        if (this.firedSeeds.has(i) || dayOffset < s.onDay) continue;
+        this.firedSeeds.add(i);
+        const r = this.runtimes[Math.min(s.agentIndex ?? 0, this.runtimes.length - 1)]!;
+        await r.agent.perceive(s.text, this.clock);
+      }
+    }
 
     // 0. TOWN MEETING (opt-in) — once per sim day the whole cast converges on
     // the plaza to talk through the day's big worry (the rent). This gives the
