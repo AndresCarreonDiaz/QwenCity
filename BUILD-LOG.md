@@ -6,6 +6,27 @@ run before moving on.
 
 ---
 
+## Iteration 25 — 2026-07-13 · weather + the audience on the broadcast (watchability loop, 2/n) ✅
+
+**Done**
+- **Deterministic town weather** (`src/world/weather.ts`, +3 tests → 94): a pure hash of sim time
+  (3-hour blocks; ~16% rain, ~22% overcast) shared by all three layers with zero extra model calls —
+  decision prompts get "A light rain is falling over the town." (agents write rain-aware actions),
+  the snapshot carries `weather`, and the view renders it: slanted rain streaks over the set, grey
+  grades, drifting cloud shadows, birds/butterflies sit out the rain, 🌧/☁️ header chip. `?wx=rain`
+  debug override. Replays stay bit-identical (no randomness).
+- **Audience replies ON the broadcast**: new first-class `snapshot.audience` (last 6 injection
+  memories parsed to handle+text — the 24-entry ticker flushed them within one tick, found via CDP
+  probing). The viewer's message renders as an amber-bordered 📨 bubble over the character who
+  received it, jumps the beat queue (plays next), is never evicted by the queue cap, and the camera
+  pushes in on the moment — replying to the cast now has a visible on-air payoff.
+- Fixed a first-load ordering bug (`everPushed` set before the audience block read it).
+
+**Verified:** typecheck · 94/94 · syntax gate · CDP: rain render + ☁️ header, `cur=aud:tom` probe +
+screenshot of @night_owl's message playing over Tom with auto-director push-in · deployed, live OK.
+
+---
+
 ## Iteration 24 — 2026-07-13 · the broadcast package (all-day watchability loop, 1/n) ✅
 
 **Done** (`/loop` iteration — Truman-Show-style continuous-broadcast touches)
