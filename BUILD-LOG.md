@@ -6,6 +6,28 @@ run before moving on.
 
 ---
 
+## Iteration 40 — 2026-07-14 · arc payoff: relationship milestones as broadcast "moments" ✅
+
+- **Why:** the desire arcs (iter 38) build tension, but a casual all-day viewer never got a clear
+  "did you see that?" beat when a bond actually *turned*. Soap operas reward continued watching with
+  visible turning points — that's what makes 24/7 watchable.
+- **What:** on each new snapshot the client diffs consecutive relationship states; when one visibly
+  turns — a **new bond** forms (weight ≥2), **warms**, gains **tension**, **ruptures**, or deepens to
+  **inseparable** (weight ≥4) — it surfaces a rare, transient broadcast beat: `✦ A NEW BOND` /
+  `♥ A MOMENT` / `⚡ TENSION` / `💔 A RIFT`, each with its own accent color.
+- **Respects the calm redesign:** reuses the existing breaking-news flash lane (generalized to carry a
+  per-item label + color) instead of adding a persistent overlay — transient (5.4s), rare (prod ticks
+  are 5 min apart), yields to the event banner, and gated under the cold-open. The sim decides if/when;
+  detection is a pure diff that self-dedupes on the transition, so nothing re-fires while a state holds.
+- **Catch-up:** every turn is also logged under a new **"Turning points"** section in the "story so
+  far" drawer, so a drop-in viewer sees what shifted while they were away.
+
+**Verified:** client JS compiles · typecheck clean · 110/110 · CDP held one client across ticks —
+moments fired 0→4 as bonds formed, each a transient flash (screenshot of "✦ A NEW BOND · Ana & Tom
+have struck up a rapport."), Turning points populated · `?dbg=1` now reports `mom=N` · deployed to ECS.
+
+---
+
 ## Iteration 39 — 2026-07-14 · calm the view: one channel per job, detail on demand ✅
 
 - **Why:** user felt *overwhelmed* by the screen. Diagnosis: the info wasn't too much, it was told
