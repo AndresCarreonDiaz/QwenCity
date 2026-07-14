@@ -6,6 +6,37 @@ run before moving on.
 
 ---
 
+## Iteration 23 — 2026-07-13 · the Truman Show cut: follow-cam, Kokoro voices, a populated city ✅
+
+**Done**
+- **Broadcast camera** (`src/view/app.ts`): click a character (map or roster) → the camera glides in
+  (1.6×) and FOLLOWS them with a pulsing "● CAM 02 · FOLLOWING <NAME>" bug + vignette framing; with
+  nobody selected, an auto-director gently pushes in (1.22×) on whichever scene is playing; wide shot
+  otherwise. Screen↔world mapping fixed for clicks; bubbles clamp to the visible viewport.
+- **Kokoro voices, opt-in** (`🔊 voices` header toggle): kokoro-js 1.2.1 dynamically imported from
+  jsdelivr ONLY on click (zero page weight otherwise); WebGPU when a real adapter exists, WASM q8
+  fallback (~110MB one-time, browser-cached). Per-character voices (Maya af_heart, Ana af_bella,
+  Tom am_michael, Leo am_puck); a background pump pre-generates scheduled lines so audio is ready
+  when bubbles appear; bubbles extend while their line speaks. Verified end-to-end in headless
+  Chrome via CDP (state probe: loading → ready → first line cached).
+- **A populated city**: 6 background extras (LimeZu premade characters 07/09/10/12/16/18, atlas
+  layout verified) stroll the street network on wander loops — no minds, no nameplates, most head
+  home after dark; new street life: green + silver parked cars, vending-machine bank, classical park
+  statue, extra benches, pecking pigeons (also new vignettes: feeding the pigeons, grabbing a drink).
+- **Deeper world-awareness** (`src/world/world.ts`, `src/view/places.ts`): every place now carries a
+  `flavor` description (espresso machine, pastry case, the rival across the boulevard…) and decision
+  prompts include it plus WHO else is present — live effect immediately visible ("unlocking the café
+  door and waving to Tom as he approaches", "greet her cat Miso who naps by the register").
+
+**Verified:** typecheck clean · 91/91 tests · client-JS syntax gate OK · CDP live-session captures:
+follow-cam zoom + broadcast bug (local + live deploy), extras walking among the cast, voices
+pipeline ready/1 · deployed to ECS + assets scp'd (x1-x6 sheets, 6 city props, manifest).
+
+**Blocked (needs you)**
+- Alibaba Cloud Workbench "running resources" screenshot · 3-min demo video · Devpost writeup.
+
+---
+
 ## Iteration 22 — 2026-07-13 · the show gets a director (pacing + environment-awareness) ✅
 
 **Done**
