@@ -120,7 +120,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // Band y=64 is idle, y=128 is walk. Direction column offsets within a band:
   var DIRCOL={R:0,U:6,L:12,D:18}, IDLE_Y=64, WALK_Y=128;
   var CW=34, CH=68; // on-screen character size
-  var HHOVR=null,DBG=false; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";}catch(e){}
+  var HHOVR=null,DBG=false,NOCOLD=false; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";NOCOLD=usp.get("nocold")==="1";}catch(e){}
 
   // --- image assets: character sheets, legacy props, LimeZu buildings + CITY set ---
   var props={}, buildings={}, citybld={};
@@ -242,9 +242,19 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // --- the broadcast camera: wide shot by default, auto-director nudges in on
   // live scenes, click-to-follow goes close (the Truman feel) ---
   var cam={cx:0,cy:0,z:1};
+  // roaming coverage: when nothing is playing and nobody is followed, the
+  // control room drifts a camera to someone for a while (all-day watchability)
+  var roam=null, roamAt=0;
   function viewBounds(){var hw=W/(2*cam.z),hh=H/(2*cam.z);return {x1:cam.cx-hw,y1:cam.cy-hh,x2:cam.cx+hw,y2:cam.cy+hh};}
-  function stepCam(dt){
+  function stepCam(dt,now){
     if(!cam.cx){cam.cx=W/2;cam.cy=H/2;}
+    if(!selected&&!cur&&snap&&(!coldOpen||coldOpen.done)){
+      if(roam&&now>roam.until)roam=null;
+      if(!roam&&now>roamAt){
+        var ids=Object.keys(sprites);
+        if(ids.length){roam={sid:ids[Math.floor(Math.random()*ids.length)],until:now+12000};roamAt=now+30000+Math.random()*20000;}
+      }
+    } else roam=null;
     var tz=1,tcx=W/2,tcy=H/2;
     var fsp=selected?sprites[selected]:null;
     if(fsp){tz=isMobile()?1.45:1.6;tcx=fsp.x;tcy=fsp.y-34;}
@@ -252,6 +262,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       var s1=sprites[cur.sid],s2=(cur.lid&&sprites[cur.lid])?sprites[cur.lid]:null;
       tz=1.22;tcx=s2?(s1.x+s2.x)/2:s1.x;tcy=(s2?(s1.y+s2.y)/2:s1.y)-30;
     }
+    else if(roam&&sprites[roam.sid]){var rs=sprites[roam.sid];tz=1.18;tcx=rs.x;tcy=rs.y-32;}
     var hw=W/(2*tz),hh=H/(2*tz);
     tcx=clamp(tcx,hw,W-hw);tcy=clamp(tcy,hh,H-hh);
     var kz=Math.min(1,dt*0.0016),kp=Math.min(1,dt*0.0024);
@@ -385,6 +396,13 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     }
     var h=hourNow(), nn=nightness(h);
     var day=Math.floor((s.t-Date.UTC(2026,6,10))/86400000)+1;
+    // broadcast package: recap for drop-in viewers, title card on day change
+    if(coldOpen===null){
+      if(NOCOLD)coldOpen={done:true,lines:[]};
+      else coldOpen={lines:(s.highlights||[]).slice(0,3).map(function(b){return b.text;}),start:performance.now(),day:day};
+    }
+    if(lastDay&&day!==lastDay&&day>=1)dayCard={text:"DAY "+day,start:performance.now()};
+    if(day>=1)lastDay=day;
     var ph=nn>0.6?"🌙":h<8?"🌅":h<17?"☀️":"🌇";
     document.getElementById("clock").textContent=(day>=1&&day<1000?"S1 · Day "+day+" · ":"")+ph+" "+(s.clock||"--:--");
     document.getElementById("stat").textContent=(s.stats?(s.stats.agents+" souls · "+s.stats.memories+" memories · "+s.stats.edges+" bonds"):"");
@@ -630,6 +648,51 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var bw=32,bh=17,bx=clamp(sp.x-bw/2,4,W-bw-4),by=sp.y-CH-18-bh;if(by<4)by=4;
     ctx.fillStyle="rgba(255,255,255,.85)";rr(bx,by,bw,bh,8);ctx.fill();
     for(var k=0;k<3;k++){ctx.globalAlpha=.35+.35*(1+Math.sin(T*0.16+k*1.1))/2;ctx.fillStyle="#4a5668";ctx.beginPath();ctx.arc(bx+9+k*7,by+bh/2,2.2,0,7);ctx.fill();}
+    ctx.globalAlpha=1;
+  }
+
+  // ============ broadcast package: cold open + day title cards ==============
+  var coldOpen=null, dayCard=null, lastDay=0;
+  function drawColdOpen(now){
+    if(!coldOpen||coldOpen.done)return;
+    var el=now-coldOpen.start, n=coldOpen.lines.length;
+    var LEAD=1500,PER=2600,TAIL=700, total=n?LEAD+n*PER+TAIL:2800;
+    if(el>=total){coldOpen.done=true;return;}
+    var a=el<400?el/400:el>total-600?(total-el)/600:1;
+    ctx.fillStyle="rgba(6,8,14,"+(0.9*a).toFixed(3)+")";ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=Math.max(0,a);ctx.textAlign="center";
+    if(n){
+      ctx.font="700 12px ui-monospace,Menlo,monospace";ctx.fillStyle="#ecb44a";
+      ctx.fillText("P R E V I O U S L Y   O N",W/2,H*0.3);
+      ctx.font="800 30px ui-sans-serif";ctx.fillStyle="#fff";
+      ctx.fillText("The Feed",W/2,H*0.3+38);
+      var li=Math.floor((el-LEAD)/PER);
+      if(el>LEAD&&li>=0&&li<n){
+        var t2=(el-LEAD-li*PER)/PER, la=t2<0.15?t2/0.15:t2>0.85?(1-t2)/0.15:1;
+        ctx.globalAlpha=Math.max(0,a*la);
+        ctx.font="600 15px ui-sans-serif";ctx.fillStyle="#dfe6f2";
+        var wr=wrap(coldOpen.lines[li],W*0.62);
+        for(var i=0;i<wr.lines.length;i++)ctx.fillText(wr.lines[i],W/2,H*0.52+i*22);
+      }
+    } else {
+      ctx.font="800 36px ui-monospace,Menlo,monospace";ctx.fillStyle="#fff";
+      ctx.fillText("DAY "+(coldOpen.day||1),W/2,H*0.46);
+      ctx.font="700 12px ui-monospace,Menlo,monospace";ctx.fillStyle="#ecb44a";
+      ctx.fillText("THE STORY BEGINS",W/2,H*0.46+26);
+    }
+    ctx.globalAlpha=1;
+  }
+  function drawDayCard(now){
+    if(!dayCard)return;
+    var el=now-dayCard.start, total=3000;
+    if(el>=total){dayCard=null;return;}
+    var a=el<300?el/300:el>total-500?(total-el)/500:1;
+    ctx.fillStyle="rgba(6,8,14,"+(0.6*a).toFixed(3)+")";ctx.fillRect(0,H*0.4,W,H*0.2);
+    ctx.globalAlpha=Math.max(0,a);ctx.textAlign="center";
+    ctx.font="800 34px ui-monospace,Menlo,monospace";ctx.fillStyle="#fff";
+    ctx.fillText(dayCard.text,W/2,H*0.5+6);
+    ctx.font="700 11px ui-monospace,Menlo,monospace";ctx.fillStyle="#ecb44a";
+    ctx.fillText("A NEW EPISODE BEGINS",W/2,H*0.5+30);
     ctx.globalAlpha=1;
   }
 
@@ -1013,7 +1076,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     // don't animate everything at double speed
     T=Math.floor(ts*0.06);var now=ts;
     ctx.imageSmoothingEnabled=false;
-    stepCam(dt);camApply();
+    stepCam(dt,now);camApply();
     // grass
     for(var gy=0;gy<H;gy+=44)for(var gx=0;gx<W;gx+=44){ctx.fillStyle=((gx+gy)/44)%2?"#7bbf6a":"#74b863";ctx.fillRect(gx,gy,44,44);}
     plates=[];namePlates=[];
@@ -1023,7 +1086,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       stepBeats(now);
       stepEmotes(now);
       pumpVoices();
-      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2);
+      if(DBG)document.title="DBG t="+Math.round(now/1000)+" beats="+beats.length+(beats.length?" b0in="+Math.round((beats[0].at-now)/1000):"")+" cur="+(cur?cur.kind+":"+cur.sid:"-")+" emote="+(emote?emote.sid:"-")+" gap="+Math.round(tickGapMs/1000)+" sched="+Math.round((lastSchedAt-now)/1000)+" seen="+Object.keys(seen).length+" vox="+voiceState+"/"+Object.keys(voiceCache).length+" cam="+cam.z.toFixed(2)+" roam="+(roam?roam.sid:"-")+" cold="+(coldOpen&&!coldOpen.done?"on":"off");
       // painter list: props + decorative + functional buildings + characters, by baseline
       var items=[], placeGeom={}, decGeom={};
       PROPS.forEach(function(p){if(!shown(p))return;var c=px(p);items.push({y:c.y,f:function(){drawProp(props[p.slot],c.x,c.y,pHeight(p.slot),p.flip);}});});
@@ -1101,7 +1164,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         ctx.textAlign="center";
       }
       drawChyron(dt);
+      drawDayCard(now);
+      drawColdOpen(now);
     } else {
+      camReset();
       ctx.fillStyle="rgba(0,0,0,.5)";ctx.font="14px ui-sans-serif";ctx.textAlign="center";
       ctx.fillText(lastErr||"connecting to the town…",W/2,H/2);
     }
