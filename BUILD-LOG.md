@@ -6,6 +6,28 @@ run before moving on.
 
 ---
 
+## Iteration 38 — 2026-07-14 · standing desires: give the audience an arc to root for ✅
+
+- **Why:** the cast was reactive turn-to-turn — nobody *wanted* anything across days, so there was no
+  throughline to follow. Soap operas keep you watching because someone wants something and you're
+  rooting for it. This is the biggest cost-neutral watchability lever (no extra model calls per tick).
+- **What:** each character now carries a persistent `desire` (Tom → reconcile with Maya but too proud;
+  Maya → the mirror of that; Ana → outshine the café yet fears standing alone; Leo → to finally
+  matter). A new `Agent.identity()` folds the desire into the bio and feeds it to **every** cognitive
+  module — act, plan, speak, reflect, post — so behaviour is *motivated* over time. The sim never
+  scripts the outcome; the desire only tilts choices, so arcs emerge.
+- **Surfaced** in the follow panel as a soft-purple "✧ What they want" card (between who-they-are and
+  what-they're-doing), giving viewers the hook to root for. `AgentView.desire` added to the snapshot.
+- **Safety of the change:** `identity()` returns *exactly* the bio when no desire is set, so prompts
+  (and the deterministic mock's hashed outputs) stay byte-identical for every plain test profile — no
+  existing test perturbed.
+
+**Verified:** typecheck clean · 110/110 (3 new: desire woven into all modules · no-desire byte-identity
+· snapshot surfaces desire) · CDP screenshot of the "What Tom wants" card · pushed, deployed to ECS,
+live `/snapshot.json` serves all four desires.
+
+---
+
 ## Iteration 37 — 2026-07-14 · live QA + camera cuts to the town meeting ✅
 
 - **Live E2E QA pass** (no code change): verified the deployed product across desktop + mobile — no
