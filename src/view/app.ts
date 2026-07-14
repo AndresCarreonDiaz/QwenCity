@@ -43,6 +43,12 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   #stage{position:relative;flex:1;min-width:0;background:var(--grass)}
   canvas{display:block;width:100%;height:100%;touch-action:manipulation}
   #hint{position:absolute;left:12px;bottom:42px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;padding:6px 10px;border-radius:8px;pointer-events:none}
+  #coach{position:absolute;left:50%;bottom:56px;transform:translateX(-50%);width:min(360px,86%);background:linear-gradient(120deg,#2a1e10,#171b24);border:1px solid var(--amber);border-radius:12px;padding:13px 15px;color:var(--ink);font-size:13px;line-height:1.5;box-shadow:0 10px 34px rgba(0,0,0,.55);display:none;z-index:6}
+  #coach.show{display:block;animation:coachin .45s ease}
+  @keyframes coachin{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  #coach b{color:var(--amber)}
+  #coach .cx{margin-top:10px;display:flex;gap:12px;align-items:center}
+  #coach button{background:var(--amber);color:#1a1305;border:none;border-radius:8px;padding:6px 13px;font-weight:700;cursor:pointer;font-size:12px}
   aside{flex:0 0 340px;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
   .apanel{padding:14px 15px;overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
   @media(max-width:980px){aside{flex-basis:300px}.sub{display:none}}
@@ -109,7 +115,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     <span class="stat" id="stat"></span>
   </header>
   <main>
-    <div id="stage"><canvas id="c"></canvas><div id="hint">Click a character to follow their life →</div></div>
+    <div id="stage"><canvas id="c"></canvas><div id="hint">Click anyone to follow — and reply to change their story →</div><div id="coach"><div>👋 <b>You're not just watching.</b> Click any character and send them a message — it becomes a memory they act on, and <b>you change what happens next</b>.</div><div class="cx"><button id="coachok">Got it — let me try</button></div></div></div>
     <aside><div class="apanel" id="panel"></div></aside>
   </main>
 </div>
@@ -1353,7 +1359,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     // screen → world (the camera may be zoomed in)
     var mx=(sx-(W/2-cam.z*cam.cx))/cam.z, my=(sy-(H/2-cam.z*cam.cy))/cam.z;
     Object.keys(sprites).forEach(function(id){var sp=sprites[id];var d=Math.hypot(sp.x-mx,(sp.y-26)-my);if(d<38&&d<bd){bd=d;best=id;}});
-    selected=best; document.getElementById("hint").style.display=best?"none":"block"; renderPanel();
+    selected=best; if(best)hideCoach(); document.getElementById("hint").style.display=best?"none":"block"; renderPanel();
   });
 
   function esc(s){return (s==null?"":String(s)).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}[c];});}
@@ -1431,6 +1437,15 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   function poll(){
     fetch(base()+"/snapshot.json",{cache:"no-store"}).then(function(r){return r.json();}).then(function(s){lastErr="";if(s&&s.agents)ingest(s);})
       .catch(function(e){lastErr="waiting for the world…";});
+  }
+  // one-time coachmark teaching the core interaction (talk to the cast → change the story)
+  var coachEl=document.getElementById("coach"), coachSeen=false;
+  try{coachSeen=localStorage.getItem("feed_coach")==="1";}catch(e){}
+  function hideCoach(){if(!coachEl)return;coachEl.className="";try{localStorage.setItem("feed_coach","1");}catch(e){}}
+  if(coachEl&&!coachSeen){
+    var okb=document.getElementById("coachok"); if(okb)okb.onclick=hideCoach;
+    setTimeout(function(){if(!selected)coachEl.className="show";},4400);
+    setTimeout(hideCoach,22000);
   }
   resize();requestAnimationFrame(frame);
   if(EMBEDDED&&EMBEDDED.agents)ingest(EMBEDDED);
