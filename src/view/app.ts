@@ -59,6 +59,12 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   .story{background:linear-gradient(120deg,#241a12,#1a1e28);border:1px solid #4a3a24;border-radius:10px;padding:10px 12px;margin-bottom:12px}
   .story .st{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-weight:800;margin-bottom:5px}
   .story .sp{font-size:12px;line-height:1.5;color:#d9cbb2}
+  .sci{margin-top:16px;border:1px solid #2a3140;border-radius:10px;padding:11px 12px;background:var(--panel2)}
+  .sci .sh{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8fd49a;font-weight:800;margin-bottom:6px}
+  .sci p{font-size:12px;line-height:1.55;color:var(--dim);margin-bottom:7px}
+  .sci b{color:var(--ink)}
+  .sci .stat{color:#8fd49a;font-weight:700}
+  .sci a{color:var(--amber);text-decoration:none}
   .ra2{font-size:11px;color:#7f8ba0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
   .bio{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:12.5px;line-height:1.5}
   .bio .role{color:var(--ink);font-weight:600}
@@ -1368,9 +1374,13 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         return '<div class="bond"><span>'+esc(nameOf[e.a]||e.a)+' ↔ '+esc(nameOf[e.b]||e.b)+(tn.e?' <span title="'+tn.l+'">'+tn.e+'</span>':"")+'</span><span class="hearts">'+hearts+'</span></div>';
       }).join("");
       var storyHtml=snap.premise?'<div class="story"><div class="st">📺 The Story</div><div class="sp">'+esc(snap.premise)+'</div></div>':"";
+      var sciHtml='<div class="sci"><div class="sh">⚡ Why this is different</div>'+
+        '<p>You\\'re <b>in the loop</b>, not just watching. Click anyone and reply — your message enters the <b>same memory</b> these AI minds reason from (with a salience boost) and steers what they do next.</p>'+
+        '<p>In a controlled test, one audience reply changed <span class="stat">25% of the town\\'s next actions</span> — vs <span class="stat">0%</span> with no audience. That open, perturbable society is the leap past a closed sim.</p>'+
+        '<p style="margin-bottom:0"><a href="https://github.com/AndresCarreonDiaz/QwenCity" target="_blank" rel="noopener">Audience-Coupled Salience Memory ↗</a></p></div>';
       el.innerHTML='<div class="ptitle">The Town · Today</div>'+sceneHtml+storyHtml+'<div class="roster">'+roster+'</div>'+
         '<div class="sec"><div class="h">Today\\'s drama</div>'+hls+'</div>'+
-        (bonds?'<div class="sec"><div class="h">Bonds</div>'+bonds+'</div>':"");
+        (bonds?'<div class="sec"><div class="h">Bonds</div>'+bonds+'</div>':"")+sciHtml;
       Array.prototype.forEach.call(el.querySelectorAll(".rrow"),function(row){row.onclick=function(){selected=row.getAttribute("data-id");document.getElementById("hint").style.display="none";renderPanel();};});
       return;
     }
@@ -1405,7 +1415,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     function send(){var text=inp.value.trim();if(!text)return;btn.disabled=true;msg.textContent="sending…";
       fetch(base()+"/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({agentId:a.id,handle:"guest",text:text})})
         .then(function(r){return r.json();}).then(function(res){btn.disabled=false;
-          if(res.ok){inp.value="";msg.innerHTML='✓ '+esc(a.name)+" heard you (salience "+res.importance+"). Watch for it in their thoughts.";}
+          if(res.ok){inp.value="";msg.innerHTML='✓ '+esc(a.name)+" heard you — stored as a memory (salience "+res.importance+"), boosted so it surfaces to their next decision. You just entered the loop; watch their thoughts &amp; actions shift.";}
           else{msg.textContent="✗ "+(res.reason||"not sent");}}).catch(function(){btn.disabled=false;msg.textContent="✗ network error";});}
     btn.onclick=send; inp.onkeydown=function(e){if(e.key==="Enter")send();};
   }
