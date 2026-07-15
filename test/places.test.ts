@@ -18,7 +18,9 @@ test("locationForAction maps actions to believable places", () => {
 test("every place has coordinates in range and a unique id", () => {
   const ids = new Set<string>();
   for (const p of PLACES) {
-    assert.ok(p.x >= 0 && p.x <= 100 && p.y >= 0 && p.y <= 100);
+    // x is always 0..100 (world width is fixed); y can extend past 100 into the
+    // South Quarter (the world is taller than one screen — see WORLDH in app.ts).
+    assert.ok(p.x >= 0 && p.x <= 100 && p.y >= 0 && p.y <= 140);
     assert.ok(!ids.has(p.id), `duplicate place ${p.id}`);
     ids.add(p.id);
     assert.equal(placeById(p.id)!.label, p.label);

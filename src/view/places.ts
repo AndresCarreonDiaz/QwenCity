@@ -47,6 +47,10 @@ export const PLACES: Place[] = [
   { id: "market", label: "The Market", x: 22, y: 34, type: "shop", anchor: true, flavor: "produce crates, the grocer's scale, the bread rack, neighbours filling their baskets, the bell over the door" },
   { id: "tavern", label: "The Tavern", x: 28, y: 82, type: "shop", anchor: true, flavor: "the long bar, a few worn booths, a chalkboard of specials, low evening light, regulars over a pint" },
   { id: "clinic", label: "The Clinic", x: 74, y: 82, type: "shop", anchor: true, flavor: "the waiting bench, the doctor's shingle, a jar of lollipops on the desk, the quiet examining room" },
+  // The South Quarter (phase-2 map expansion): a greener district below the park
+  { id: "school", label: "The School", x: 24, y: 112, type: "shop", anchor: true, flavor: "the little schoolhouse, rows of desks, a chalkboard, the bell in the yard, children's drawings taped to the window" },
+  { id: "library", label: "The Library", x: 76, y: 112, type: "shop", anchor: true, flavor: "the reading room, tall stacks, the card catalogue, a green desk lamp, the hush of turning pages" },
+  { id: "garden", label: "The Community Garden", x: 26, y: 128, type: "shop", anchor: true, flavor: "raised beds, the greenhouse, watering cans, tomato vines, a wheelbarrow, neighbours working the soil" },
 ];
 
 /** public destinations a character can head to (everything but private homes) —
@@ -88,6 +92,9 @@ export function locationForAction(agentId: string, action: string): string {
   if (/\bmarket|grocer|groceries|produce|errands|the basket|picking up|shopping\b/.test(a)) return "market";
   if (/\btavern|pub\b|the bar\b|a pint|for a drink|ale\b/.test(a)) return "tavern";
   if (/\bclinic|the doctor|nurse|checkup|check-up|unwell|feeling sick|prescription\b/.test(a)) return "clinic";
+  if (/\bschool|schoolhouse|classroom|pupils|a lesson|teach\w*|chalkboard\b/.test(a)) return "school";
+  if (/\blibrary|librarian|the stacks|archive|reading room|study\b/.test(a)) return "library";
+  if (/\bgarden|greenhouse|seedlings?|planting|watering|the soil|raised beds?|weeding\b/.test(a)) return "garden";
   if (/\bbakery|pastr\w*|bread|flour|dough|inventory|restock|shelv\w*|display case|oven|apprentice|recipe\b/.test(a)) return "bakery";
   if (/\bcaf[eé]|coffee|barista|tables|counter|opening up|brew|espresso|shop\b/.test(a)) return "cafe";
   if (/\bpark|stroll|walk|outside|air|garden|bench|neighbou?r\b/.test(a)) return "park";

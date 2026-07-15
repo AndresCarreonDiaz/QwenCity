@@ -34,7 +34,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   h1{font-size:17px;font-weight:800;letter-spacing:.02em}
   h1 b{color:var(--amber)}
   .sub{font-size:11px;color:var(--dim)}
-  #vbtn{margin-left:auto;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--dim);padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap}
+  #vbtn,#wbtn{background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--dim);padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap}
+  #wbtn{margin-left:auto}
+  #wbtn.on,#vbtn.on{color:var(--amber);border-color:var(--amber)}
   #vbtn.on{color:#8fd49a;border-color:#3a5c42}
   #vbtn.busy{color:var(--amber)}
   .clock{font-family:ui-monospace,Menlo,monospace;color:var(--dim);font-size:13px;white-space:nowrap}
@@ -123,6 +125,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     <span class="live"><span class="dot"></span>LIVE</span>
     <h1>The <b>Feed</b></h1>
     <span class="sub">a soap opera played by AI minds — talk to the cast, change the story</span>
+    <button id="wbtn" title="See the whole town — zoom out to the full map">🗺 map</button>
     <button id="vbtn" title="Kokoro TTS runs in your browser — one-time ~110MB download">🔇 voices</button>
     <span class="clock" id="clock">--:--</span>
   </header>
@@ -163,7 +166,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // Band y=64 is idle, y=128 is walk. Direction column offsets within a band:
   var DIRCOL={R:0,U:6,L:12,D:18}, IDLE_Y=64, WALK_Y=128;
   var CW=34, CH=68; // on-screen character size
-  var HHOVR=null,DBG=false,NOCOLD=false,WXOVR=null,BRKDBG=false; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";NOCOLD=usp.get("nocold")==="1";BRKDBG=usp.get("brk")==="1";var wq=usp.get("wx");if(wq==="rain"||wq==="overcast"||wq==="clear")WXOVR=wq;}catch(e){}
+  var HHOVR=null,DBG=false,NOCOLD=false,WXOVR=null,BRKDBG=false,WORLDVIEW=false; try{var usp=new URLSearchParams(location.search);var q=usp.get("hh"); if(q!==null&&q!==""&&isFinite(+q))HHOVR=clamp(+q,0,23.99);DBG=usp.get("dbg")==="1";NOCOLD=usp.get("nocold")==="1";BRKDBG=usp.get("brk")==="1";WORLDVIEW=usp.get("world")==="1";var wq=usp.get("wx");if(wq==="rain"||wq==="overcast"||wq==="clear")WXOVR=wq;}catch(e){}
   function wxNow(){return WXOVR||((snap&&snap.weather)||"clear");}
 
   // --- image assets: character sheets, legacy props, LimeZu buildings + CITY set ---
@@ -191,7 +194,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // street graph (Manhattan): two horizontal corridors + vertical rails
   var HSTREETS=[
     {y:48,x1:6,x2:94,kind:"main"},
-    {y:70,x1:8,x2:92,kind:"side",mobile:false}   // the promenade (plaza-south)
+    {y:70,x1:8,x2:92,kind:"side",mobile:false},  // the promenade (plaza-south)
+    {y:115,x1:16,x2:84,kind:"side"}              // the South Quarter's lane (Phase-2 expansion)
   ];
   var VSTREETS=[
     {x:50,y1:48,y2:88,kind:"main"}                // center boulevard (main → plaza → park)
@@ -217,7 +221,14 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {id:"shop_c",  slot:"shop_c", x:30, y:58, hScale:1.00, sign:"DINER", mobile:false},
     {id:"civic",   slot:"civic",  x:68, y:58, hScale:0.95, mobile:false},
     {id:"house_bl",slot:"house_b",x:28, y:82, hScale:0.85, mobile:false},
-    {id:"house_br",slot:"house_a",x:74, y:82, hScale:0.85, mobile:false}
+    {id:"house_br",slot:"house_a",x:74, y:82, hScale:0.85, mobile:false},
+    // The South Quarter (Phase-2): a greener civic/residential district below the park.
+    // Buildings sit off the central x=50 axis so walkers reach them via the x13/x87 side
+    // lanes and never cross the fountain.
+    {id:"school",    slot:"civic",  x:24, y:112, hScale:0.92},
+    {id:"library",   slot:"office", x:76, y:112, hScale:1.00},
+    {id:"greenhouse",slot:"house_b",x:26, y:128, hScale:0.82},
+    {id:"cottage_s", slot:"house_a",x:74, y:128, hScale:0.82}
   ];
   // props: cars, signage, sidewalk furniture, terraces, benches, lamps, greenery.
   // legacy slots keep propH heights; new city slots use manifest DRAWH*m; flip
@@ -256,7 +267,13 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {slot:"tree_green",x:40,y:90},{slot:"tree_autumn",x:60,y:90},
     {slot:"bush_pink",x:20,y:74,mobile:false},{slot:"bush_white",x:80,y:74,mobile:false},
     {slot:"flowers",x:46,y:63},{slot:"flowers",x:54,y:63},
-    {slot:"flowers",x:33,y:90,mobile:false},{slot:"flowers",x:67,y:90,mobile:false}
+    {slot:"flowers",x:33,y:90,mobile:false},{slot:"flowers",x:67,y:90,mobile:false},
+    // South Quarter greenery — a lusher, greener district than downtown
+    {slot:"tree_green",x:12,y:120},{slot:"tree_autumn",x:88,y:120},
+    {slot:"tree_autumn",x:42,y:104,mobile:false},{slot:"tree_green",x:58,y:104,mobile:false},
+    {slot:"tree_green",x:16,y:132,mobile:false},{slot:"tree_autumn",x:84,y:132,mobile:false},
+    {slot:"bush_pink",x:38,y:123,mobile:false},{slot:"bush_white",x:62,y:123,mobile:false},
+    {slot:"flowers",x:34,y:126,mobile:false},{slot:"flowers",x:66,y:126,mobile:false}
   ];
   function mFac(){return clamp(H/760,0.9,1.3);}
   function propH(k){var m=mFac();return (k.slice(0,4)==="tree"?62:k==="lamp"?56:k==="fountain"?66:k==="table_umbrella"?50:k==="stall"?46:(k==="bush_pink"||k==="bush_white")?16:k==="bench"?26:17)*m;}
@@ -312,16 +329,24 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     }
     else if(roam&&sprites[roam.sid]){var rs=sprites[roam.sid];tz=1.18;tcx=rs.x;tcy=rs.y-32;}
     else if(meeting){var mc=px({x:50,y:58});tz=isMobile()?1.04:1.12;tcx=mc.x;tcy=mc.y;} // establishing shot of the gathering
+    if(WORLDVIEW&&!fsp){tz=Math.min(1,H/ph());tcx=W/2;tcy=ph()/2;} // debug/overview: fit the whole world
     var hw=W/(2*tz),hh=H/(2*tz);
-    tcx=clamp(tcx,hw,W-hw);tcy=clamp(tcy,hh,H-hh);
+    // clamp within world bounds; Math.min/max keeps it valid when the view is wider/
+    // taller than the world (zoom-out), where the naive lo could exceed hi and invert.
+    tcx=clamp(tcx,Math.min(hw,W-hw),Math.max(hw,W-hw));tcy=clamp(tcy,Math.min(hh,ph()-hh),Math.max(hh,ph()-hh));
     var kz=Math.min(1,dt*0.0016),kp=Math.min(1,dt*0.0024);
     cam.z+=(tz-cam.z)*kz;cam.cx+=(tcx-cam.cx)*kp;cam.cy+=(tcy-cam.cy)*kp;
     var hw2=W/(2*cam.z),hh2=H/(2*cam.z);
-    cam.cx=clamp(cam.cx,hw2,W-hw2);cam.cy=clamp(cam.cy,hh2,H-hh2);
+    cam.cx=clamp(cam.cx,Math.min(hw2,W-hw2),Math.max(hw2,W-hw2));cam.cy=clamp(cam.cy,Math.min(hh2,ph()-hh2),Math.max(hh2,ph()-hh2));
   }
   function camApply(){ctx.setTransform(DPR*cam.z,0,0,DPR*cam.z,DPR*(W/2-cam.z*cam.cx),DPR*(H/2-cam.z*cam.cy));}
   function camReset(){ctx.setTransform(DPR,0,0,DPR,0,0);}
   function px(p){return {x:p.x/100*W, y:p.y/100*H};}
+  // World extent. The town is WORLDH units tall (100 = exactly one screen at zoom 1).
+  // Extending SOUTH makes a bigger, explorable world the camera pans into; width stays
+  // 100 so every x-based clamp (nameplates, labels, rails, mobile fit) is untouched.
+  var WORLDH=135;
+  function ph(){return WORLDH/100*H;}
   function plazaR(){return Math.max(56, W*0.04);}
   // responsive building base height: scale with the smaller of H and W so the
   // dense downtown row fits horizontally at narrow desktop widths without ever
@@ -646,6 +671,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       curUntil=Math.max(curUntil,performance.now()+ms+300);
     }catch(e){}
   }
+  (function(){var b=document.getElementById("wbtn");if(!b)return;if(WORLDVIEW)b.classList.add("on");
+    b.onclick=function(){WORLDVIEW=!WORLDVIEW;b.classList.toggle("on",WORLDVIEW);};})();
   (function(){
     var b=document.getElementById("vbtn");
     if(!b)return;
@@ -1086,6 +1113,11 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       if(cw.dir==="v"){for(i=0;i<n;i++){var yy=c.y-tot/2+i*(stw+gap);ctx.fillRect(c.x-aHalf,yy,aHalf*2,stw);}}
       else{for(i=0;i<n;i++){var xx=c.x-tot/2+i*(stw+gap);ctx.fillRect(xx,c.y-aHalf,stw,aHalf*2);}}
     });
+    // 4. the South Quarter pond — a small landmark lake in the new district
+    if(WORLDH>100){var pc2=px({x:50,y:120}),prw=clamp(W*0.062,44,88),prh=prw*0.44;
+      ctx.fillStyle="#4f94b8";ctx.beginPath();ctx.ellipse(pc2.x,pc2.y,prw,prh,0,0,7);ctx.fill();
+      ctx.strokeStyle="rgba(60,90,70,.5)";ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle="rgba(255,255,255,.14)";ctx.beginPath();ctx.ellipse(pc2.x-prw*0.28,pc2.y-prh*0.32,prw*0.42,prh*0.34,0,0,7);ctx.fill();}
   }
   var plates=[], namePlates=[];
   function drawNamePlates(){
@@ -1328,8 +1360,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var COLD=coldOpen&&!coldOpen.done, TK=COLD||dayCard;
     ctx.imageSmoothingEnabled=false;
     stepCam(dt,now);camApply();
-    // grass
-    for(var gy=0;gy<H;gy+=44)for(var gx=0;gx<W;gx+=44){ctx.fillStyle=((gx+gy)/44)%2?"#7bbf6a":"#74b863";ctx.fillRect(gx,gy,44,44);}
+    // grass — covers the whole world plus a wide margin so a zoomed-out overview
+    // shows countryside around the town, never the dark void
+    var gm=44*9;
+    for(var gy=-gm;gy<ph()+gm;gy+=44)for(var gx=-gm;gx<W+gm;gx+=44){ctx.fillStyle=((gx+gy)/44)%2?"#7bbf6a":"#74b863";ctx.fillRect(gx,gy,44,44);}
     plates=[];namePlates=[];
     if(snap){
       var h=HHOVR!==null?HHOVR:hourNow(), tint=ambTint(h), nn=nightness(h), wx=wxNow();
