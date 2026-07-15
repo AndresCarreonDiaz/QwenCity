@@ -6,6 +6,24 @@ run before moving on.
 
 ---
 
+## Iteration 48 — 2026-07-15 · more places to go (map expansion, phase 1) ✅
+
+- **Why:** the 8-person cast clustered on café/bakery/plaza/park. User asked to expand the map — chose
+  "more places now, bigger world later."
+- **+5 destinations, zero new buildings:** all anchor places at existing decor buildings — **Bookshop**
+  (BOOKS, 68,35), **Town Hall** (civic, 68,58), **Market** (LIME CORP office, 22,34), **Tavern** (SW
+  house, 28,82), **Clinic** (SE house, 74,82). `drawBuilding` already skips anchors; `locationForAction`
+  gets specific keyword routing per place (doesn't hijack existing actions).
+- **Cast actually uses them:** the decision situation now lists `DESTINATIONS` (all 12 public places)
+  and nudges "stay here, or head somewhere in town … vary where they go across the day."
+
+**Verified:** typecheck clean · 117/117 · routing spot-checked (5 new places + existing behavior
+preserved) · town renders with no regression (anchors invisible until visited) · snapshot carries 12
+public destinations · deployed, live healthy, cast at sensible spots. **Phase 2 (bigger, explorable
+world) to follow.**
+
+---
+
 ## Iteration 47 — 2026-07-14 · expand the society (4 → 8) + custom domain w/ HTTPS ✅
 
 - **Society 4 → 8 (user-greenlit):** a 3-writer design panel → critique → synthesis produced four new
