@@ -6,6 +6,32 @@ run before moving on.
 
 ---
 
+## Iteration 47 — 2026-07-14 · expand the society (4 → 8) + custom domain w/ HTTPS ✅
+
+- **Society 4 → 8 (user-greenlit):** a 3-writer design panel → critique → synthesis produced four new
+  residents, each pressuring a lead's desire and tying to a season arc — **Nadia** (florist = the
+  Newcomer; reaches Tom the way Maya can't; seeds the Spring Fair), **Ruth** (Diner owner, Tom's
+  protective sister, muscle behind The Leaving; opens the café/bakery binary into a 3-way plaza war),
+  **Sam** (Ana's pastry apprentice aching to author his own recipe; can tip The Critic), **Gil** (hotel
+  manager, the landlord's son made a reachable person; befriends Leo). Appended after Leo so arc-seed
+  indices hold.
+- **Placement, no new buildings:** position-only **anchor places** (`Place.anchor`, type `"shop"`) at
+  the existing decor buildings (flower shop 31,35 · diner 30,58 · hotel 78,34); `drawBuilding` skips
+  anchors so nothing is double-drawn; `HOME_BY_AGENT` + `locationForAction` route each resident to
+  their shop (Sam → bakery). Sprites: explicit `SHEET_BY_ID` (c1-c5 + x1-x3, all 8 distinct); extras
+  shift to x4-x6 and thin out. The plaza `RING` already has 8 slots.
+- **Custom domain:** **https://qwensociety.andresio.com** (GoDaddy A record → the box). Set up nginx
+  reverse proxy (Node moved to `:8080`) + **Let's Encrypt** cert via certbot (auto-renew); http→https
+  redirect; the raw IP still serves over http. No app code change (client already uses relative URLs).
+  Remaining: user must open **port 443** in the Alibaba ECS security group for external HTTPS.
+
+**Verified:** typecheck clean · 117/117 (server count 4→8) · CDP screenshots (8 distinct nameplated
+characters, correct anchor placement, no overlap, mobile single-row header, noon meeting gathers all 8,
+new bonds like Leo&Nadia / Maya&Gil already forming) · deployed, live serves all 8; nginx+cert verified
+on-box; domain redirect works. **Cost ~2× decisions/tick** (event-driven; tunable via TICK_INTERVAL_MS).
+
+---
+
 ## Iteration 46 — 2026-07-14 · QA / cohesion pass (capstone) ✅
 
 - **Why:** after eight feature layers (desires → calm redesign → moments → season → chapters →
