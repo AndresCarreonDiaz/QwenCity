@@ -6,6 +6,27 @@ run before moving on.
 
 ---
 
+## Iteration 45 — 2026-07-14 · fill the namesake feed: the cast posts, replies close the loop ✅
+
+- **Why:** the app is called "The Feed," but nothing ever posted — `liveworld` created a `Feed` and
+  passed it to the snapshot, yet `composePost`/`addPost` were never called. It was also incoherent:
+  audience replies are framed as "replied to my post," but there were no posts.
+- **Posting:** one agent per cadence broadcasts a first-person post about a **fresh** salient memory.
+  `composePost` gains an `exclude` predicate so it never re-posts the same beat — and makes **no model
+  call** when there's nothing new to say, so the feed fills cheaply. Cadence + budget are env-tunable
+  (`POST_EVERY_TICKS=3`, `MAX_POSTS=400`) and self-gated by salience → modest Qwen cost.
+- **Replies close the loop:** a focus-panel reply now also attaches to the character's latest post (the
+  live world never re-ingests feed replies — see `src/sim/` — so no double-count), so a post's
+  reply-count is real AND the reply still enters memory to steer the story.
+- **Surfaced:** a "📱 Latest posts" section in the "story so far" drawer + the existing "Their posts"
+  focus section (finally populated).
+
+**Verified:** client JS compiles · typecheck clean · 117/117 (`composePost` exclude + null-when-nothing-
+fresh) · local run — Tom & Ana posted about the rent, and a reply to Tom bumped his post to 1 reply
+end-to-end · deployed, live active.
+
+---
+
 ## Iteration 44 — 2026-07-14 · watch them think: surface the reflection tree ✅
 
 - **Why:** the generative-agents engine synthesizes higher-level insights from memory (the reflection
