@@ -58,6 +58,20 @@ test("feed posts appear with accepted-reply counts", async () => {
   assert.equal(snap.feed[0]!.replies, 1); // only the accepted one
 });
 
+test("snapshot surfaces the 2 most-recent reflections per agent (the reflection tree)", async () => {
+  const { store, a, b } = await setup();
+  await store.add({ agentId: "a", kind: "reflection", description: "insight A1", now: T0 + 1e5 });
+  await store.add({ agentId: "a", kind: "reflection", description: "insight A2", now: T0 + 2e5 });
+  await store.add({ agentId: "a", kind: "reflection", description: "insight A3", now: T0 + 3e5 });
+  await store.add({ agentId: "b", kind: "reflection", description: "insight B1", now: T0 + 1e5 });
+  const snap = buildSnapshot({ now: T0 + 1e6, agents: [a, b], store, currentActions: {} });
+  const forA = snap.reflections!.filter((r) => r.agentId === "a");
+  assert.equal(forA.length, 2, "capped at 2 per agent");
+  assert.deepEqual(forA.map((r) => r.text), ["insight A3", "insight A2"], "newest-first, oldest dropped");
+  assert.equal(snap.reflections!.filter((r) => r.agentId === "b").length, 1);
+  assert.equal(snap.reflections!.find((r) => r.agentId === "b")!.name, "Bo", "carries the agent's name");
+});
+
 test("snapshot includes importance-ranked town highlights", async () => {
   const { store, a, b } = await setup();
   await a.perceive("Ana had a huge dramatic falling-out and felt betrayed.", T0 + 5e5); // poignant

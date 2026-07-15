@@ -112,6 +112,9 @@ export interface WorldSnapshot {
   /** the audience's causal fingerprints — viewer replies that shaped a character's action, newest last
    *  (a persistent record so the audience's authorship of the story is visible even to a drop-in viewer) */
   influences?: Array<{ handle: string; name: string; text: string; action: string }>;
+  /** recent higher-level insights the cast has synthesized (the reflection tree), newest first —
+   *  surfaced so viewers can watch the AI minds *think*, not just act */
+  reflections?: Array<{ agentId: string; name: string; text: string; t: number }>;
   /** a town-wide happening in progress (e.g. the daily town meeting), or null */
   event: WorldEvent | null;
   stats: { agents: number; memories: number; posts: number; edges: number };
@@ -267,6 +270,21 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
   // Town-wide daily highlights (importance-driven; USE 2 of the Salience Engine).
   const highlights = selectHighlights([...store.all()], { k: input.highlightLimit ?? 6 });
 
+  // Recent realizations — the reflection tree, surfaced so viewers can watch the cast *think*.
+  // Keep the 2 most-recent per agent (not a town-wide top-N), so every character's realizations are
+  // always available to their focus panel and one busy reflector can't crowd the others out.
+  const perAgentRefl = new Map<string, number>();
+  const reflections = [...store.all()]
+    .filter((n) => n.kind === "reflection")
+    .sort((a, b) => b.created - a.created)
+    .filter((n) => {
+      const c = perAgentRefl.get(n.agentId) ?? 0;
+      if (c >= 2) return false;
+      perAgentRefl.set(n.agentId, c + 1);
+      return true;
+    })
+    .map((n) => ({ agentId: n.agentId, name: nameById.get(n.agentId) ?? n.agentId, text: n.description, t: n.created }));
+
   return {
     t: now,
     clock: new Date(now).toISOString().slice(11, 16),
@@ -282,6 +300,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     premise: PREMISE,
     chapter: input.chapter,
     influences: input.influences,
+    reflections,
     event: input.event ?? null,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },
   };

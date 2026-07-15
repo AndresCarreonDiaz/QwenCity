@@ -510,6 +510,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     pushBeats(s);
     setChyron(s);
     pushMoments(s,reset);
+    pushReflections(s);
     pushBreaking(s);
     renderPanel();
   }
@@ -661,10 +662,35 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
 
   // --- stage directions: an idle character narrates what they're doing, in place ---
   var emote=null, emoteUntil=0, nextEmoteAt=0, emoteIdx=0;
+  // --- realizations: when a character synthesizes a higher-level insight (the
+  // reflection tree), surface it as a 💭 thought that interrupts idle filler, so
+  // an all-day viewer watches the AI minds *think*, not just act. ---
+  var reflSeen={}, reflQ=[], everRefl=false;
+  function pushReflections(s){
+    var rs=(s.reflections)||[];              // newest-first from the snapshot
+    for(var i=rs.length-1;i>=0;i--){         // enqueue oldest-first → chronological
+      var r=rs[i], k=r.agentId+"|"+r.t+"|"+r.text;   // dedupe exact insights (distinct ones still surface)
+      if(reflSeen[k])continue; reflSeen[k]=1;
+      if(everRefl)reflQ.push(r);              // skip the first-load backlog
+    }
+    everRefl=true;
+    if(reflQ.length>6)reflQ=reflQ.slice(-6);
+    var ks=Object.keys(reflSeen); if(ks.length>240){for(var j=0;j<ks.length-240;j++)delete reflSeen[ks[j]];}
+  }
   function stepEmotes(now){
     if((coldOpen&&!coldOpen.done)||dayCard){emote=null;return;}
     if(emote&&now>emoteUntil)emote=null;
     if(emote||!snap)return;
+    // a fresh realization takes priority over idle filler (skip a busy reflector, keep it queued)
+    for(var ri=0;ri<reflQ.length;ri++){
+      var rf=reflQ[ri], rsp=sprites[rf.agentId];
+      if(rsp&&!rsp.moving&&!pairs[rf.agentId]&&!(cur&&(cur.sid===rf.agentId||cur.lid===rf.agentId))){
+        reflQ.splice(ri,1);
+        emote={sid:rf.agentId,kind:"think",text:"💭 "+rf.text,dur:clamp(3400+42*rf.text.length,4600,7600)};
+        emoteUntil=now+emote.dur; nextEmoteAt=now+9000+Math.random()*10000;
+        return;
+      }
+    }
     if(!nextEmoteAt){nextEmoteAt=now+6000;return;}
     if(now<nextEmoteAt)return;
     var ags=(snap.agents||[]);
@@ -1482,6 +1508,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     var posts=(snap.feed||[]).filter(function(p){return p.agentId===selected;});
     var memHtml=mems.map(function(m){return '<div class="mem"><span class="kd" style="color:'+(KIND_COLOR[m.kind]||"#888")+'">'+esc(m.kind)+'</span>'+esc(m.text)+'</div>';}).join("")||'<div class="mem" style="color:var(--dim)">quiet mind so far…</div>';
     var postHtml=posts.map(function(p){return '<div class="post">'+esc(p.text)+' <span style="color:var(--dim);font-size:11px">· '+p.replies+' repl'+(p.replies===1?"y":"ies")+'</span></div>';}).join("")||'<div style="color:var(--dim);font-size:12px">no posts yet</div>';
+    // their realizations — the higher-level insights this mind has synthesized (the reflection tree)
+    var reflAll=(snap.reflections||[]).filter(function(r){return r.agentId===selected;});
+    var reflSeenP={}, refl=[]; reflAll.forEach(function(r){if(!reflSeenP[r.text]){reflSeenP[r.text]=1;refl.push(r);}}); refl=refl.slice(0,4);
+    var reflHtml=refl.length?('<div class="sec"><div class="h">💭 What '+esc(a.name)+' has realized</div>'+refl.map(function(r){return '<div class="mem"><span class="kd" style="color:#9e8cff">insight</span>'+esc(r.text)+'</div>';}).join("")+'</div>'):"";
     // who is this: split the bio into a role clause + personality traits
     var bio=a.bio||"", si=bio.indexOf(";"), role=si<0?bio:bio.slice(0,si), traits=si<0?"":bio.slice(si+1).trim();
     var md=moodOf(a), moodChip=md.e?'<div class="traits" style="margin-top:5px">Mood right now: '+md.e+' <b style="color:'+(md.c||"#95a0b3")+'">'+md.l+'</b></div>':"";
@@ -1501,6 +1531,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       '<div class="doing"><div class="k">Right now</div>'+esc(a.action)+(a.planActivity?'<div style="color:var(--dim);margin-top:5px;font-size:12px">📋 plan: '+esc(a.planActivity)+'</div>':"")+'</div>'+
       '<div class="sec"><div class="h">💬 Say something to '+esc(a.name)+'</div><div class="replybox"><input id="rin" maxlength="240" placeholder="a message they\\'ll remember…"/><button id="rbtn">Send</button></div><div class="replymsg" id="rmsg">Your reply becomes a memory that can change what they do next.</div></div>'+
       (rels?'<div class="sec"><div class="h">Who '+esc(a.name)+' knows</div>'+rels+'</div>':"")+
+      reflHtml+
       '<div class="sec"><div class="h">Their thoughts</div>'+memHtml+'</div>'+
       '<div class="sec"><div class="h">Their posts</div>'+postHtml+'</div>';
     document.getElementById("back").onclick=function(){selected=null;document.getElementById("hint").style.display="block";renderPanel();};

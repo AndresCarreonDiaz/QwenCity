@@ -194,8 +194,9 @@ export class LiveWorld {
       dailyGathering: { hour: 12, durationMin: 90, topics },
       arcSeeds,
     });
+    const reflectionThreshold = Number(process.env.REFLECT_THRESHOLD ?? 200);
     for (const [id, name, bio, desire] of DEFAULT_CAST) {
-      const a = new Agent({ id, name, bio, desire }, this.store, model, { reflectionThreshold: 200 });
+      const a = new Agent({ id, name, bio, desire }, this.store, model, { reflectionThreshold });
       this.world.add(a);
       this.agents.push(a);
       this.nameById.set(id, name);
