@@ -4,6 +4,7 @@ dist/
 # Meta-strategy / competitive analysis — kept OUT of the public repo by default
 # (reveals idea selection + competition read). The Truman Show design + research
 # docs under strategy/truman-show/ ARE committed. Remove these lines to publish.
+strategy/HANDOFF.md
 strategy/WINNING-PLAYBOOK.md
 strategy/ROUND2-VERDICT.md
 strategy/ranked-ideas.json
