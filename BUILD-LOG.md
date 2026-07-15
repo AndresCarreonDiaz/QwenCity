@@ -6,6 +6,30 @@ run before moving on.
 
 ---
 
+## Iteration 49 — 2026-07-15 · a bigger, explorable world (map expansion, phase 2) ✅
+
+- **Why:** user chose "more places now, bigger world later." Phase 1 added destinations; phase 2 makes
+  the world physically larger.
+- **World-size abstraction:** the map was hardwired to `0-100 == one screen`. Added `WORLDH` + `ph()`
+  and extended the world **south** (width stays 100, so every x-based clamp — nameplates, labels, rails,
+  mobile fit — is untouched; only grass-height + the camera y-clamp change). Fixed the camera clamp for
+  zoom-out (`Math.min/max`, so `lo` can't exceed `hi` and invert — that bug had doubled the overview).
+  Grass fills a wide margin → the overview shows countryside, never the void.
+- **The South Quarter** (below the park): a greener civic/residential district — a **School**, a
+  **Library**, a **Community Garden** (3 new destinations → 15 public places), a landmark **pond**, a
+  lane (y=115), lush greenery. Buildings sit OFF the central x=50 axis so walkers reach them via the
+  x13/x87 side lanes and never path through the fountain. Reuse existing city sprites as anchor places
+  (no new art, no double-draw).
+- **"🗺 map" button** (header) zooms out to the whole town so the bigger world is immediately
+  discoverable; following a character south reveals the quarter in detail (Truman-cam reveal).
+
+**Verified (CDP):** desktop default/scene/overview · mobile default/overview · the map-button toggle —
+8 characters, South Quarter renders (school, library, pond, street, greenery), contiguous with the
+core, no overlap/duplication/regression · typecheck clean · 117/117 (place y-range → 140) · deployed.
+Routing south uses the same side-lane path as the corner homes.
+
+---
+
 ## Iteration 48 — 2026-07-15 · more places to go (map expansion, phase 1) ✅
 
 - **Why:** the 8-person cast clustered on café/bakery/plaza/park. User asked to expand the map — chose
