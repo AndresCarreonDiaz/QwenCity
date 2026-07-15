@@ -6,6 +6,25 @@ run before moving on.
 
 ---
 
+## Iteration 43 — 2026-07-14 · the audience's fingerprints: a persistent influence log ✅
+
+- **Why:** the differentiator (viewer replies causally steer the AI cast) was only shown *while* a reply
+  was actively steering someone — the ephemeral "🎙️ You're steering the story" card. Once it cleared,
+  there was no record, so a drop-in viewer or a judge loading the page saw no evidence the audience
+  shapes the story. This is the on-thesis win for the Agent Society track.
+- **What:** `LiveWorld` now accumulates a persistent log — whenever a viewer reply shaped a character's
+  latest decision (`agent.influence`), it's recorded once (deduped by the injection's timestamp),
+  capturing who nudged whom, what they said, and what the character then did. Carried on the snapshot
+  as an optional `influences`, so it survives reloads and reflects every viewer.
+- **Surfaced two ways:** a LIVE tally in the always-visible green hook ("N real moments viewers have
+  already changed ↓"), and the full list as leading evidence in the "Why this is different" drawer
+  (`@handle nudged Maya — "…" → wiping down the tables`).
+
+**Verified:** client JS compiles · typecheck clean · 115/115 · live `/reply` → `snapshot.influences`
+populated → hook tally + drawer entry render end-to-end (screenshot) · deployed to ECS, live active.
+
+---
+
 ## Iteration 42 — 2026-07-14 · make the season visible: chapters ✅
 
 - **Why:** the rotating season (iter 41) was only *felt* through dialogue — a watcher couldn't see
