@@ -34,6 +34,17 @@ const DEFAULT_CAST: Array<[string, string, string, string]> = [
     "Ana is determined to prove her bakery can outshine Maya's café — though a part of her wonders whether winning is worth standing alone."],
   ["leo", "Leo", "Leo delivers for both shops; cheerful, a bit of a gossip.",
     "Leo wants the neighbours to finally see him as someone who matters, not just the kid who carries the boxes."],
+  // The society expands (designed by a 3-writer panel): each new resident pressures an
+  // existing lead's desire and ties into a season arc. Appended after the original four so
+  // the arc-seed indices (Maya=0…Leo=3) stay valid.
+  ["nadia", "Nadia", "Nadia quietly signed the lease on the empty flower shop off the plaza; observant, guarded, disarmingly kind.",
+    "Nadia wants to earn a permanent place in a town that isn't sure it wants her — to stop being the newcomer and finally become a neighbour."],
+  ["ruth", "Ruth", "Ruth runs the Diner on the plaza corner; Tom's older sister — blunt, fiercely protective, sure she knows what's best for him.",
+    "Ruth wants to pry Tom loose and take him to the city for a clean start, convinced this town — and Maya — only ever breaks his heart."],
+  ["sam", "Sam", "Sam is Ana's young pastry apprentice, living in the room above the bakery; gifted, eager, quietly proud.",
+    "Sam aches to author one pastry that is unmistakably his — a recipe of his own making, not another line in Ana's ledger."],
+  ["gil", "Gil", "Gil runs the plaza hotel and would rather no one remembered whose son he is; reserved, fair-minded, tired of apologising for a name.",
+    "Gil wants to do right by the neighbours his family is squeezing without openly betraying his father — to be judged as Gil, not as the landlord's son."],
 ];
 
 /** cast index by role, for arc seeds (matches DEFAULT_CAST order) */

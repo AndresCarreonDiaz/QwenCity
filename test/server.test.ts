@@ -26,7 +26,7 @@ test("GET /health reports alive with a heartbeat", async () => {
   assert.equal(r.status, 200);
   const h = await r.json();
   assert.equal(h.status, "alive");
-  assert.ok(h.ticks >= 1 && h.agents === 4);
+  assert.ok(h.ticks >= 1 && h.agents === 8);
 });
 
 test("GET /snapshot.json returns the world snapshot", async () => {
@@ -34,7 +34,7 @@ test("GET /snapshot.json returns the world snapshot", async () => {
   assert.equal(r.status, 200);
   assert.equal(r.headers.get("content-type"), "application/json");
   const snap = await r.json();
-  assert.ok(Array.isArray(snap.agents) && snap.agents.length === 4);
+  assert.ok(Array.isArray(snap.agents) && snap.agents.length === 8);
   assert.ok(Array.isArray(snap.ticker));
 });
 

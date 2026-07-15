@@ -154,8 +154,11 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // load an image with a couple of retries so a transient blip doesn't leave
   // permanent placeholder circles/boxes on a 24/7 spectator tab
   function loadImg(src){var im=new Image(),tries=0;im.onerror=function(){if(tries<2){tries++;setTimeout(function(){im.src=src+"?r="+tries;},2200*tries);}};im.src=src;return im;}
-  // character atlases are ~9MB decoded each — load lazily, only the cast's own
-  function getSheet(id){var i=(hue(id)%5)+1;if(!sheets[i])sheets[i]=loadImg(base()+"/assets/characters/c"+i+".png");return sheets[i];}
+  // character atlases are ~9MB decoded each — load lazily, only the cast's own.
+  // explicit sheet per named resident so all 8 look distinct (c1-c5 + x1-x3);
+  // background extras use x4-x6 so they never share a look with a named character.
+  var SHEET_BY_ID={maya:"c1",tom:"c2",ana:"c3",leo:"c4",nadia:"c5",ruth:"x1",sam:"x2",gil:"x3"};
+  function getSheet(id){var name=SHEET_BY_ID[id]||("c"+((hue(id)%5)+1));if(!sheets[name])sheets[name]=loadImg(base()+"/assets/characters/"+name+".png");return sheets[name];}
   // LimeZu premade atlas: 32x64 characters, 6 frames x 4 directions per band.
   // Band y=64 is idle, y=128 is walk. Direction column offsets within a band:
   var DIRCOL={R:0,U:6,L:12,D:18}, IDLE_Y=64, WALK_Y=128;
@@ -1113,6 +1116,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     });
   }
   function drawBuilding(p,g){
+    if(p.anchor)return; // the decor layer already draws this building; place is position-only
     if(p.type==="park"){
       ctx.fillStyle="rgba(70,140,70,.30)";ctx.beginPath();ctx.ellipse(g.c.x,g.c.y+14,g.rx,g.rx*0.5,0,0,7);ctx.fill();
       drawProp(props.tree_green,g.c.x-g.rx*0.42,g.c.y+6,60);
@@ -1243,10 +1247,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     if(!snap)return;
     if(!extras){
       extras=[];
-      var n=isMobile()?3:6;
+      var n=isMobile()?2:3; // fewer wandering extras now the named cast is 8
       for(var i=0;i<n;i++){
         var t0=extraTarget();
-        extras.push({img:loadImg(base()+"/assets/characters/x"+(i+1)+".png"),x:t0.x,y:t0.y,path:null,dir:"D",waitUntil:now+i*2500,speed:(26+Math.random()*14)/1000,night:i<2});
+        extras.push({img:loadImg(base()+"/assets/characters/x"+(i+4)+".png"),x:t0.x,y:t0.y,path:null,dir:"D",waitUntil:now+i*2500,speed:(26+Math.random()*14)/1000,night:i<2});
       }
     }
     extras.forEach(function(ex){

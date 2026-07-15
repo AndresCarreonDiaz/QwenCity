@@ -4,7 +4,7 @@
  * space; the frontend scales them to the canvas. This is what lets characters be
  * placed on a map and walk between buildings as their plans unfold.
  */
-export type PlaceType = "cafe" | "bakery" | "home" | "park" | "plaza";
+export type PlaceType = "cafe" | "bakery" | "home" | "park" | "plaza" | "shop";
 
 export interface Place {
   id: string;
@@ -15,6 +15,9 @@ export interface Place {
   /** what's physically around a character standing here — fed into decision
    * prompts so actions reference real surroundings (and into nothing else) */
   flavor: string;
+  /** a position-only anchor: the building is already drawn by the decor layer, so
+   * the frontend places characters here without drawing another structure */
+  anchor?: boolean;
 }
 
 // Laid out as a small city: Main Street (y=48) carries the downtown strip with
@@ -33,6 +36,11 @@ export const PLACES: Place[] = [
   { id: "leo_home", label: "Leo's Place", x: 13, y: 82, type: "home", flavor: "his delivery bike by the porch, a cluttered workbench, a radio in the kitchen" },
   { id: "park", label: "The Park", x: 50, y: 85, type: "park", flavor: "benches under the trees, the lawn, a quiet path, birdsong" },
   { id: "plaza", label: "Town Plaza", x: 50, y: 60, type: "plaza", flavor: "the stone fountain, benches, flower planters, street lamps, the clock tower, the diner on the corner" },
+  // anchor places — the building already exists in the decor layer; these just give
+  // the new residents a spot to stand at their own shop (no second structure drawn).
+  { id: "flowershop", label: "The Flower Shop", x: 31, y: 35, type: "shop", anchor: true, flavor: "buckets of cut flowers, the cooler, the little bell over the door, the storefront she's slowly bringing back to life" },
+  { id: "diner", label: "The Diner", x: 30, y: 58, type: "shop", anchor: true, flavor: "the counter and stools, the griddle, booths by the window, the pie case, regulars nursing coffee" },
+  { id: "hotel", label: "The Plaza Hotel", x: 78, y: 34, type: "shop", anchor: true, flavor: "the front desk, the key rack, the quiet lobby, the guest ledger, a window over the plaza" },
 ];
 
 const PLACE_BY_ID = new Map(PLACES.map((p) => [p.id, p]));
@@ -43,6 +51,11 @@ const HOME_BY_AGENT: Record<string, string> = {
   tom: "tom_home",
   ana: "ana_home",
   leo: "leo_home",
+  // the new residents live at/above their own shop
+  nadia: "flowershop",
+  ruth: "diner",
+  sam: "bakery",
+  gil: "hotel",
 };
 
 export function placeById(id: string): Place | undefined {
@@ -56,7 +69,11 @@ export function placeById(id: string): Place | undefined {
  */
 export function locationForAction(agentId: string, action: string): string {
   const a = action.toLowerCase();
-  if (/\bbakery|pastr\w*|bread|flour|dough|inventory|restock|shelv\w*|display case|oven\b/.test(a)) return "bakery";
+  // new-resident shops (checked before the café's broad keywords so they win)
+  if (/\bflower|floral|florist|bouquet|petal|vase|blooms?|stems?\b/.test(a)) return "flowershop";
+  if (/\bdiner|griddle|booth|short-order|pie case|milkshake|waitress|serving breakfast\b/.test(a)) return "diner";
+  if (/\bhotel|lobby|front desk|guest|check-in|check in|key rack|reception\b/.test(a)) return "hotel";
+  if (/\bbakery|pastr\w*|bread|flour|dough|inventory|restock|shelv\w*|display case|oven|apprentice|recipe\b/.test(a)) return "bakery";
   if (/\bcaf[eé]|coffee|barista|tables|counter|opening up|brew|espresso|shop\b/.test(a)) return "cafe";
   if (/\bpark|stroll|walk|outside|air|garden|bench|neighbou?r\b/.test(a)) return "park";
   if (/\bhome|shower|dress|sleep|bed|waking|nap|rest|breakfast|winding down|\bread|journal|window\b/.test(a)) {
