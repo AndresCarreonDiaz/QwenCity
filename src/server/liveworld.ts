@@ -165,6 +165,11 @@ export class LiveWorld {
   private replyCount = 0;
   private running = false;
   private ticking = false;
+  /** the audience's causal fingerprints: viewer replies that shaped a decision,
+   *  logged once each (deduped by agent+injection), so the record persists and
+   *  the audience's authorship stays visible long after the live steer clears. */
+  private readonly influenceLog: Array<{ handle: string; name: string; text: string; action: string; at: number }> = [];
+  private readonly loggedInfluence = new Set<string>();
 
   constructor(opts: LiveWorldOptions = {}) {
     const model = opts.model ?? getModel();
@@ -208,7 +213,19 @@ export class LiveWorld {
     await this.world.tick();
     this.ticks++;
     if (this.logPath) for (const e of this.world.tickLog.slice(-this.agents.length)) appendTick(this.logPath, e);
-    this.snap = buildSnapshot({ now: this.world.clock, agents: this.agents, store: this.store, currentActions: this.world.currentActions(), feed: this.feed, event: this.world.activeEvent(this.world.clock), chapter: chapterAt(SEASON, this.world.simDay()) });
+    const currentActions = this.world.currentActions();
+    // record any fresh audience-caused moment once — a persistent thread of the
+    // story the audience has actually changed (deduped by the injection's timestamp).
+    for (const a of this.agents) {
+      const inf = a.influence;
+      if (!inf) continue;
+      const key = `${a.profile.id}|${inf.at}`;
+      if (this.loggedInfluence.has(key)) continue;
+      this.loggedInfluence.add(key);
+      this.influenceLog.push({ handle: inf.handle, name: a.profile.name, text: inf.text, action: currentActions[a.profile.id] ?? "…", at: inf.at });
+      if (this.influenceLog.length > 40) this.influenceLog.shift();
+    }
+    this.snap = buildSnapshot({ now: this.world.clock, agents: this.agents, store: this.store, currentActions, feed: this.feed, event: this.world.activeEvent(this.world.clock), chapter: chapterAt(SEASON, this.world.simDay()), influences: this.influenceLog.slice(-8).map(({ handle, name, text, action }) => ({ handle, name, text, action })) });
     this.cachedHtml = renderSnapshotHtml(this.snap);
   }
 

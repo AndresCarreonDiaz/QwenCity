@@ -109,6 +109,9 @@ export interface WorldSnapshot {
   premise: string;
   /** the current season chapter (1-based) + title/hook, so the view can name where the story is now */
   chapter?: { n: number; title: string; hook?: string };
+  /** the audience's causal fingerprints — viewer replies that shaped a character's action, newest last
+   *  (a persistent record so the audience's authorship of the story is visible even to a drop-in viewer) */
+  influences?: Array<{ handle: string; name: string; text: string; action: string }>;
   /** a town-wide happening in progress (e.g. the daily town meeting), or null */
   event: WorldEvent | null;
   stats: { agents: number; memories: number; posts: number; edges: number };
@@ -133,6 +136,8 @@ export interface SnapshotInput {
   event?: WorldEvent | null;
   /** the current season chapter, from `chapterAt(SEASON, world.simDay())` */
   chapter?: { n: number; title: string; hook?: string };
+  /** the accumulated audience-influence log (viewer replies that shaped an action), newest last */
+  influences?: Array<{ handle: string; name: string; text: string; action: string }>;
 }
 
 /** how many of the most recent dialogue lines a snapshot carries */
@@ -276,6 +281,7 @@ export function buildSnapshot(input: SnapshotInput): WorldSnapshot {
     places: PLACES,
     premise: PREMISE,
     chapter: input.chapter,
+    influences: input.influences,
     event: input.event ?? null,
     stats: { agents: agents.length, memories: store.size, posts: feedPosts.length, edges: relationships.length },
   };
