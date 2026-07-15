@@ -6,6 +6,30 @@ run before moving on.
 
 ---
 
+## Iteration 46 — 2026-07-14 · QA / cohesion pass (capstone) ✅
+
+- **Why:** after eight feature layers (desires → calm redesign → moments → season → chapters →
+  influence log → reflections → feed), verify the whole experience still holds together — especially
+  that the sidebar didn't creep back toward the original "overwhelm" complaint.
+- **Checked (CDP screenshots):** resting desktop, resting mobile, the opened "story so far" drawer, and
+  a focus-panel dossier — with reflections/posts/moments all populated (fast ticks + low reflect
+  threshold locally).
+- **Result — PASS, no fixes needed:**
+  - Resting town view is as calm as the iter-39 redesign — header clean; sidebar = title · chapter chip
+    · green hook · roster · two collapsed drawers. Everything new lives behind progressive disclosure
+    or transient/diegetic surfaces, so the resting state never got busier.
+  - Mobile header stays a single row (no wrap); resting sidebar short.
+  - The opened story drawer is a clean, scannable narrative digest (premise · this chapter · latest
+    posts · today's drama · bonds) — long but opt-in.
+  - Focus dossier reads in a logical arc (who they are · what they want · right now · say something ·
+    who they know · what they've realized · thoughts · posts) with clear per-section hierarchy.
+  - Live season progression confirmed end-to-end (Chapter 2 · The Newcomer with the correct hook).
+
+**Verified:** 117/117 tests still green; no code change (verification pass). The product is coherent,
+calm, and feature-complete for the watchability goal.
+
+---
+
 ## Iteration 45 — 2026-07-14 · fill the namesake feed: the cast posts, replies close the loop ✅
 
 - **Why:** the app is called "The Feed," but nothing ever posted — `liveworld` created a `Feed` and
