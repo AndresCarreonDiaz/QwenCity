@@ -41,7 +41,17 @@ export const PLACES: Place[] = [
   { id: "flowershop", label: "The Flower Shop", x: 31, y: 35, type: "shop", anchor: true, flavor: "buckets of cut flowers, the cooler, the little bell over the door, the storefront she's slowly bringing back to life" },
   { id: "diner", label: "The Diner", x: 30, y: 58, type: "shop", anchor: true, flavor: "the counter and stools, the griddle, booths by the window, the pie case, regulars nursing coffee" },
   { id: "hotel", label: "The Plaza Hotel", x: 78, y: 34, type: "shop", anchor: true, flavor: "the front desk, the key rack, the quiet lobby, the guest ledger, a window over the plaza" },
+  // more places to go — all anchors at existing decor buildings (no new structures)
+  { id: "bookshop", label: "The Bookshop", x: 68, y: 35, type: "shop", anchor: true, flavor: "shelves of secondhand books, a reading nook by the window, the little bell, dust motes in the light" },
+  { id: "townhall", label: "The Town Hall", x: 68, y: 58, type: "shop", anchor: true, flavor: "the public notice board, the records room, the meeting hall, the clerk's window, the old town seal" },
+  { id: "market", label: "The Market", x: 22, y: 34, type: "shop", anchor: true, flavor: "produce crates, the grocer's scale, the bread rack, neighbours filling their baskets, the bell over the door" },
+  { id: "tavern", label: "The Tavern", x: 28, y: 82, type: "shop", anchor: true, flavor: "the long bar, a few worn booths, a chalkboard of specials, low evening light, regulars over a pint" },
+  { id: "clinic", label: "The Clinic", x: 74, y: 82, type: "shop", anchor: true, flavor: "the waiting bench, the doctor's shingle, a jar of lollipops on the desk, the quiet examining room" },
 ];
+
+/** public destinations a character can head to (everything but private homes) —
+ *  offered in the decision prompt so the cast actually spreads across the town */
+export const DESTINATIONS = PLACES.filter((p) => p.type !== "home").map((p) => p.label);
 
 const PLACE_BY_ID = new Map(PLACES.map((p) => [p.id, p]));
 
@@ -73,6 +83,11 @@ export function locationForAction(agentId: string, action: string): string {
   if (/\bflower|floral|florist|bouquet|petal|vase|blooms?|stems?\b/.test(a)) return "flowershop";
   if (/\bdiner|griddle|booth|short-order|pie case|milkshake|waitress|serving breakfast\b/.test(a)) return "diner";
   if (/\bhotel|lobby|front desk|guest|check-in|check in|key rack|reception\b/.test(a)) return "hotel";
+  if (/\bbookshop|bookstore|browse|browsing|paperback|novel|a book\b|reading nook\b/.test(a)) return "bookshop";
+  if (/\btown hall|townhall|notice board|records|the clerk|permit|the hall\b/.test(a)) return "townhall";
+  if (/\bmarket|grocer|groceries|produce|errands|the basket|picking up|shopping\b/.test(a)) return "market";
+  if (/\btavern|pub\b|the bar\b|a pint|for a drink|ale\b/.test(a)) return "tavern";
+  if (/\bclinic|the doctor|nurse|checkup|check-up|unwell|feeling sick|prescription\b/.test(a)) return "clinic";
   if (/\bbakery|pastr\w*|bread|flour|dough|inventory|restock|shelv\w*|display case|oven|apprentice|recipe\b/.test(a)) return "bakery";
   if (/\bcaf[eé]|coffee|barista|tables|counter|opening up|brew|espresso|shop\b/.test(a)) return "cafe";
   if (/\bpark|stroll|walk|outside|air|garden|bench|neighbou?r\b/.test(a)) return "park";

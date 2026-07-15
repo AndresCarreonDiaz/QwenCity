@@ -1,6 +1,6 @@
 import { Agent } from "../agent/agent.ts";
 import type { MemoryStore } from "../memory/store.ts";
-import { locationForAction, placeById } from "../view/places.ts";
+import { DESTINATIONS, locationForAction, placeById } from "../view/places.ts";
 import { converse } from "./conversation.ts";
 import { weatherPhrase } from "./weather.ts";
 
@@ -255,7 +255,8 @@ export class World {
           `It is ${new Date(this.clock).toISOString()}. ${weatherPhrase(this.clock)}${r.agent.profile.name} is at ${here?.label ?? "the Town Plaza"} — around them: ${here?.flavor ?? "the fountain and benches"}. ` +
           (copresent ? `Also here: ${copresent}. ` : "") +
           `${r.agent.profile.name} is currently ${r.action}. ` +
-          `What does ${r.agent.profile.name} do next, here or nearby? Prefer concrete actions that use the surroundings or the people present.`;
+          `Places around town they could head to: ${DESTINATIONS.join(", ")}. ` +
+          `What does ${r.agent.profile.name} do next — stay here, or head somewhere in town? Prefer concrete actions that use the surroundings or the people present, and vary where they go across the day.`;
         const act = await r.agent.decideAction(situation, this.clock);
         r.action = act.label;
         r.nextDecisionAt = this.clock + this.actionMs;
