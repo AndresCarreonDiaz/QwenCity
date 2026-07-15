@@ -170,6 +170,14 @@ export class LiveWorld {
    *  the audience's authorship stays visible long after the live steer clears. */
   private readonly influenceLog: Array<{ handle: string; name: string; text: string; action: string; at: number }> = [];
   private readonly loggedInfluence = new Set<string>();
+  /** social-feed posting: one agent per cadence broadcasts a post about a NEW
+   *  salient memory. Self-gated (no model call unless there's something fresh to
+   *  say) + budget-capped, so the namesake feed fills without a big Qwen bill. */
+  private readonly postedMem = new Set<string>();
+  private postCursor = 0;
+  private postCount = 0;
+  private readonly postEveryTicks: number;
+  private readonly maxPosts: number;
 
   constructor(opts: LiveWorldOptions = {}) {
     const model = opts.model ?? getModel();
@@ -179,6 +187,10 @@ export class LiveWorld {
     this.store = new MemoryStore(model, { maxNodes: Number(process.env.MAX_MEMORIES ?? 6000) });
     this.tickIntervalMs = opts.tickIntervalMs ?? 4000;
     this.maxReplies = opts.maxReplies ?? 200;
+    // Post cadence + budget (env-tunable): a post is only *attempted* every N ticks
+    // and only fires a model call when the chosen agent has a fresh salient memory.
+    this.postEveryTicks = Math.max(1, Number(process.env.POST_EVERY_TICKS ?? 3));
+    this.maxPosts = Number(process.env.MAX_POSTS ?? 400);
     this.logPath = opts.logPath;
     // The season: a rotating sequence of emergent arcs. The meeting framing walks
     // through every arc's escalating topics day by day, and each arc's hook is
@@ -225,6 +237,18 @@ export class LiveWorld {
       this.loggedInfluence.add(key);
       this.influenceLog.push({ handle: inf.handle, name: a.profile.name, text: inf.text, action: currentActions[a.profile.id] ?? "…", at: inf.at });
       if (this.influenceLog.length > 40) this.influenceLog.shift();
+    }
+    // Social feed: one agent per cadence broadcasts a post about a fresh salient
+    // memory (composePost self-gates on new+salient, so no wasted model calls).
+    if (this.ticks % this.postEveryTicks === 0 && this.postCount < this.maxPosts && this.agents.length) {
+      const poster = this.agents[this.postCursor % this.agents.length]!;
+      this.postCursor++;
+      const draft = await poster.composePost(this.world.clock, { exclude: (id) => this.postedMem.has(id) });
+      if (draft) {
+        this.postedMem.add(draft.sourceMemoryId);
+        this.feed.addPost(poster.profile.id, draft.text, draft.sourceMemoryId, this.world.clock);
+        this.postCount++;
+      }
     }
     this.snap = buildSnapshot({ now: this.world.clock, agents: this.agents, store: this.store, currentActions, feed: this.feed, event: this.world.activeEvent(this.world.clock), chapter: chapterAt(SEASON, this.world.simDay()), influences: this.influenceLog.slice(-8).map(({ handle, name, text, action }) => ({ handle, name, text, action })) });
     this.cachedHtml = renderSnapshotHtml(this.snap);
@@ -281,6 +305,11 @@ export class LiveWorld {
     if (!ok) return { ok: false, reason };
     const node = await agent.ingestAudienceReply(handle || "guest", text, this.world.clock);
     this.replyCount++;
+    // also attach it to the character's latest post so the feed's reply-counts are
+    // real (the live world never re-ingests feed replies — see sim/ — so no double-count).
+    const myPosts = this.feed.postsBy(agentId);
+    const latest = myPosts[myPosts.length - 1];
+    if (latest) this.feed.addReply(latest.id, handle || "guest", text, this.world.clock);
     return { ok: true, importance: node.importance };
   }
 }

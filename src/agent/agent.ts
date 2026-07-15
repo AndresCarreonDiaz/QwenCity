@@ -238,13 +238,16 @@ export class Agent {
    */
   async composePost(
     now: number,
-    opts: { threshold?: number; window?: number } = {},
+    opts: { threshold?: number; window?: number; exclude?: (memoryId: string) => boolean } = {},
   ): Promise<{ text: string; sourceMemoryId: string } | null> {
     const threshold = opts.threshold ?? 5;
     const window = opts.window ?? 15;
+    const exclude = opts.exclude ?? (() => false);
     const recent = this.memory.forAgent(this.profile.id).slice(-window);
+    // Skip memories already posted about, so we never re-post the same beat (and,
+    // for the live world, never spend a model call when there's nothing new to say).
     const salient = recent
-      .filter((m) => m.importance >= threshold)
+      .filter((m) => m.importance >= threshold && !exclude(m.id))
       .sort((a, b) => b.importance - a.importance)[0];
     if (!salient) return null;
     const raw = await this.model.complete(

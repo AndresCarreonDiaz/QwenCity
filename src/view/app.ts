@@ -1486,7 +1486,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       // the current chapter's hook — the fact that kicked off where the season is now
       var chp=snap.chapter;
       var chapHook=(chp&&chp.hook)?('<div class="h" style="margin-top:6px">This chapter</div><div class="hl">'+esc(chp.hook)+'</div>'):"";
-      var storyBody=showStory?('<div class="db">'+storyHtml+chapHook+turns+'<div class="h" style="margin-top:12px">Today\\'s drama</div>'+hls+(bonds?'<div class="h" style="margin-top:12px">Bonds</div>'+bonds:"")+'</div>'):"";
+      // the namesake feed: the cast's most recent first-person posts (newest first)
+      var feedPosts=(snap.feed||[]).slice(-4).reverse();
+      var postsHtml=feedPosts.length?('<div class="h" style="margin-top:12px">📱 Latest posts</div>'+feedPosts.map(function(p){return '<div class="post"><b>'+esc(nameOf[p.agentId]||p.agentId)+'</b> '+esc(p.text)+'<span style="color:var(--dim);font-size:11px"> · '+p.replies+' repl'+(p.replies===1?"y":"ies")+'</span></div>';}).join("")):"";
+      var storyBody=showStory?('<div class="db">'+storyHtml+chapHook+postsHtml+turns+'<div class="h" style="margin-top:12px">Today\\'s drama</div>'+hls+(bonds?'<div class="h" style="margin-top:12px">Bonds</div>'+bonds:"")+'</div>'):"";
       var storyDrawer='<div class="drw"><div class="dh" id="tglStory">The story so far <span class="chv">'+(showStory?'▾':'▸')+'</span></div>'+storyBody+'</div>';
       // "Why this is different" drawer — judges' explainer + engine substrate, collapsed by default
       var statLine=snap.stats?'<p>Under the hood right now: <b>'+snap.stats.memories+'</b> memories across <b>'+snap.stats.edges+'</b> bonds among <b>'+snap.stats.agents+'</b> souls.</p>':"";

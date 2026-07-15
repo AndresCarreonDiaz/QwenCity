@@ -42,6 +42,24 @@ test("composePost picks the salient memory, not a mundane one", async () => {
   assert.match(draft!.text, /tom|argument|betray/i);
 });
 
+test("composePost skips memories it already posted about, and returns null when nothing is fresh", async () => {
+  const model = new MockAdapter();
+  const store = new MemoryStore(model);
+  const maya = new Agent({ id: "maya", name: "Maya", bio: "Maya runs the café." }, store, model);
+  await maya.perceive("Maya had a painful argument with Tom and feels betrayed.", T0);
+  await maya.perceive("Maya confessed her love and was rejected.", T0 + 1e5);
+  const posted = new Set<string>();
+  const p1 = await maya.composePost(T0 + 1e6, { exclude: (id) => posted.has(id) });
+  assert.ok(p1);
+  posted.add(p1!.sourceMemoryId);
+  const p2 = await maya.composePost(T0 + 2e6, { exclude: (id) => posted.has(id) });
+  assert.ok(p2, "the other salient memory is still postable");
+  assert.notEqual(p2!.sourceMemoryId, p1!.sourceMemoryId, "did not re-post the same memory");
+  posted.add(p2!.sourceMemoryId);
+  const p3 = await maya.composePost(T0 + 3e6, { exclude: (id) => posted.has(id) });
+  assert.equal(p3, null, "nothing fresh left → null (so the live world spends no model call)");
+});
+
 test("ingested audience reply gets the +2 salience boost and surfaces in retrieval", async () => {
   const model = new MockAdapter();
   const store = new MemoryStore(model);
