@@ -6,6 +6,27 @@ run before moving on.
 
 ---
 
+## Iteration 44 — 2026-07-14 · watch them think: surface the reflection tree ✅
+
+- **Why:** the generative-agents engine synthesizes higher-level insights from memory (the reflection
+  tree — the paper's signature cognitive depth), but they were buried in the raw memory stream. A
+  viewer never saw the cast *think*, only act/talk.
+- **Snapshot:** carries `reflections` — the **2 most-recent per agent** (per-agent, not a town-wide
+  top-N, so every character's realizations are always available to their focus panel and one busy
+  reflector can't crowd the others out).
+- **Surfaced two ways:** a **💭 thought bubble** on the canvas when a fresh realization occurs — it
+  takes priority over idle stage-directions (a busy reflector is skipped, not dropped), so you watch
+  a character have an insight; and a **"💭 What <name> has realized"** section in the focus panel,
+  distinct from the raw "Their thoughts" stream.
+- **Bonus:** `reflectionThreshold` is now env-configurable (`REFLECT_THRESHOLD`, default 200) for
+  tuning/verification without a code change.
+
+**Verified:** client JS compiles · typecheck clean · 116/116 (per-agent cap + newest-first) · a
+low-threshold local run showed a 💭 bubble over Maya on the canvas ("💭 A recurring concern connects
+the recent events") and the "💭 What Tom has realized" section in his panel · deployed, live active.
+
+---
+
 ## Iteration 43 — 2026-07-14 · the audience's fingerprints: a persistent influence log ✅
 
 - **Why:** the differentiator (viewer replies causally steer the AI cast) was only shown *while* a reply
