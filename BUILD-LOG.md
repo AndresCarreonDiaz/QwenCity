@@ -6,6 +6,26 @@ run before moving on.
 
 ---
 
+## Iteration 52 — 2026-07-16 · fix building overlaps (accurate collision check) ✅
+
+- **Why:** user spotted overlapping buildings on the live iteration-51 city. Root cause: my earlier
+  collision checks (a) used shop-sized footprints for the **legacy café/bakery/home sprites, which are
+  much wider** (café ≈ hotel width; `home4`, Leo's Japanese house, is ~2× a normal house), and (b) I only
+  eyeballed the zoomed-out whole-world view, where overlaps hide.
+- **Accurate checker:** `bldg_collide.py` computes each building's real footprint from actual sprite
+  aspect ratios + the render's `unitB`/anchor math, and runs it at **two stage aspect ratios** (the tall
+  layout the user sees + a wide one) since building width-in-units is stage-dependent. Found the real
+  overlaps.
+- **Fixes:** **Leo's house → normal-width sprite** (`home4`→`home3`) so it stops crashing into the west
+  tailor/barber/cobbler (the overlap the user saw); **removed the 3 uptown shops** (florist/toys/sweets)
+  that sat on top of the wide café/bakery — no clean slot exists between them and the x=50 avenue, so the
+  gap is now a **market** (stalls/planters/benches); nudged up_grocer clear of the tall office, up_gym and
+  e_yoga off their neighbours; removed the 3 uptown cars stranded when the y=18 road was deleted.
+- **Verified:** `bldg_collide.py` → **0 overlaps at both aspect ratios**; zoomed crops of the Leo/west
+  block and uptown plaza confirm clean separation · road-overlap check clean · typecheck · 117/117.
+
+---
+
 ## Iteration 51 — 2026-07-16 · city grid: buildings off the roads + pave the green ✅
 
 - **Why:** user feedback on the live iteration-50 city — "several buildings in the middle of the road"

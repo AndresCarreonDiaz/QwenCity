@@ -171,7 +171,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
 
   // --- image assets: character sheets, legacy props, LimeZu buildings + CITY set ---
   var props={}, buildings={}, citybld={};
-  var BLDG={cafe:"cafe",bakery:"bakery",maya_home:"home1",tom_home:"home2",ana_home:"home3",leo_home:"home4"};
+  var BLDG={cafe:"cafe",bakery:"bakery",maya_home:"home1",tom_home:"home2",ana_home:"home3",leo_home:"home3"};
   ["tree_green","tree_autumn","bush_pink","bush_white","bench","flowers","fountain","lamp"].forEach(function(n){props[n]=loadImg(base()+"/assets/props/"+n+".png");});
   ["table_umbrella","stall"].forEach(function(n){props[n]=loadImg(base()+"/assets/buildings/"+n+".png");});
   Object.keys(BLDG).forEach(function(k){buildings[k]=loadImg(base()+"/assets/buildings/"+BLDG[k]+".png");});
@@ -253,11 +253,8 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {id:"up_inn", slot:"hotel", x:66, y:10.5, hScale:0.8, sign:"INN",mobile:false},
     {id:"up_boutique", slot:"shop_c", x:76, y:10.5, sign:"GIFTS",mobile:false},
     {id:"up_deli", slot:"shop_c", x:22, y:20.5, sign:"DELI",mobile:false},
-    {id:"up_grocer", slot:"shop_a", x:30, y:25.5, sign:"GROCER",mobile:false},
-    {id:"up_florist", slot:"shop_b", x:37, y:23.5, sign:"PLANTS",mobile:false},
-    {id:"up_toys", slot:"shop_c", x:44, y:23.5, sign:"TOYS",mobile:false},
-    {id:"up_bakery2", slot:"shop_a", x:57, y:23, sign:"SWEETS",mobile:false},
-    {id:"up_gym", slot:"shop_c", x:66, y:25.5, sign:"GYM",mobile:false},
+    {id:"up_grocer", slot:"shop_a", x:31, y:23, sign:"GROCER",mobile:false},
+    {id:"up_gym", slot:"shop_c", x:68, y:23, sign:"GYM",mobile:false},
     {id:"w_chapel", slot:"civic", x:6, y:39, hScale:1.1, sign:"CHAPEL",mobile:false},
     {id:"w_house_1", slot:"house_b", x:5.5, y:60, hScale:1,mobile:false},
     {id:"w_house_2", slot:"house_a", x:4.5, y:78, hScale:1,mobile:false},
@@ -272,7 +269,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {id:"e_bakery", slot:"shop_c", x:94, y:86, hScale:1, sign:"BREAD",mobile:false},
     {id:"e_row_s", slot:"house_a", x:93, y:98, hScale:1,mobile:false},
     {id:"e_gym", slot:"shop_c", x:81, y:60, hScale:1, sign:"GYM",mobile:false},
-    {id:"e_yoga", slot:"shop_a", x:80.5, y:80, hScale:0.9, sign:"YOGA",mobile:false},
+    {id:"e_yoga", slot:"shop_a", x:80, y:80, hScale:0.9, sign:"YOGA",mobile:false},
     {id:"mid_shop_1", slot:"shop_a", x:29, y:93, sign:"GROCER"},
     {id:"mid_house_2", slot:"house_a", x:36.5, y:93},
     {id:"mid_shop_2", slot:"shop_b", x:44, y:93, sign:"TOYS"},
@@ -367,9 +364,12 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {slot:"flowers", x:72, y:16,mobile:false},
     {slot:"park_statue", x:50, y:13,mobile:false},
     {slot:"pigeons", x:48, y:17,mobile:false},
-    {slot:"car_a", x:32, y:18,mobile:false},
-    {slot:"car_c", x:58, y:18, flip:true,mobile:false},
-    {slot:"car_b", x:70, y:18,mobile:false},
+    {slot:"stall", x:40, y:21,mobile:false},
+    {slot:"stall", x:57, y:21,mobile:false},
+    {slot:"planter", x:34, y:22,mobile:false},
+    {slot:"planter", x:63, y:22,mobile:false},
+    {slot:"bench_b", x:44, y:23,mobile:false},
+    {slot:"pigeons", x:46, y:24,mobile:false},
     {slot:"tree_green", x:10, y:36,mobile:false},
     {slot:"park_statue", x:9, y:40,mobile:false},
     {slot:"tree_autumn", x:12, y:44,mobile:false},
