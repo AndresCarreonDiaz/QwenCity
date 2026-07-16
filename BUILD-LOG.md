@@ -6,6 +6,34 @@ run before moving on.
 
 ---
 
+## Iteration 50 — 2026-07-16 · fill the town: a full city (map densification) ✅
+
+- **Why:** user said the map was "too empty with too much green" and asked for a city "full of buildings
+  and stuff to see so characters have more things to do." Prior iterations added destinations + extended
+  the world south; the world was bigger but the new space (and the top third + side margins) read as bare
+  grass around a dense downtown core.
+- **How (an army of subagents):** a design workflow — **6 district designers** (disjoint zones so their
+  placements can't collide) → **streets/districts + behavior-wiring specialists** → an **adversarial
+  collision auditor** — proposed the layout; a **6-critic vision-QA workflow** then inspected the actual
+  render and I fixed what it caught. All from the **existing tile set** (reused shop/office/civic/hotel/
+  house sprites + props; activated the unused `kiosk.png`) — no new art.
+- **5 new districts fill every void:** **Uptown North** (arts/commerce plaza — Museum, Theatre, Grand
+  Inn, Gallery, Bank, Post, statue monument, north avenue), **West & East residential avenues** (chapel,
+  houses, tailor/barber/cobbler, gym/yoga/bakery), a **Midtown garden lane** linking downtown↔park, and a
+  **South Waterfront** ringing the pond (teahouse, boathouse, creamery, bait & tackle, kayak, lakeview
+  inn + bench promenade). **+47 buildings, +200 props, +6 roads, +2 paved plazas.**
+- **More to do:** **+13 destinations** (→ 24 anchor places), each wired into `locationForAction` with
+  specific keywords so the cast actually walks there; `DESTINATIONS` auto-includes them. Data-only:
+  `DECOR`/`PROPS`/streets arrays in `app.ts` (`DISTRICT`→`DISTRICTS` loop; new buildings desktop-only so
+  mobile stays uncluttered) + anchor `PLACES` in `places.ts`. No routing/render engine changes.
+
+**Verified (CDP screenshots):** whole-world day + night (city lit with warm windows), mobile (clean,
+outer districts hidden), all 6 districts crop-inspected · fixed 6 real defects the critics found (kiosk
+over the pond, lamp over water, stall on a roof, kiosk occluding the diner, overlapping cars, INN
+collision) · typecheck clean · 117/117 · deployed.
+
+---
+
 ## Iteration 49 — 2026-07-15 · a bigger, explorable world (map expansion, phase 2) ✅
 
 - **Why:** user chose "more places now, bigger world later." Phase 1 added destinations; phase 2 makes

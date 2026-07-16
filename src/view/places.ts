@@ -51,6 +51,20 @@ export const PLACES: Place[] = [
   { id: "school", label: "The School", x: 24, y: 112, type: "shop", anchor: true, flavor: "the little schoolhouse, rows of desks, a chalkboard, the bell in the yard, children's drawings taped to the window" },
   { id: "library", label: "The Library", x: 76, y: 112, type: "shop", anchor: true, flavor: "the reading room, tall stacks, the card catalogue, a green desk lamp, the hush of turning pages" },
   { id: "garden", label: "The Community Garden", x: 26, y: 128, type: "shop", anchor: true, flavor: "raised beds, the greenhouse, watering cans, tomato vines, a wheelbarrow, neighbours working the soil" },
+  // ===== CITY EXPANSION destinations: Uptown, West/East avenues, Midtown lane, South waterfront =====
+  { id: "up_gallery", label: "The North Gallery", x: 22, y: 10.5, type: "shop", anchor: true, flavor: "Whitewashed halls hung with local canvases, the smell of fresh paint and floor wax drifting out to the sidewalk." },
+  { id: "up_museum", label: "Uptown Museum", x: 30, y: 10.5, type: "shop", anchor: true, flavor: "Marble steps climb past glass cases of dusty relics glowing under soft amber spotlights." },
+  { id: "up_theatre", label: "The Marquee Theatre", x: 39, y: 10.5, type: "shop", anchor: true, flavor: "A red-brick playhouse where the marquee bulbs buzz and velvet curtains muffle a rehearsing chorus." },
+  { id: "up_inn", label: "The Grand North Inn", x: 66, y: 10.5, type: "shop", anchor: true, flavor: "A teal-and-cream five-story lobby smelling of coffee and rain-damp coats, bellhops nodding by the brass doors." },
+  { id: "chapel", label: "West Avenue Chapel", x: 6, y: 39, type: "shop", anchor: true, flavor: "Worn stone steps, a little bell up in the steeple, candlelight falling through narrow windows, and the quiet smell of old wood and beeswax." },
+  { id: "laundromat", label: "The Washhouse", x: 19, y: 60, type: "shop", anchor: true, flavor: "Rows of humming machines, the warm smell of soap and dryer lint, coins lined up on the sill, and neighbours trading gossip over the spin cycle." },
+  { id: "east_gym", label: "The East Gym", x: 81, y: 60, type: "shop", anchor: true, flavor: "the squeak of sneakers on a rubber floor, a rack of chalked dumbbells, a fogged mirror wall, and a heavy bag swaying under the low hum of a treadmill." },
+  { id: "east_barber", label: "The Barbershop", x: 95, y: 74, type: "shop", anchor: true, flavor: "a red-and-white pole turning out front, warm lather and hot towels, the snip of scissors and low buzz of clippers over a cracked leather chair." },
+  { id: "toy_shop", label: "The Toy Shop", x: 44, y: 95, type: "shop", anchor: true, flavor: "A window crammed with wooden trains and paper kites, shelves of marbles and spinning tops, a rocking horse by the door, and a little brass bell that jingles on the way in." },
+  { id: "midtown_tearoom", label: "The Midtown Tearoom", x: 56, y: 95, type: "shop", anchor: true, flavor: "Steam curling off a fat brown teapot, tiered plates of scones and clotted cream, lace doilies and mismatched china, with the garden hedge framing the window." },
+  { id: "teahouse", label: "The Lakeside Teahouse", x: 33, y: 108.5, type: "shop", anchor: true, flavor: "steam curling off celadon cups, low tables at the window, the lake glittering just beyond the glass." },
+  { id: "boathouse", label: "The Boathouse", x: 50, y: 108.5, type: "shop", anchor: true, flavor: "rowboats racked to the rafters, oars and life-rings on their pegs, the smell of varnish and cool lake water drifting up the ramp." },
+  { id: "lakeview_inn", label: "The Lakeview Inn", x: 88, y: 124, type: "shop", anchor: true, flavor: "a little inn with rooms facing the water, rocking chairs on the porch, lanterns warming to amber at dusk." },
 ];
 
 /** public destinations a character can head to (everything but private homes) —
@@ -83,6 +97,20 @@ export function placeById(id: string): Place | undefined {
  */
 export function locationForAction(agentId: string, action: string): string {
   const a = action.toLowerCase();
+  // ===== CITY EXPANSION destinations (checked first; specific keywords) =====
+  if (/\bgallery\b|\bpaintings?\b|\bcanvas\b|\bmural\b|\bsketch\w*|\bartwork\b|\bart show\b|\bart opening\b|\bart\b/.test(a)) return "up_gallery";
+  if (/\bmuseum\b|\bexhibit\w*|\bartifacts?\b|\brelics?\b|\bfossils?\b|\btours?\b|\bhistory\b|\bdisplay(?!\s+case)/.test(a)) return "up_museum";
+  if (/\btheatre\b|\btheater\b|\bmarquee\b|\bmatinee\b|\bcurtain\b|\bplaybill\b|\brehears\w*|\bthe play\b|\bthe show\b/.test(a)) return "up_theatre";
+  if (/\bchapel\b|\bsteeple\b|\bpews?\b|\bprayer\b|\bprayed\b|\bpraying\b|\bcandlelit\b|\bcandles?\b|\bsermon\b|\bchurch service\b|\bsunday service\b/.test(a)) return "chapel";
+  if (/\blaundr\w*|\bwashhouse\b|\bwashing\b|\bdryer\b|\blinens?\b|\bfolding\b|\bgossip\w*|\bsoap\b/.test(a)) return "laundromat";
+  if (/\bgym\b|\bgymnasium\b|\bworkout\b|\bworking out\b|\btreadmill\b|\bdumbbells?\b|\bweights?\b|\bexercis\w*|\blifting\b|\bsweat\b|\bsweating\b/.test(a)) return "east_gym";
+  if (/\bbarber\w*|\bhaircuts?\b|\bshave\b|\bshaving\b|\bclippers?\b|\brazor\b|\bgrooming\b|\btrim\b|\btrimming\b|\bbarber chair\b/.test(a)) return "east_barber";
+  if (/\btoy shop\b|\btoyshop\b|\btoys?\b|\bwooden train\b|\bkite\b|\bmarbles?\b|\bspinning top\b|\brocking horse\b/.test(a)) return "toy_shop";
+  if (/\btearoom\b|\bteapot\b|\bscones?\b|\bclotted cream\b|\bteacups?\b|\btea leaves\b|\bdoil(?:y|ies)\b|\bsaucers?\b|\bcrumpets?\b/.test(a)) return "midtown_tearoom";
+  if (/\bteahouse\b|\blakeside teahouse\b|\btea\b|\bcup of tea\b|\bpot of tea\b|\bbrewing tea\b/.test(a)) return "teahouse";
+  if (/\bboathouse\b|\bboats?\b|\browboats?\b|\boars?\b|\bdock\b|\bpaddle\w*|\blake\b|\bramp\b|\bjetty\b/.test(a)) return "boathouse";
+  if (/\blakeview\b|\blakeview inn\b|\bporch\b|\brocking chair\b|\blantern\b/.test(a)) return "lakeview_inn";
+  if (/\binn\b|\bgrand north\b|\bnorth inn\b|\bgrand inn\b|\bnightcap\b|\bbell(?:boy|hop)\b|\bsuitcase\b/.test(a)) return "up_inn";
   // new-resident shops (checked before the café's broad keywords so they win)
   if (/\bflower|floral|florist|bouquet|petal|vase|blooms?|stems?\b/.test(a)) return "flowershop";
   if (/\bdiner|griddle|booth|short-order|pie case|milkshake|waitress|serving breakfast\b/.test(a)) return "diner";

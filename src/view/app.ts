@@ -176,7 +176,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   ["table_umbrella","stall"].forEach(function(n){props[n]=loadImg(base()+"/assets/buildings/"+n+".png");});
   Object.keys(BLDG).forEach(function(k){buildings[k]=loadImg(base()+"/assets/buildings/"+BLDG[k]+".png");});
   // NEW: the staged LimeZu city set — served from /assets/city/<slot>.png
-  var CITY_PROP=["car_a","car_b","car_c","car_d","traffic_light","hydrant","bus_stop","mailbox","trash_bin","planter","city_bench","bench_b","street_sign","phone_booth","streetlamp_modern","tree_city","vending","park_statue","pigeons"];
+  var CITY_PROP=["car_a","car_b","car_c","car_d","traffic_light","hydrant","bus_stop","mailbox","trash_bin","planter","city_bench","bench_b","street_sign","phone_booth","streetlamp_modern","tree_city","vending","park_statue","pigeons","kiosk"];
   var CITY_BLD=["shop_a","shop_b","shop_c","office","civic","hotel","house_a","house_b"];
   CITY_PROP.forEach(function(n){props[n]=loadImg(base()+"/assets/city/"+n+".png");});
   CITY_BLD.forEach(function(n){citybld[n]=loadImg(base()+"/assets/city/"+n+".png");});
@@ -184,7 +184,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var DRAWH={shop_a:120,shop_b:120,shop_c:120,office:175,civic:165,hotel:190,house_a:140,house_b:130,
     car_a:40,car_b:40,car_c:40,car_d:40,traffic_light:72,hydrant:44,bus_stop:60,mailbox:44,trash_bin:44,planter:26,
     city_bench:40,bench_b:40,street_sign:48,phone_booth:84,streetlamp_modern:92,tree_city:84,
-    vending:54,park_statue:110,pigeons:16};
+    vending:54,park_statue:110,pigeons:16,kiosk:120};
   function ok(im){return im&&im.complete&&im.naturalWidth>0;}
 
   // ======================= the CITY layout plan (percent coords) =======================
@@ -195,10 +195,16 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var HSTREETS=[
     {y:48,x1:6,x2:94,kind:"main"},
     {y:70,x1:8,x2:92,kind:"side",mobile:false},  // the promenade (plaza-south)
-    {y:115,x1:16,x2:84,kind:"side"}              // the South Quarter's lane (Phase-2 expansion)
+    {y:115,x1:16,x2:84,kind:"side"},              // the South Quarter's lane (Phase-2 expansion)
+    {y:18, x1:20, x2:80, kind:"main"},
+    {y:101, x1:24, x2:80, kind:"side", mobile:false},
   ];
   var VSTREETS=[
-    {x:50,y1:48,y2:88,kind:"main"}                // center boulevard (main → plaza → park)
+    {x:50,y1:48,y2:88,kind:"main"},                // center boulevard (main → plaza → park)
+    {x:50, y1:18, y2:48, kind:"main"},
+    {x:50, y1:88, y2:101, kind:"main"},
+    {x:13, y1:42, y2:76, kind:"side", mobile:false},
+    {x:87, y1:42, y2:76, kind:"side", mobile:false},
     // NB: no cross-streets at x=30/x=70 (they ran through the DINER + clock
     // tower) and no residential avenues at x=13/x=87 (they ran straight up
     // through the four corner homes). Those buildings would read as standing in
@@ -207,9 +213,17 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   ];
   var CROSSWALKS=[
     {x:50,y:48,dir:"v"},                          // the rivalry crossing @ MAIN
-    {x:50,y:70,dir:"v",mobile:false}
+    {x:50,y:70,dir:"v",mobile:false},
+    {x:50, y:18, dir:"v"},
+    {x:50, y:101, dir:"v", mobile:false},
+    {x:13, y:48, dir:"v", mobile:false},
+    {x:87, y:48, dir:"v", mobile:false},
   ];
-  var DISTRICT={x1:8,y1:42,x2:92,y2:73};          // paved downtown rectangle
+  var DISTRICTS=[
+    {x1:8,y1:42,x2:92,y2:73},                     // paved downtown rectangle
+    {x1:16,y1:5,x2:82,y2:31, mob:false},          // Uptown plaza (desktop only)
+    {x1:28,y1:104,x2:72,y2:114, mob:false}        // Waterfront promenade (desktop only)
+  ];
   // decorative buildings (desktop only). x/hScale nudged from the raw plan so that
   // NOTHING overlaps at real canvas heights (H~=755, not the plan's 1500 — towers
   // are ~2x taller in %H there). Verified collision-free across W 560..1280.
@@ -228,7 +242,55 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {id:"school",    slot:"civic",  x:24, y:112, hScale:0.92},
     {id:"library",   slot:"office", x:76, y:112, hScale:1.00},
     {id:"greenhouse",slot:"house_b",x:26, y:128, hScale:0.82},
-    {id:"cottage_s", slot:"house_a",x:74, y:128, hScale:0.82}
+    {id:"cottage_s", slot:"house_a",x:74, y:128, hScale:0.82},
+    // ===== CITY EXPANSION: new buildings across Uptown, West/East avenues, Midtown lane, South waterfront =====
+    {id:"up_gallery", slot:"shop_a", x:22, y:10.5, sign:"GALLERY",mobile:false},
+    {id:"up_museum", slot:"office", x:30, y:10.5, hScale:0.8, sign:"MUSEUM",mobile:false},
+    {id:"up_theatre", slot:"civic", x:39, y:10.5, hScale:0.9, sign:"THEATRE",mobile:false},
+    {id:"up_bank", slot:"shop_b", x:47, y:10.5, sign:"BANK",mobile:false},
+    {id:"up_post", slot:"shop_a", x:56, y:10.5, sign:"POST",mobile:false},
+    {id:"up_inn", slot:"hotel", x:66, y:10.5, hScale:0.8, sign:"INN",mobile:false},
+    {id:"up_boutique", slot:"shop_c", x:76, y:10.5, sign:"GIFTS",mobile:false},
+    {id:"up_deli", slot:"shop_c", x:22, y:20.5, sign:"DELI",mobile:false},
+    {id:"up_grocer", slot:"shop_a", x:30, y:25.5, sign:"GROCER",mobile:false},
+    {id:"up_florist", slot:"shop_b", x:37, y:23.5, sign:"PLANTS",mobile:false},
+    {id:"up_toys", slot:"shop_c", x:44, y:23.5, sign:"TOYS",mobile:false},
+    {id:"up_bakery2", slot:"shop_a", x:57, y:23, sign:"SWEETS",mobile:false},
+    {id:"up_gym", slot:"shop_c", x:66, y:25.5, sign:"GYM",mobile:false},
+    {id:"w_chapel", slot:"civic", x:6, y:39, hScale:1.1, sign:"CHAPEL",mobile:false},
+    {id:"w_house_1", slot:"house_b", x:5.5, y:60, hScale:1,mobile:false},
+    {id:"w_house_2", slot:"house_a", x:4.5, y:78, hScale:1,mobile:false},
+    {id:"w_house_3", slot:"house_a", x:6, y:96, hScale:0.9,mobile:false},
+    {id:"w_laundry", slot:"shop_b", x:19, y:60, hScale:1, sign:"WASH",mobile:false},
+    {id:"w_tailor", slot:"shop_c", x:20, y:77, hScale:0.9, sign:"TAILOR",mobile:false},
+    {id:"w_barber", slot:"shop_a", x:20, y:87, hScale:0.9, sign:"BARBER",mobile:false},
+    {id:"w_cobbler", slot:"shop_b", x:20, y:97, hScale:0.9, sign:"COBBLER",mobile:false},
+    {id:"e_row_n", slot:"house_a", x:93, y:38, hScale:1,mobile:false},
+    {id:"e_row_c", slot:"house_a", x:93, y:62, hScale:0.9,mobile:false},
+    {id:"e_barber", slot:"shop_a", x:95, y:74, hScale:0.9, sign:"BARBER",mobile:false},
+    {id:"e_bakery", slot:"shop_c", x:94, y:86, hScale:1, sign:"BREAD",mobile:false},
+    {id:"e_row_s", slot:"house_a", x:93, y:98, hScale:1,mobile:false},
+    {id:"e_gym", slot:"shop_c", x:81, y:60, hScale:1, sign:"GYM",mobile:false},
+    {id:"e_yoga", slot:"shop_a", x:80.5, y:80, hScale:0.9, sign:"YOGA",mobile:false},
+    {id:"mid_shop_1", slot:"shop_a", x:29, y:95, sign:"GROCER"},
+    {id:"mid_house_2", slot:"house_a", x:36.5, y:95},
+    {id:"mid_shop_2", slot:"shop_b", x:44, y:95, sign:"TOYS"},
+    {id:"mid_shop_3", slot:"shop_b", x:56, y:95, sign:"TEAROOM"},
+    {id:"mid_house_3", slot:"house_a", x:63.5, y:95},
+    {id:"mid_shop_4", slot:"shop_a", x:71, y:95, sign:"BARBER"},
+    {id:"mid_house_4", slot:"house_a", x:78.5, y:95},
+    {id:"sq_teahouse", slot:"shop_c", x:33, y:108.5, hScale:1, sign:"TEA"},
+    {id:"sq_creamery", slot:"shop_a", x:41, y:108.5, hScale:1, sign:"ICES"},
+    {id:"sq_boathouse", slot:"house_b", x:50, y:108.5, hScale:0.9, sign:"BOATS"},
+    {id:"sq_gifts", slot:"shop_b", x:59, y:108.5, hScale:1, sign:"GIFTS"},
+    {id:"sq_bait", slot:"shop_c", x:67, y:108.5, hScale:0.9, sign:"BAIT"},
+    {id:"sq_grill", slot:"shop_a", x:35, y:123, hScale:1, sign:"GRILL"},
+    {id:"sq_kayak", slot:"shop_b", x:66, y:123, hScale:1, sign:"KAYAK"},
+    {id:"sq_westcottage", slot:"house_a", x:12, y:124, hScale:0.9},
+    {id:"sq_inn", slot:"house_a", x:88, y:124, hScale:1, sign:"INN"},
+    {id:"sq_pavilion", slot:"shop_c", x:50, y:130.5, hScale:0.9},
+    {id:"sq_tackle", slot:"shop_a", x:42, y:130.5, hScale:1, sign:"TACKLE"},
+    {id:"sq_deli", slot:"shop_b", x:58, y:130.5, hScale:1, sign:"DELI"},
   ];
   // props: cars, signage, sidewalk furniture, terraces, benches, lamps, greenery.
   // legacy slots keep propH heights; new city slots use manifest DRAWH*m; flip
@@ -273,7 +335,209 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {slot:"tree_autumn",x:42,y:104,mobile:false},{slot:"tree_green",x:58,y:104,mobile:false},
     {slot:"tree_green",x:16,y:132,mobile:false},{slot:"tree_autumn",x:84,y:132,mobile:false},
     {slot:"bush_pink",x:38,y:123,mobile:false},{slot:"bush_white",x:62,y:123,mobile:false},
-    {slot:"flowers",x:34,y:126,mobile:false},{slot:"flowers",x:66,y:126,mobile:false}
+    {slot:"flowers",x:34,y:126,mobile:false},{slot:"flowers",x:66,y:126,mobile:false},
+    // ===== CITY EXPANSION props: street furniture, greenery, cars, kiosks across the new districts =====
+    {slot:"tree_city", x:26, y:15.5,mobile:false},
+    {slot:"tree_green", x:34, y:15.5,mobile:false},
+    {slot:"tree_city", x:43, y:15.5,mobile:false},
+    {slot:"tree_green", x:61, y:15.5,mobile:false},
+    {slot:"tree_city", x:71, y:15.5,mobile:false},
+    {slot:"tree_autumn", x:26, y:21,mobile:false},
+    {slot:"tree_city", x:60, y:21,mobile:false},
+    {slot:"tree_autumn", x:70, y:21,mobile:false},
+    {slot:"streetlamp_modern", x:25, y:16,mobile:false},
+    {slot:"streetlamp_modern", x:37, y:16,mobile:false},
+    {slot:"streetlamp_modern", x:63, y:16,mobile:false},
+    {slot:"streetlamp_modern", x:75, y:16,mobile:false},
+    {slot:"city_bench", x:28, y:16,mobile:false},
+    {slot:"bench", x:44, y:16,mobile:false},
+    {slot:"bench_b", x:59, y:16,mobile:false},
+    {slot:"bus_stop", x:20, y:21,mobile:false},
+    {slot:"bench_b", x:61, y:16,mobile:false},
+    {slot:"phone_booth", x:34, y:21,mobile:false},
+    {slot:"vending", x:64, y:16,mobile:false},
+    {slot:"mailbox", x:53, y:16,mobile:false},
+    {slot:"trash_bin", x:46, y:16,mobile:false},
+    {slot:"hydrant", x:24, y:16,mobile:false},
+    {slot:"traffic_light", x:49, y:16.5,mobile:false},
+    {slot:"bush_pink", x:40, y:21,mobile:false},
+    {slot:"planter", x:68, y:16,mobile:false},
+    {slot:"stall", x:35, y:21,mobile:false},
+    {slot:"flowers", x:72, y:16,mobile:false},
+    {slot:"park_statue", x:50, y:13,mobile:false},
+    {slot:"pigeons", x:48, y:17,mobile:false},
+    {slot:"car_a", x:32, y:18,mobile:false},
+    {slot:"car_c", x:58, y:18, flip:true,mobile:false},
+    {slot:"car_b", x:70, y:18,mobile:false},
+    {slot:"tree_green", x:10, y:36,mobile:false},
+    {slot:"park_statue", x:9, y:40,mobile:false},
+    {slot:"tree_autumn", x:12, y:44,mobile:false},
+    {slot:"pigeons", x:11, y:46,mobile:false},
+    {slot:"lamp", x:10, y:47,mobile:false},
+    {slot:"bush_pink", x:11, y:52,mobile:false},
+    {slot:"flowers", x:12, y:56,mobile:false},
+    {slot:"city_bench", x:10, y:58,mobile:false},
+    {slot:"tree_green", x:12, y:61,mobile:false},
+    {slot:"bush_white", x:9, y:64,mobile:false},
+    {slot:"mailbox", x:11, y:67,mobile:false},
+    {slot:"streetlamp_modern", x:12, y:69,mobile:false},
+    {slot:"tree_autumn", x:10, y:73,mobile:false},
+    {slot:"planter", x:12, y:76,mobile:false},
+    {slot:"bench", x:9, y:79,mobile:false},
+    {slot:"tree_city", x:11, y:81,mobile:false},
+    {slot:"hydrant", x:12, y:85,mobile:false},
+    {slot:"bush_pink", x:10, y:88,mobile:false},
+    {slot:"flowers", x:11, y:91,mobile:false},
+    {slot:"tree_green", x:12, y:95,mobile:false},
+    {slot:"bush_white", x:10, y:98,mobile:false},
+    {slot:"trash_bin", x:12, y:101,mobile:false},
+    {slot:"tree_green", x:3, y:46,mobile:false},
+    {slot:"bush_pink", x:4, y:58,mobile:false},
+    {slot:"tree_autumn", x:3, y:72,mobile:false},
+    {slot:"tree_green", x:3, y:92,mobile:false},
+    {slot:"flowers", x:4, y:101,mobile:false},
+    {slot:"bus_stop", x:15, y:51,mobile:false},
+    {slot:"streetlamp_modern", x:15, y:55,mobile:false},
+    {slot:"trash_bin", x:16, y:59,mobile:false},
+    {slot:"stall", x:16, y:76, flip:true,mobile:false},
+    {slot:"planter", x:16, y:83,mobile:false},
+    {slot:"bench_b", x:16, y:90, flip:true,mobile:false},
+    {slot:"tree_city", x:15, y:96,mobile:false},
+    {slot:"tree_green", x:89, y:34,mobile:false},
+    {slot:"streetlamp_modern", x:90, y:40,mobile:false},
+    {slot:"bush_pink", x:89, y:44,mobile:false},
+    {slot:"tree_autumn", x:90, y:56,mobile:false},
+    {slot:"flowers", x:89, y:60,mobile:false},
+    {slot:"planter", x:90, y:64,mobile:false},
+    {slot:"streetlamp_modern", x:89, y:67,mobile:false},
+    {slot:"tree_green", x:90, y:76,mobile:false},
+    {slot:"bush_white", x:89, y:80,mobile:false},
+    {slot:"tree_autumn", x:90, y:88,mobile:false},
+    {slot:"streetlamp_modern", x:89, y:92,mobile:false},
+    {slot:"flowers", x:90, y:98,mobile:false},
+    {slot:"bush_pink", x:89, y:102,mobile:false},
+    {slot:"tree_city", x:79, y:54,mobile:false},
+    {slot:"lamp", x:84, y:57,mobile:false},
+    {slot:"bench", x:79, y:66,mobile:false},
+    {slot:"flowers", x:83, y:64,mobile:false},
+    {slot:"tree_green", x:79, y:86,mobile:false},
+    {slot:"bush_pink", x:84, y:90,mobile:false},
+    {slot:"planter", x:79, y:101,mobile:false},
+    {slot:"flowers", x:83, y:101,mobile:false},
+    {slot:"city_bench", x:91, y:58, flip:true,mobile:false},
+    {slot:"lamp", x:91, y:44,mobile:false},
+    {slot:"mailbox", x:91, y:88,mobile:false},
+    {slot:"hydrant", x:88, y:53,mobile:false},
+    {slot:"bus_stop", x:90, y:103,mobile:false},
+    {slot:"phone_booth", x:79, y:44,mobile:false},
+    {slot:"vending", x:79, y:74,mobile:false},
+    {slot:"trash_bin", x:84, y:52,mobile:false},
+    {slot:"pigeons", x:90, y:58,mobile:false},
+    {slot:"pigeons", x:83, y:92,mobile:false},
+    {slot:"street_sign", x:79, y:52, flip:true,mobile:false},
+    {slot:"tree_autumn", x:88, y:32,mobile:false},
+    {slot:"car_c", x:90, y:48, flip:true,mobile:false},
+    {slot:"streetlamp_modern", x:19, y:100},
+    {slot:"tree_city", x:26, y:101},
+    {slot:"streetlamp_modern", x:33, y:100},
+    {slot:"tree_autumn", x:40, y:101},
+    {slot:"tree_city", x:53, y:100},
+    {slot:"streetlamp_modern", x:60, y:100},
+    {slot:"tree_autumn", x:67, y:101, flip:true},
+    {slot:"streetlamp_modern", x:74, y:100},
+    {slot:"tree_city", x:81, y:101},
+    {slot:"tree_green", x:15, y:98},
+    {slot:"bush_pink", x:24, y:92},
+    {slot:"flowers", x:31, y:92},
+    {slot:"bush_white", x:39, y:92},
+    {slot:"planter", x:46, y:92},
+    {slot:"planter", x:54, y:92},
+    {slot:"bush_pink", x:62, y:92, flip:true},
+    {slot:"flowers", x:69, y:92},
+    {slot:"planter", x:29, y:98},
+    {slot:"bench", x:44, y:99},
+    {slot:"planter", x:56, y:98},
+    {slot:"bench_b", x:63, y:99},
+    {slot:"flowers", x:71, y:98},
+    {slot:"stall", x:34, y:103},
+    {slot:"table_umbrella", x:58, y:103},
+    {slot:"bus_stop", x:15, y:101},
+    {slot:"mailbox", x:48, y:99},
+    {slot:"pigeons", x:41, y:100, flip:true},
+    {slot:"phone_booth", x:82, y:99},
+    {slot:"street_sign", x:20, y:99},
+    {slot:"hydrant", x:76, y:99},
+    {slot:"streetlamp_modern", x:38, y:116},
+    {slot:"streetlamp_modern", x:62, y:116},
+    {slot:"streetlamp_modern", x:38, y:124},
+    {slot:"streetlamp_modern", x:62, y:124},
+    {slot:"streetlamp_modern", x:50, y:113.5},
+    {slot:"flowers", x:44, y:127},
+    {slot:"city_bench", x:44, y:114},
+    {slot:"city_bench", x:56, y:114, flip:true},
+    {slot:"city_bench", x:37, y:121},
+    {slot:"city_bench", x:63, y:121, flip:true},
+    {slot:"city_bench", x:50, y:127},
+    {slot:"tree_green", x:30, y:117},
+    {slot:"tree_autumn", x:70, y:117},
+    {slot:"tree_autumn", x:31, y:126},
+    {slot:"tree_green", x:69, y:126},
+    {slot:"tree_city", x:20, y:121},
+    {slot:"tree_city", x:80, y:121},
+    {slot:"flowers", x:42, y:125},
+    {slot:"flowers", x:58, y:125},
+    {slot:"bush_pink", x:36, y:122},
+    {slot:"bush_white", x:64, y:122},
+    {slot:"planter", x:46, y:113},
+    {slot:"planter", x:54, y:113},
+    {slot:"park_statue", x:18, y:125},
+    {slot:"pigeons", x:48, y:125},
+    {slot:"stall", x:72, y:120},
+    {slot:"kiosk", x:24, y:120},
+    {slot:"mailbox", x:70, y:123},
+    {slot:"hydrant", x:30, y:124},
+    {slot:"bus_stop", x:15, y:112},
+    {slot:"table_umbrella", x:33, y:113},
+    {slot:"table_umbrella", x:41, y:113, flip:true},
+    {slot:"car_c", x:15, y:49,mobile:false},
+    {slot:"car_a", x:29, y:49, flip:true,mobile:false},
+    {slot:"car_d", x:45, y:49,mobile:false},
+    {slot:"car_b", x:53, y:49, flip:true,mobile:false},
+    {slot:"car_a", x:83, y:49, flip:true,mobile:false},
+    {slot:"car_d", x:79, y:70, flip:true,mobile:false},
+    {slot:"kiosk", x:38, y:65,mobile:false},
+    {slot:"vending", x:18, y:54,mobile:false},
+    {slot:"vending", x:21, y:56,mobile:false},
+    {slot:"street_sign", x:20, y:44, flip:true,mobile:false},
+    {slot:"bush_pink", x:30, y:44,mobile:false},
+    {slot:"mailbox", x:40, y:44,mobile:false},
+    {slot:"tree_city", x:44, y:44,mobile:false},
+    {slot:"pigeons", x:52, y:44,mobile:false},
+    {slot:"hydrant", x:58, y:44,mobile:false},
+    {slot:"tree_city", x:64, y:44,mobile:false},
+    {slot:"bush_white", x:70, y:44,mobile:false},
+    {slot:"planter", x:72, y:44,mobile:false},
+    {slot:"trash_bin", x:80, y:44,mobile:false},
+    {slot:"planter", x:84, y:44,mobile:false},
+    {slot:"bench_b", x:34, y:56, flip:true,mobile:false},
+    {slot:"planter", x:40, y:55,mobile:false},
+    {slot:"hydrant", x:60, y:55,mobile:false},
+    {slot:"city_bench", x:64, y:56, flip:true,mobile:false},
+    {slot:"mailbox", x:72, y:56,mobile:false},
+    {slot:"trash_bin", x:80, y:55,mobile:false},
+    {slot:"planter", x:84, y:56,mobile:false},
+    {slot:"streetlamp_modern", x:30, y:67,mobile:false},
+    {slot:"streetlamp_modern", x:70, y:67, flip:true,mobile:false},
+    {slot:"planter", x:20, y:66,mobile:false},
+    {slot:"planter", x:80, y:66,mobile:false},
+    {slot:"bench_b", x:68, y:66, flip:true,mobile:false},
+    {slot:"pigeons", x:38, y:67,mobile:false},
+    {slot:"flowers", x:30, y:63,mobile:false},
+    {slot:"flowers", x:70, y:63,mobile:false},
+    {slot:"flowers", x:40, y:66,mobile:false},
+    {slot:"street_sign", x:72, y:66, flip:true,mobile:false},
+    {slot:"phone_booth", x:82, y:66,mobile:false},
+    {slot:"mailbox", x:84, y:66,mobile:false},
   ];
   function mFac(){return clamp(H/760,0.9,1.3);}
   function propH(k){var m=mFac();return (k.slice(0,4)==="tree"?62:k==="lamp"?56:k==="fountain"?66:k==="table_umbrella"?50:k==="stall"?46:(k==="bush_pink"||k==="bush_white")?16:k==="bench"?26:17)*m;}
@@ -1079,14 +1343,17 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   // --- procedural city ground: paved district, asphalt streets, crosswalks ---
   function drawGround(nn){
     var mob=isMobile();
-    // 1. the paved downtown district — sidewalk concrete laid over the grass
-    var d1=px({x:DISTRICT.x1,y:DISTRICT.y1}), d2=px({x:DISTRICT.x2,y:DISTRICT.y2});
-    ctx.fillStyle="#c3c7cf";ctx.fillRect(d1.x,d1.y,d2.x-d1.x,d2.y-d1.y);
-    ctx.strokeStyle="#aab0ba";ctx.lineWidth=1;
+    // 1. paved districts — sidewalk concrete laid over the grass (downtown + uptown + waterfront)
     var sx,sy;
-    for(sx=d1.x+64;sx<d2.x;sx+=64){ctx.beginPath();ctx.moveTo(Math.round(sx)+0.5,d1.y);ctx.lineTo(Math.round(sx)+0.5,d2.y);ctx.stroke();}
-    for(sy=d1.y+64;sy<d2.y;sy+=64){ctx.beginPath();ctx.moveTo(d1.x,Math.round(sy)+0.5);ctx.lineTo(d2.x,Math.round(sy)+0.5);ctx.stroke();}
-    ctx.fillStyle="rgba(120,126,138,.16)";ctx.fillRect(d1.x,d2.y-6,d2.x-d1.x,6);
+    DISTRICTS.forEach(function(D){
+      if(isMobile()&&D.mob===false)return;
+      var d1=px({x:D.x1,y:D.y1}), d2=px({x:D.x2,y:D.y2});
+      ctx.fillStyle="#c3c7cf";ctx.fillRect(d1.x,d1.y,d2.x-d1.x,d2.y-d1.y);
+      ctx.strokeStyle="#aab0ba";ctx.lineWidth=1;
+      for(sx=d1.x+64;sx<d2.x;sx+=64){ctx.beginPath();ctx.moveTo(Math.round(sx)+0.5,d1.y);ctx.lineTo(Math.round(sx)+0.5,d2.y);ctx.stroke();}
+      for(sy=d1.y+64;sy<d2.y;sy+=64){ctx.beginPath();ctx.moveTo(d1.x,Math.round(sy)+0.5);ctx.lineTo(d2.x,Math.round(sy)+0.5);ctx.stroke();}
+      ctx.fillStyle="rgba(120,126,138,.16)";ctx.fillRect(d1.x,d2.y-6,d2.x-d1.x,6);
+    });
     // 2. streets: sidewalk band, asphalt, curb lines, dashed centerline (main)
     var aHalf=clamp(W*0.014,9,17)*(mob?0.72:1);
     var swW=clamp(W*0.006,4,8)*(mob?0.72:1);
