@@ -195,16 +195,15 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var HSTREETS=[
     {y:48,x1:6,x2:94,kind:"main"},
     {y:70,x1:8,x2:92,kind:"side",mobile:false},  // the promenade (plaza-south)
-    {y:115,x1:16,x2:84,kind:"side"},              // the South Quarter's lane (Phase-2 expansion)
-    {y:18, x1:20, x2:80, kind:"main"},
-    {y:101, x1:24, x2:80, kind:"side", mobile:false},
+    {y:115,x1:6,x2:94,kind:"side"},              // the South Quarter's lane (Phase-2 expansion)
+    {y:101, x1:24, x2:80, kind:"side", mobile:false},  // midtown lane
   ];
   var VSTREETS=[
     {x:50,y1:48,y2:88,kind:"main"},                // center boulevard (main → plaza → park)
-    {x:50, y1:18, y2:48, kind:"main"},
+    {x:50, y1:5, y2:48, kind:"main"},             // downtown→north spine
     {x:50, y1:88, y2:101, kind:"main"},
-    {x:13, y1:42, y2:76, kind:"side", mobile:false},
-    {x:87, y1:42, y2:76, kind:"side", mobile:false},
+    {x:13, y1:30, y2:76, kind:"side", mobile:false},   // west avenue (extended north)
+    {x:87, y1:30, y2:76, kind:"side", mobile:false},   // east avenue (extended north)
     // NB: no cross-streets at x=30/x=70 (they ran through the DINER + clock
     // tower) and no residential avenues at x=13/x=87 (they ran straight up
     // through the four corner homes). Those buildings would read as standing in
@@ -214,7 +213,6 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var CROSSWALKS=[
     {x:50,y:48,dir:"v"},                          // the rivalry crossing @ MAIN
     {x:50,y:70,dir:"v",mobile:false},
-    {x:50, y:18, dir:"v"},
     {x:50, y:101, dir:"v", mobile:false},
     {x:13, y:48, dir:"v", mobile:false},
     {x:87, y:48, dir:"v", mobile:false},
@@ -222,7 +220,10 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   var DISTRICTS=[
     {x1:8,y1:42,x2:92,y2:73},                     // paved downtown rectangle
     {x1:16,y1:5,x2:82,y2:31, mob:false},          // Uptown plaza (desktop only)
-    {x1:28,y1:104,x2:72,y2:114, mob:false}        // Waterfront promenade (desktop only)
+    {x1:3,y1:33,x2:26,y2:102, mob:false},         // West avenue blocks
+    {x1:74,y1:33,x2:97,y2:102, mob:false},        // East avenue blocks
+    {x1:16,y1:86,x2:84,y2:103, mob:false},        // Midtown blocks
+    {x1:6,y1:103,x2:94,y2:133, mob:false}         // South / waterfront quarter
   ];
   // decorative buildings (desktop only). x/hScale nudged from the raw plan so that
   // NOTHING overlaps at real canvas heights (H~=755, not the plan's 1500 — towers
@@ -239,16 +240,16 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     // The South Quarter (Phase-2): a greener civic/residential district below the park.
     // Buildings sit off the central x=50 axis so walkers reach them via the x13/x87 side
     // lanes and never cross the fountain.
-    {id:"school",    slot:"civic",  x:24, y:112, hScale:0.92},
-    {id:"library",   slot:"office", x:76, y:112, hScale:1.00},
+    {id:"school",    slot:"civic",  x:24, y:108.5, hScale:0.62},
+    {id:"library",   slot:"office", x:76, y:108.5, hScale:0.62},
     {id:"greenhouse",slot:"house_b",x:26, y:128, hScale:0.82},
     {id:"cottage_s", slot:"house_a",x:74, y:128, hScale:0.82},
     // ===== CITY EXPANSION: new buildings across Uptown, West/East avenues, Midtown lane, South waterfront =====
     {id:"up_gallery", slot:"shop_a", x:22, y:10.5, sign:"GALLERY",mobile:false},
     {id:"up_museum", slot:"office", x:30, y:10.5, hScale:0.8, sign:"MUSEUM",mobile:false},
-    {id:"up_theatre", slot:"civic", x:39, y:10.5, hScale:0.9, sign:"THEATRE",mobile:false},
-    {id:"up_bank", slot:"shop_b", x:47, y:10.5, sign:"BANK",mobile:false},
-    {id:"up_post", slot:"shop_a", x:56, y:10.5, sign:"POST",mobile:false},
+    {id:"up_theatre", slot:"civic", x:37, y:10.5, hScale:0.9, sign:"THEATRE",mobile:false},
+    {id:"up_bank", slot:"shop_b", x:44, y:10.5, sign:"BANK",mobile:false},
+    {id:"up_post", slot:"shop_a", x:59, y:10.5, sign:"POST",mobile:false},
     {id:"up_inn", slot:"hotel", x:66, y:10.5, hScale:0.8, sign:"INN",mobile:false},
     {id:"up_boutique", slot:"shop_c", x:76, y:10.5, sign:"GIFTS",mobile:false},
     {id:"up_deli", slot:"shop_c", x:22, y:20.5, sign:"DELI",mobile:false},
@@ -272,13 +273,13 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     {id:"e_row_s", slot:"house_a", x:93, y:98, hScale:1,mobile:false},
     {id:"e_gym", slot:"shop_c", x:81, y:60, hScale:1, sign:"GYM",mobile:false},
     {id:"e_yoga", slot:"shop_a", x:80.5, y:80, hScale:0.9, sign:"YOGA",mobile:false},
-    {id:"mid_shop_1", slot:"shop_a", x:29, y:95, sign:"GROCER"},
-    {id:"mid_house_2", slot:"house_a", x:36.5, y:95},
-    {id:"mid_shop_2", slot:"shop_b", x:44, y:95, sign:"TOYS"},
-    {id:"mid_shop_3", slot:"shop_b", x:56, y:95, sign:"TEAROOM"},
-    {id:"mid_house_3", slot:"house_a", x:63.5, y:95},
-    {id:"mid_shop_4", slot:"shop_a", x:71, y:95, sign:"BARBER"},
-    {id:"mid_house_4", slot:"house_a", x:78.5, y:95},
+    {id:"mid_shop_1", slot:"shop_a", x:29, y:93, sign:"GROCER"},
+    {id:"mid_house_2", slot:"house_a", x:36.5, y:93},
+    {id:"mid_shop_2", slot:"shop_b", x:44, y:93, sign:"TOYS"},
+    {id:"mid_shop_3", slot:"shop_b", x:56, y:93, sign:"TEAROOM"},
+    {id:"mid_house_3", slot:"house_a", x:63.5, y:93},
+    {id:"mid_shop_4", slot:"shop_a", x:71, y:93, sign:"BARBER"},
+    {id:"mid_house_4", slot:"house_a", x:78.5, y:93},
     {id:"sq_teahouse", slot:"shop_c", x:33, y:108.5, hScale:1, sign:"TEA"},
     {id:"sq_creamery", slot:"shop_a", x:41, y:108.5, hScale:1, sign:"ICES"},
     {id:"sq_boathouse", slot:"house_b", x:50, y:108.5, hScale:0.9, sign:"BOATS"},

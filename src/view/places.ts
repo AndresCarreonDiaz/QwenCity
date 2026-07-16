@@ -54,7 +54,7 @@ export const PLACES: Place[] = [
   // ===== CITY EXPANSION destinations: Uptown, West/East avenues, Midtown lane, South waterfront =====
   { id: "up_gallery", label: "The North Gallery", x: 22, y: 10.5, type: "shop", anchor: true, flavor: "Whitewashed halls hung with local canvases, the smell of fresh paint and floor wax drifting out to the sidewalk." },
   { id: "up_museum", label: "Uptown Museum", x: 30, y: 10.5, type: "shop", anchor: true, flavor: "Marble steps climb past glass cases of dusty relics glowing under soft amber spotlights." },
-  { id: "up_theatre", label: "The Marquee Theatre", x: 39, y: 10.5, type: "shop", anchor: true, flavor: "A red-brick playhouse where the marquee bulbs buzz and velvet curtains muffle a rehearsing chorus." },
+  { id: "up_theatre", label: "The Marquee Theatre", x: 37, y: 10.5, type: "shop", anchor: true, flavor: "A red-brick playhouse where the marquee bulbs buzz and velvet curtains muffle a rehearsing chorus." },
   { id: "up_inn", label: "The Grand North Inn", x: 66, y: 10.5, type: "shop", anchor: true, flavor: "A teal-and-cream five-story lobby smelling of coffee and rain-damp coats, bellhops nodding by the brass doors." },
   { id: "chapel", label: "West Avenue Chapel", x: 6, y: 39, type: "shop", anchor: true, flavor: "Worn stone steps, a little bell up in the steeple, candlelight falling through narrow windows, and the quiet smell of old wood and beeswax." },
   { id: "laundromat", label: "The Washhouse", x: 19, y: 60, type: "shop", anchor: true, flavor: "Rows of humming machines, the warm smell of soap and dryer lint, coins lined up on the sill, and neighbours trading gossip over the spin cycle." },

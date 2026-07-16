@@ -6,6 +6,28 @@ run before moving on.
 
 ---
 
+## Iteration 51 — 2026-07-16 · city grid: buildings off the roads + pave the green ✅
+
+- **Why:** user feedback on the live iteration-50 city — "several buildings in the middle of the road"
+  and "add more streets, it looks empty green, I want a full city." Ran as a self-paced `/loop`
+  (screenshot → detect → fix → re-screenshot → verify).
+- **Buildings off roads:** wrote a `road_check.py` that computes each building's sprite-box vs every
+  road band and flags overlaps (32 found). Fixes: **removed the uptown y=18 avenue** (it cut through the
+  south shop row — no E-W road fits between uptown's two rows, so uptown is now a pedestrian plaza);
+  **moved the midtown row up** (y95→93) off the y=101 lane; **dropped school/library into the waterfront
+  row** (y112→108.5, smaller scale) so they clear both south lanes. Remaining overlaps are all ≤0.7u
+  edge-grazing (buildings against sidewalks, as intended).
+- **More streets + less green:** the inhabited bands are dense, so the fix for "empty green" is pavement,
+  not just asphalt — **extended `DISTRICTS`** to pave the west/east avenues, midtown, and the whole south
+  quarter into city sidewalk blocks (the park stays green, drawn on top; margins stay green). Added real
+  roads too: the **x=50 central avenue now runs the full height** (uptown→downtown→plaza→park→midtown) by
+  widening the uptown gap around it (theatre/bank/post nudged), **extended the x=13/x=87 side avenues
+  north**, and **widened the south lane** to full width.
+- **Verified (CDP):** whole-world day, zoomed uptown/midtown/south crops — no building sits in a road,
+  paving reads as a full city, park + pond remain as green/blue accents · typecheck clean · 117/117.
+
+---
+
 ## Iteration 50 — 2026-07-16 · fill the town: a full city (map densification) ✅
 
 - **Why:** user said the map was "too empty with too much green" and asked for a city "full of buildings
