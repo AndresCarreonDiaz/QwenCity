@@ -1,4 +1,4 @@
-# Deploying The Feed to Alibaba Cloud
+# Deploying Qwen City to Alibaba Cloud
 
 The spectator server is dependency-free (Node's built-in `http`), so it runs on a bare ECS box with
 just Node + `tsx`. This is the path to the judge-visitable URL and satisfies the hackathon's
@@ -39,7 +39,7 @@ npm run smoke:live     # confirms Qwen is reachable with your key
 Create `/etc/systemd/system/thefeed.service`:
 ```ini
 [Unit]
-Description=The Feed — spectator server
+Description=Qwen City — spectator server
 After=network-online.target
 
 [Service]

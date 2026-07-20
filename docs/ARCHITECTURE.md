@@ -1,6 +1,6 @@
 # Architecture
 
-The Feed is a society of generative agents rendered as a watchable, audience-steerable livestream.
+Qwen City is a society of generative agents rendered as a watchable, audience-steerable livestream.
 This doc covers the runtime components and the live Alibaba Cloud deployment. For the "why" and the
 research behind each choice, see [`../strategy/truman-show/`](../strategy/truman-show/).
 

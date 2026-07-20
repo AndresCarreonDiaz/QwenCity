@@ -1,5 +1,5 @@
 [Unit]
-Description=The Feed - spectator server
+Description=Qwen City - spectator server
 After=network-online.target
 
 [Service]

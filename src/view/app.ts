@@ -18,7 +18,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>The Feed — a live AI soap opera</title>
+<title>Qwen City — a live AI soap opera</title>
 <style>
   :root{
     --bg:#12151c; --panel:#171b24; --panel2:#1e2431; --line:#2a3140; --ink:#eef1f6; --dim:#95a0b3; --amber:#ecb44a; --live:#f0575f;
@@ -1059,7 +1059,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       ctx.font="700 12px ui-monospace,Menlo,monospace";ctx.fillStyle="#ecb44a";
       ctx.fillText("P R E V I O U S L Y   O N",W/2,H*0.3);
       ctx.font="800 30px ui-sans-serif";ctx.fillStyle="#fff";
-      ctx.fillText("The Feed",W/2,H*0.3+38);
+      ctx.fillText("Qwen City",W/2,H*0.3+38);
       var li=Math.floor((el-LEAD)/PER);
       if(el>LEAD&&li>=0&&li<n){
         var t2=(el-LEAD-li*PER)/PER, la=t2<0.15?t2/0.15:t2>0.85?(1-t2)/0.15:1;
@@ -1119,7 +1119,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
     chy.x-=dt*0.072; if(chy.x<-chy.w)chy.x=W+24;
     ctx.fillStyle="#2a0d12";ctx.fillRect(0,y,96,h);
     ctx.fillStyle="#f0575f";ctx.beginPath();ctx.arc(12,y+12,3.5,0,7);ctx.globalAlpha=.55+.45*Math.sin(T*0.1);ctx.fill();ctx.globalAlpha=1;
-    ctx.font="800 10px ui-monospace,Menlo,monospace";ctx.textAlign="left";ctx.fillStyle="#ffd9dc";ctx.fillText("THE FEED",22,y+16);ctx.textAlign="center";
+    ctx.font="800 10px ui-monospace,Menlo,monospace";ctx.textAlign="left";ctx.fillStyle="#ffd9dc";ctx.fillText("QWEN CITY",22,y+16);ctx.textAlign="center";
   }
 
   // ============ broadcast lower-third: name the drama of a live scene =========

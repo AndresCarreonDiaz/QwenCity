@@ -1,4 +1,4 @@
-# The Feed — Audience-Coupled Generative Agents
+# Qwen City — Audience-Coupled Generative Agents
 
 > Stanford built a town of AI minds you could only watch as a replay. We turned it into a
 > livestream you can talk to — and every message you send becomes a memory that rewires who
