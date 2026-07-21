@@ -637,7 +637,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
   // decorative building geometry (drawH-based, bottom-anchored like functional)
   function decorGeom(l){
-    var c=px(l), bh=(DRAWH[l.slot]||120)*l.hScale*(unitB()/176);
+    var c=px(l), bh=(DRAWH[l.slot]||120)*(l.hScale||1)*(unitB()/176);
     var im=citybld[l.slot];
     var bw=ok(im)?im.naturalWidth*(bh/im.naturalHeight):bh*0.7;
     var bottom=c.y+bh*0.45;
@@ -1617,7 +1617,7 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
   }
 
   var lastTs=0;
-  function frame(ts){
+  function frameBody(ts){
     if(stage.clientWidth!==W||stage.clientHeight!==H)resize();
     var dt=clamp(ts-lastTs||16,1,50);lastTs=ts;
     // time-based phase counter (~one unit per 60Hz frame) so 120Hz displays
@@ -1693,6 +1693,9 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
         });
         // warm window glow — functional homes/shops AND the decorative skyline
         function winGlow(g){var wy=g.bottom-g.bh*0.30,r=g.bh*0.42;
+          // createRadialGradient throws on non-finite args (unlike drawImage, which
+          // no-ops) — a single bad geometry must not take down the night pass
+          if(!isFinite(g.c.x+wy+r)||r<=0)return;
           var g3=ctx.createRadialGradient(g.c.x,wy,3,g.c.x,wy,r);
           g3.addColorStop(0,"rgba(255,190,96,"+(0.24*nn).toFixed(2)+")");g3.addColorStop(1,"rgba(255,190,96,0)");
           ctx.fillStyle=g3;ctx.beginPath();ctx.arc(g.c.x,wy,r,0,7);ctx.fill();}
@@ -1752,6 +1755,12 @@ export function renderAppHtml(deployOrigin = "http://47.237.78.57", embedded: un
       ctx.fillStyle="rgba(0,0,0,.5)";ctx.font="14px ui-sans-serif";ctx.textAlign="center";
       ctx.fillText(lastErr||"connecting to the town…",W/2,H/2);
     }
+  }
+  // the broadcast must outlive a bad frame: an uncaught throw inside the rAF
+  // callback would end the chain and freeze the whole town until a reload
+  var frameErr=false;
+  function frame(ts){
+    try{frameBody(ts);}catch(e){if(!frameErr){frameErr=true;console.error("frame error:",e);}}
     requestAnimationFrame(frame);
   }
 
